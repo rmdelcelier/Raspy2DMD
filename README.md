@@ -21,7 +21,7 @@ Transformez votre Raspberry Pi en afficheur DMD haute performance pour fléchett
 
 ### Option 1 : Image SD pré-configurée (recommandé)
 
-**La méthode la plus simple - Prêt en 5 minutes**
+**La méthode la plus simple**
 
 1. **Télécharger** l'image SD depuis https://raspydarts.wordpress.com/telechargement/ (Rubrique "Raspy2DMD" puis sur => DRIVE <=)
 2. **Graver** avec votre logiciel préféré

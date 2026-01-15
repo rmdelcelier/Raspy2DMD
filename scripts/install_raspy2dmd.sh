@@ -33,8 +33,9 @@ GITHUB_API_URL="https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}"
 INSTALL_DIR="/Raspy2DMD"
 MEDIAS_DIR="/Medias"
 CONFIG_FILE="${MEDIAS_DIR}/Raspy2DMD.cfg"
-TMP_DIR="/tmp/raspy2dmd_install"
-LOG_FILE="/tmp/raspy2dmd_install.log"
+# Utiliser la partition principale / au lieu de /tmp (tmpfs en RAM trop petit)
+TMP_DIR="/raspy2dmd_install_tmp"
+LOG_FILE="/var/log/raspy2dmd_install.log"
 
 # =============================================================================
 # CONFIGURATION BASE DE DONNEES

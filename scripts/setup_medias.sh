@@ -20,7 +20,8 @@ set -e
 # =============================================================================
 MEDIAS_DIR="/Medias"
 CONFIG_FILE="${MEDIAS_DIR}/Raspy2DMD.cfg"
-TMP_DIR="/tmp/raspy2dmd_medias"
+# Utiliser la partition principale / au lieu de /tmp (tmpfs en RAM trop petit)
+TMP_DIR="/raspy2dmd_medias_tmp"
 
 # Configuration GitHub
 GITHUB_USER="rmdelcelier"
