@@ -486,7 +486,14 @@ step_install_files() {
     log_substep "Installation de l'application dans ${INSTALL_DIR}..."
 
     if [ -d "$TMP_DIR/extracted_app" ]; then
-        cp -r "$TMP_DIR/extracted_app" "$INSTALL_DIR"
+        # Verifier si l'archive contient un sous-dossier Raspy2DMD
+        if [ -d "$TMP_DIR/extracted_app/Raspy2DMD" ]; then
+            # L'archive contient Raspy2DMD/, copier son contenu directement
+            cp -r "$TMP_DIR/extracted_app/Raspy2DMD" "$INSTALL_DIR"
+        else
+            # L'archive contient directement les fichiers
+            cp -r "$TMP_DIR/extracted_app" "$INSTALL_DIR"
+        fi
     else
         log_error "Fichiers source non trouves"
         exit 1
