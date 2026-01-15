@@ -19,9 +19,9 @@
 set -e  # Arret en cas d'erreur
 
 # =============================================================================
-# CONFIGURATION - A MODIFIER SELON VOTRE COMPTE GITHUB
+# CONFIGURATION GITHUB
 # =============================================================================
-GITHUB_USER="USERNAME"                              # Votre nom d'utilisateur GitHub
+GITHUB_USER="rmdelcelier"                           # Compte GitHub
 GITHUB_REPO="raspy2dmd"                             # Nom du depot GitHub
 GITHUB_BRANCH="main"                                # Branche principale
 GITHUB_RAW_URL="https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}"

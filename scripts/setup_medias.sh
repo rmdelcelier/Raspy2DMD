@@ -1,12 +1,11 @@
 #!/bin/bash
 ##############################################################################
 # Raspy2DMD - Script de creation de l'arborescence Medias
-# Version : 1.0.0
+# Version : 2.0.0
 # Auteur  : Remi DELCELIER
 #
-# Ce script cree l'arborescence complete du dossier /Medias
-# avec tous les sous-dossiers et fichiers necessaires au fonctionnement
-# de Raspy2DMD
+# Ce script telecharge et installe les fichiers Medias depuis les releases
+# GitHub, puis complete l'arborescence avec les dossiers necessaires.
 #
 # Usage :
 #   sudo bash setup_medias.sh
@@ -21,10 +20,18 @@ set -e
 # =============================================================================
 MEDIAS_DIR="/Medias"
 CONFIG_FILE="${MEDIAS_DIR}/Raspy2DMD.cfg"
-GITHUB_USER="USERNAME"
+TMP_DIR="/tmp/raspy2dmd_medias"
+
+# Configuration GitHub
+GITHUB_USER="rmdelcelier"
 GITHUB_REPO="raspy2dmd"
 GITHUB_BRANCH="main"
+GITHUB_API_URL="https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}"
 GITHUB_RAW_URL="https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}"
+
+# Configuration de l'archive Medias
+MEDIAS_TAG="Raspy2DMD_Medias"
+MEDIAS_ARCHIVE_NAME="Medias.7z"
 
 # =============================================================================
 # COULEURS
@@ -64,9 +71,62 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # =============================================================================
-# CREATION DE L'ARBORESCENCE PRINCIPALE
+# NETTOYAGE DU DOSSIER TEMPORAIRE
 # =============================================================================
-log_info "Creation de l'arborescence /Medias..."
+rm -rf "$TMP_DIR"
+mkdir -p "$TMP_DIR"
+
+# =============================================================================
+# TENTATIVE DE TELECHARGEMENT DE L'ARCHIVE MEDIAS DEPUIS GITHUB RELEASES
+# =============================================================================
+log_info "Recherche de l'archive Medias (tag: ${MEDIAS_TAG})..."
+
+MEDIAS_ARCHIVE_URL=""
+MEDIAS_DOWNLOADED=false
+
+# Recuperer les informations de la release avec le tag specifique Raspy2DMD_Medias
+MEDIAS_RELEASE=$(curl -s "${GITHUB_API_URL}/releases/tags/${MEDIAS_TAG}" 2>/dev/null || echo "")
+
+if [ -n "$MEDIAS_RELEASE" ] && echo "$MEDIAS_RELEASE" | grep -q "tag_name"; then
+    # Chercher l'archive Medias.7z dans les assets
+    MEDIAS_ARCHIVE_URL=$(echo "$MEDIAS_RELEASE" | grep -o "\"browser_download_url\"[^,]*${MEDIAS_ARCHIVE_NAME}\"" | cut -d'"' -f4 | head -1)
+
+    if [ -n "$MEDIAS_ARCHIVE_URL" ]; then
+        log_substep "Archive trouvee : ${MEDIAS_ARCHIVE_NAME}"
+        log_substep "Telechargement en cours..."
+
+        if wget -q --show-progress "$MEDIAS_ARCHIVE_URL" -O "${TMP_DIR}/medias.7z" 2>/dev/null; then
+            log_substep "Extraction de l'archive..."
+
+            # Verifier si 7za est disponible
+            if command -v 7za &> /dev/null; then
+                7za x -o"${TMP_DIR}" -y "${TMP_DIR}/medias.7z" > /dev/null 2>&1
+
+                # Copier les fichiers extraits vers /Medias
+                if [ -d "${TMP_DIR}/Medias" ]; then
+                    log_substep "Installation des fichiers Medias..."
+                    mkdir -p "$MEDIAS_DIR"
+                    cp -r "${TMP_DIR}/Medias/"* "$MEDIAS_DIR/" 2>/dev/null || true
+                    MEDIAS_DOWNLOADED=true
+                    log_info "Fichiers Medias installes depuis l'archive GitHub"
+                fi
+            else
+                log_warn "7za non installe, impossible d'extraire l'archive"
+            fi
+        else
+            log_warn "Echec du telechargement de l'archive Medias"
+        fi
+    else
+        log_warn "Archive ${MEDIAS_ARCHIVE_NAME} non trouvee dans la release ${MEDIAS_TAG}"
+    fi
+else
+    log_warn "Release ${MEDIAS_TAG} non trouvee sur GitHub"
+fi
+
+# =============================================================================
+# CREATION DE L'ARBORESCENCE (COMPLETE OU DEPUIS ZERO)
+# =============================================================================
+log_info "Creation/completion de l'arborescence /Medias..."
 
 # Dossier racine
 mkdir -p "$MEDIAS_DIR"
@@ -306,86 +366,67 @@ else
 fi
 
 # =============================================================================
-# TELECHARGEMENT DES POLICES DE BASE
+# TELECHARGEMENT DES FICHIERS ESSENTIELS SI NON PRESENTS
 # =============================================================================
-log_substep "Telechargement des polices de base..."
+if [ "$MEDIAS_DOWNLOADED" = false ]; then
+    log_substep "Telechargement des fichiers essentiels depuis GitHub..."
 
-FONTS=(
-    "Impact.ttf"
-    "8bit.ttf"
-)
+    # Liste des fichiers essentiels a telecharger
+    ESSENTIAL_FILES=(
+        "Fonts/Impact.ttf"
+        "Fonts/8bit.ttf"
+        "Raspy2DMD/images/DMD/Raspy2DMD.png"
+        "Raspy2DMD/images/HDMI/Raspy2DMD.png"
+        "Raspy2DMD/update_gif/DMD/update.gif"
+        "Raspy2DMD/update_gif/HDMI/update.gif"
+        "Raspy2DMD/warn/NoInternet/DMD/NoInternet.gif"
+        "Raspy2DMD/warn/NoIP/DMD/NoIp.gif"
+        "Raspy2DMD/warn/RGBTest/DMD/rgb_test.png"
+        "Raspy2DMD/warn/RGBTest/HDMI/rgb_test.png"
+    )
 
-FONTS_DIR="${MEDIAS_DIR}/Fonts"
-for font in "${FONTS[@]}"; do
-    if [ ! -f "${FONTS_DIR}/${font}" ]; then
-        # Tentative de telechargement depuis GitHub
-        FONT_URL="${GITHUB_RAW_URL}/Medias/Fonts/${font}"
-        if curl -sSL "$FONT_URL" -o "${FONTS_DIR}/${font}" 2>/dev/null; then
-            log_info "Police ${font} telechargee"
+    DOWNLOADED=0
+    for file in "${ESSENTIAL_FILES[@]}"; do
+        DEST_FILE="${MEDIAS_DIR}/${file}"
+
+        if [ ! -f "$DEST_FILE" ]; then
+            FILE_URL="${GITHUB_RAW_URL}/Medias/${file}"
+
+            # Creer le dossier parent si necessaire
+            mkdir -p "$(dirname "$DEST_FILE")"
+
+            if curl -sSL "$FILE_URL" -o "$DEST_FILE" 2>/dev/null; then
+                # Verifier que le fichier n'est pas une page d'erreur HTML
+                if file "$DEST_FILE" | grep -qE "(image|font|TrueType)" 2>/dev/null; then
+                    DOWNLOADED=$((DOWNLOADED + 1))
+                else
+                    rm -f "$DEST_FILE"
+                fi
+            fi
+        fi
+    done
+
+    if [ $DOWNLOADED -gt 0 ]; then
+        log_info "${DOWNLOADED} fichiers essentiels telecharges"
+    fi
+
+    # Si Impact.ttf n'existe toujours pas, chercher dans le systeme
+    if [ ! -f "${MEDIAS_DIR}/Fonts/Impact.ttf" ]; then
+        SYSTEM_FONT=$(find /usr/share/fonts -name "Impact*.ttf" 2>/dev/null | head -1)
+        if [ -n "$SYSTEM_FONT" ]; then
+            cp "$SYSTEM_FONT" "${MEDIAS_DIR}/Fonts/Impact.ttf"
+            log_info "Police Impact.ttf copiee depuis le systeme"
         else
-            log_warn "Impossible de telecharger ${font}"
+            # Utiliser une police de remplacement
+            FALLBACK_FONT=$(find /usr/share/fonts -name "DejaVuSans-Bold.ttf" 2>/dev/null | head -1)
+            if [ -n "$FALLBACK_FONT" ]; then
+                cp "$FALLBACK_FONT" "${MEDIAS_DIR}/Fonts/Impact.ttf"
+                log_warn "Police Impact.ttf remplacee par DejaVuSans-Bold"
+            else
+                log_warn "Aucune police trouvee - ajoutez Impact.ttf manuellement dans ${MEDIAS_DIR}/Fonts/"
+            fi
         fi
     fi
-done
-
-# Si Impact.ttf n'existe toujours pas, copier depuis le systeme
-if [ ! -f "${FONTS_DIR}/Impact.ttf" ]; then
-    # Chercher Impact.ttf dans les polices systeme
-    SYSTEM_IMPACT=$(find /usr/share/fonts -name "Impact*.ttf" 2>/dev/null | head -1)
-    if [ -n "$SYSTEM_IMPACT" ]; then
-        cp "$SYSTEM_IMPACT" "${FONTS_DIR}/Impact.ttf"
-        log_info "Police Impact.ttf copiee depuis le systeme"
-    else
-        log_warn "Police Impact.ttf non trouvee - vous devrez l'ajouter manuellement"
-    fi
-fi
-
-# =============================================================================
-# TELECHARGEMENT DES IMAGES SYSTEME
-# =============================================================================
-log_substep "Telechargement des images systeme..."
-
-# Liste des fichiers a telecharger depuis GitHub
-SYSTEM_FILES=(
-    "Raspy2DMD/gifs_videos/DMD/Raspy2DMD_1.gif"
-    "Raspy2DMD/gifs_videos/DMD/Raspy2DMD_2.gif"
-    "Raspy2DMD/gifs_videos/HDMI/Raspy2DMD.gif"
-    "Raspy2DMD/images/DMD/Raspy2DMD.png"
-    "Raspy2DMD/images/HDMI/Raspy2DMD.png"
-    "Raspy2DMD/update_gif/DMD/update.gif"
-    "Raspy2DMD/update_gif/HDMI/update.gif"
-    "Raspy2DMD/warn/NoInternet/DMD/NoInternet.gif"
-    "Raspy2DMD/warn/NoInternet/HDMI/NoInternetPart1.gif"
-    "Raspy2DMD/warn/NoIP/DMD/NoIp.gif"
-    "Raspy2DMD/warn/RGBTest/DMD/rgb_test.png"
-    "Raspy2DMD/warn/RGBTest/HDMI/rgb_test.png"
-)
-
-DOWNLOADED=0
-FAILED=0
-
-for file in "${SYSTEM_FILES[@]}"; do
-    FILE_URL="${GITHUB_RAW_URL}/Medias/${file}"
-    DEST_FILE="${MEDIAS_DIR}/${file}"
-    DEST_DIR=$(dirname "$DEST_FILE")
-
-    mkdir -p "$DEST_DIR"
-
-    if [ ! -f "$DEST_FILE" ]; then
-        if curl -sSL "$FILE_URL" -o "$DEST_FILE" 2>/dev/null; then
-            DOWNLOADED=$((DOWNLOADED + 1))
-        else
-            FAILED=$((FAILED + 1))
-        fi
-    fi
-done
-
-if [ $DOWNLOADED -gt 0 ]; then
-    log_info "${DOWNLOADED} fichiers systeme telecharges"
-fi
-
-if [ $FAILED -gt 0 ]; then
-    log_warn "${FAILED} fichiers n'ont pas pu etre telecharges"
 fi
 
 # =============================================================================
@@ -400,10 +441,24 @@ if id "raspy2dmd" &>/dev/null; then
 fi
 
 # =============================================================================
+# NETTOYAGE
+# =============================================================================
+rm -rf "$TMP_DIR"
+
+# =============================================================================
 # RESUME
 # =============================================================================
 echo ""
 log_info "Arborescence Medias creee avec succes !"
+echo ""
+
+if [ "$MEDIAS_DOWNLOADED" = true ]; then
+    echo -e "${GREEN}Les fichiers Medias ont ete telecharges depuis la release GitHub.${NC}"
+else
+    echo -e "${YELLOW}Les fichiers Medias n'ont pas pu etre telecharges automatiquement.${NC}"
+    echo -e "${YELLOW}Vous devrez peut-etre ajouter manuellement certains fichiers.${NC}"
+fi
+
 echo ""
 echo -e "${CYAN}Structure creee :${NC}"
 echo "  ${MEDIAS_DIR}/"
