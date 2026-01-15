@@ -235,9 +235,10 @@ step_get_version() {
         return
     fi
 
-    # Extraire le tag de la premiere release (la plus recente)
-    # Exclure la release Raspy2DMD_Medias qui contient les medias
-    LATEST_VERSION=$(echo "$RELEASES_JSON" | grep -o '"tag_name": *"[^"]*"' | grep -v "Raspy2DMD_Medias" | head -1 | sed 's/.*: *"\([^"]*\)"/\1/')
+    # Extraire le tag de la premiere release de l'application (la plus recente)
+    # Format attendu : vX.X.X.X (ex: v1.5.5.30)
+    # Cela exclut automatiquement Raspy2DMD_Medias et tout autre tag non-version
+    LATEST_VERSION=$(echo "$RELEASES_JSON" | grep -o '"tag_name": *"[^"]*"' | sed 's/.*: *"\([^"]*\)"/\1/' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
 
     if [ -z "$LATEST_VERSION" ]; then
         log_warn "Aucune release trouvee"
