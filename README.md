@@ -33,7 +33,7 @@ Plus d'information sur => https://raspydarts.wordpress.com/tutoriels-raspy2dmd/
 
 ### Option 2 : Installation automatique
 
-**Sur un Raspberry Pi avec Raspbian déjà installé**
+**Sur un Raspberry Pi avec Raspbian Trixie 64 bit Light déjà installé**
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/votrecompte/raspy2dmd/main/scripts/install_raspy2dmd.sh | sudo bash
