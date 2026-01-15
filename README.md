@@ -36,7 +36,7 @@ Plus d'information sur => https://raspydarts.wordpress.com/tutoriels-raspy2dmd/
 **Sur un Raspberry Pi avec Raspbian Trixie 64 bit Light déjà installé**
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/votrecompte/raspy2dmd/main/scripts/install_raspy2dmd.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/rmdelcelier/raspy2dmd/main/scripts/install_raspy2dmd.sh | sudo bash
 ```
 
 ## 📋 Prérequis matériels
