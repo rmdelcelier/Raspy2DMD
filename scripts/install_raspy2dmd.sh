@@ -224,21 +224,44 @@ step_get_version() {
 
     log_substep "Interrogation de l'API GitHub..."
 
-    LATEST_RELEASE=$(curl -s "${GITHUB_API_URL}/releases/latest")
-    LATEST_VERSION=$(echo "$LATEST_RELEASE" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | head -1)
+    # Recuperer la liste des releases et trouver la plus recente par tag
+    RELEASES_JSON=$(curl -s "${GITHUB_API_URL}/releases" 2>/dev/null)
 
-    if [ -z "$LATEST_VERSION" ]; then
-        log_warn "Impossible de recuperer la version depuis les releases"
+    if [ -z "$RELEASES_JSON" ] || echo "$RELEASES_JSON" | grep -q "Not Found"; then
+        log_warn "Impossible de recuperer les releases depuis GitHub"
         log_substep "Utilisation de la branche ${GITHUB_BRANCH}..."
         LATEST_VERSION="dev-${GITHUB_BRANCH}"
         USE_BRANCH=true
-    else
-        log_info "Derniere version : $LATEST_VERSION"
+        return
+    fi
 
-        # Recuperation des URLs de telechargement
-        DOWNLOAD_URL=$(echo "$LATEST_RELEASE" | grep "browser_download_url.*\.7z" | cut -d'"' -f4 | head -1)
-        MANIFEST_URL=$(echo "$LATEST_RELEASE" | grep "browser_download_url.*manifest.*\.json" | cut -d'"' -f4 | head -1)
+    # Extraire le tag de la premiere release (la plus recente)
+    # Exclure la release Raspy2DMD_Medias qui contient les medias
+    LATEST_VERSION=$(echo "$RELEASES_JSON" | grep -o '"tag_name": *"[^"]*"' | grep -v "Raspy2DMD_Medias" | head -1 | sed 's/.*: *"\([^"]*\)"/\1/')
+
+    if [ -z "$LATEST_VERSION" ]; then
+        log_warn "Aucune release trouvee"
+        log_substep "Utilisation de la branche ${GITHUB_BRANCH}..."
+        LATEST_VERSION="dev-${GITHUB_BRANCH}"
+        USE_BRANCH=true
+        return
+    fi
+
+    log_info "Derniere version : $LATEST_VERSION"
+
+    # Recuperer les informations de cette release specifique
+    RELEASE_JSON=$(curl -s "${GITHUB_API_URL}/releases/tags/${LATEST_VERSION}" 2>/dev/null)
+
+    # Recuperation de l'URL de telechargement de l'archive .7z
+    DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -o '"browser_download_url": *"[^"]*\.7z"' | head -1 | sed 's/.*: *"\([^"]*\)"/\1/')
+
+    if [ -n "$DOWNLOAD_URL" ]; then
+        log_substep "Archive trouvee : $(basename "$DOWNLOAD_URL")"
         USE_BRANCH=false
+    else
+        log_warn "Aucune archive .7z trouvee dans la release"
+        log_substep "Utilisation de la branche ${GITHUB_BRANCH}..."
+        USE_BRANCH=true
     fi
 }
 
@@ -427,7 +450,7 @@ step_download_raspy2dmd() {
 
             log_substep "Extraction de l'archive..."
             7za x -o"$TMP_DIR/extracted" -y raspy2dmd.7z >> "$LOG_FILE" 2>&1
-            mv extracted extracted_app
+            mv "$TMP_DIR/extracted" "$TMP_DIR/extracted_app"
         else
             log_warn "URL de telechargement non trouvee, utilisation de la branche"
             git clone --depth 1 --branch "$GITHUB_BRANCH" "https://github.com/${GITHUB_USER}/${GITHUB_REPO}.git" raspy2dmd_src >> "$LOG_FILE" 2>&1
@@ -769,7 +792,7 @@ show_summary() {
     echo -e "${YELLOW}${BOLD}IMPORTANT :${NC} Un redemarrage est recommande pour finaliser l'installation"
     echo ""
 
-    read -p "Voulez-vous redemarrer maintenant ? (o/N) " -n 1 -r
+    read -p "Voulez-vous redemarrer maintenant ? (o/N) " -n 1 -r < /dev/tty
     echo
     if [[ $REPLY =~ ^[Oo]$ ]]; then
         log_info "Redemarrage en cours..."
@@ -807,7 +830,8 @@ confirm_installation() {
     echo -e "${CYAN}Temps d'installation estime : 15-45 minutes selon le modele de Pi${NC}"
     echo ""
 
-    read -p "Continuer l'installation ? (o/N) " -n 1 -r
+    # Utiliser /dev/tty pour lire l'entree utilisateur meme si le script est pipe
+    read -p "Continuer l'installation ? (o/N) " -n 1 -r < /dev/tty
     echo
     if [[ ! $REPLY =~ ^[Oo]$ ]]; then
         log_warn "Installation annulee par l'utilisateur"
