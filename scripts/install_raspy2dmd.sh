@@ -253,14 +253,14 @@ step_get_version() {
     # Recuperer les informations de cette release specifique
     RELEASE_JSON=$(curl -s "${GITHUB_API_URL}/releases/tags/${LATEST_VERSION}" 2>/dev/null)
 
-    # Recuperation de l'URL de telechargement de l'archive .7z
-    DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -o '"browser_download_url": *"[^"]*\.7z"' | head -1 | sed 's/.*: *"\([^"]*\)"/\1/')
+    # Recuperation de l'URL de telechargement de l'archive .tar.gz
+    DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -o '"browser_download_url": *"[^"]*\.tar\.gz"' | head -1 | sed 's/.*: *"\([^"]*\)"/\1/')
 
     if [ -n "$DOWNLOAD_URL" ]; then
         log_substep "Archive trouvee : $(basename "$DOWNLOAD_URL")"
         USE_BRANCH=false
     else
-        log_warn "Aucune archive .7z trouvee dans la release"
+        log_warn "Aucune archive .tar.gz trouvee dans la release"
         log_substep "Utilisation de la branche ${GITHUB_BRANCH}..."
         USE_BRANCH=true
     fi
@@ -447,10 +447,11 @@ step_download_raspy2dmd() {
         log_substep "Telechargement de l'archive (cela peut prendre quelques minutes)..."
 
         if [ -n "$DOWNLOAD_URL" ]; then
-            wget -q --show-progress "$DOWNLOAD_URL" -O raspy2dmd.7z
+            wget -q --show-progress "$DOWNLOAD_URL" -O raspy2dmd.tar.gz
 
             log_substep "Extraction de l'archive..."
-            7za x -o"$TMP_DIR/extracted" -y raspy2dmd.7z >> "$LOG_FILE" 2>&1
+            mkdir -p "$TMP_DIR/extracted"
+            tar -xzf raspy2dmd.tar.gz -C "$TMP_DIR/extracted" >> "$LOG_FILE" 2>&1
             mv "$TMP_DIR/extracted" "$TMP_DIR/extracted_app"
         else
             log_warn "URL de telechargement non trouvee, utilisation de la branche"
