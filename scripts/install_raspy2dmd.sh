@@ -771,36 +771,72 @@ step_setup_database() {
     systemctl start mariadb || true
     systemctl enable mariadb || true
 
-    # Configuration du mot de passe root
+    # Configuration du mot de passe root et passage en authentification par mot de passe
     log_substep "Configuration de MariaDB..."
 
-    # Verifier si le mot de passe est deja configure
+    # Verifier si le mot de passe est deja configure et fonctionne
     if mysql -u root -p${DB_PASSWORD} -e "SELECT 1;" &>/dev/null; then
         log_info "Mot de passe root deja configure"
     else
-        # Essayer de configurer le mot de passe
-        if mysql -u root -e "SELECT 1;" &>/dev/null; then
-            mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_PASSWORD}'; FLUSH PRIVILEGES;" 2>/dev/null || true
-        elif sudo mysql -e "SELECT 1;" &>/dev/null; then
-            sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_PASSWORD}'; FLUSH PRIVILEGES;" 2>/dev/null || true
+        # MariaDB utilise unix_socket par defaut sur Debian/Raspbian
+        # On doit changer le plugin d'authentification pour utiliser un mot de passe
+        log_substep "Configuration de l'authentification par mot de passe..."
+
+        # Essayer avec sudo mysql (methode unix_socket)
+        if sudo mysql -e "SELECT 1;" &>/dev/null; then
+            # Changer le plugin d'authentification de unix_socket vers mysql_native_password
+            sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('${DB_PASSWORD}');" 2>/dev/null || \
+            sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';" 2>/dev/null || \
+            sudo mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${DB_PASSWORD}');" 2>/dev/null || true
+
+            sudo mysql -e "FLUSH PRIVILEGES;" 2>/dev/null || true
+            log_info "Authentification par mot de passe configuree"
+        elif mysql -u root -e "SELECT 1;" &>/dev/null; then
+            # Acces sans mot de passe (ancien comportement)
+            mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('${DB_PASSWORD}');" 2>/dev/null || \
+            mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';" 2>/dev/null || \
+            mysql -u root -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${DB_PASSWORD}');" 2>/dev/null || true
+
+            mysql -u root -e "FLUSH PRIVILEGES;" 2>/dev/null || true
+            log_info "Authentification par mot de passe configuree"
+        else
+            log_warn "Impossible de configurer le mot de passe root MariaDB"
         fi
     fi
 
-    # Creation des bases de donnees
+    # Creation des bases de donnees (essayer avec mot de passe, sinon avec sudo)
     log_substep "Creation des bases de donnees..."
 
-    mysql -u root -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS excluded;" 2>/dev/null || true
-    mysql -u root -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS effects;" 2>/dev/null || true
+    if mysql -u root -p${DB_PASSWORD} -e "SELECT 1;" &>/dev/null; then
+        # Connexion avec mot de passe OK
+        mysql -u root -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS excluded;" 2>/dev/null || true
+        mysql -u root -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS effects;" 2>/dev/null || true
 
-    # Import des dumps SQL si disponibles
-    if [ -f "${INSTALL_DIR}/databases/excluded-dump.sql" ]; then
-        log_substep "Import de la base excluded..."
-        mysql -u root -p${DB_PASSWORD} excluded < "${INSTALL_DIR}/databases/excluded-dump.sql" 2>/dev/null || true
-    fi
+        # Import des dumps SQL si disponibles
+        if [ -f "${INSTALL_DIR}/databases/excluded-dump.sql" ]; then
+            log_substep "Import de la base excluded..."
+            mysql -u root -p${DB_PASSWORD} excluded < "${INSTALL_DIR}/databases/excluded-dump.sql" 2>/dev/null || true
+        fi
 
-    if [ -f "${INSTALL_DIR}/databases/effect-dump.sql" ]; then
-        log_substep "Import de la base effects..."
-        mysql -u root -p${DB_PASSWORD} effects < "${INSTALL_DIR}/databases/effect-dump.sql" 2>/dev/null || true
+        if [ -f "${INSTALL_DIR}/databases/effect-dump.sql" ]; then
+            log_substep "Import de la base effects..."
+            mysql -u root -p${DB_PASSWORD} effects < "${INSTALL_DIR}/databases/effect-dump.sql" 2>/dev/null || true
+        fi
+    else
+        # Fallback avec sudo mysql
+        log_warn "Utilisation de sudo mysql pour la creation des bases"
+        sudo mysql -e "CREATE DATABASE IF NOT EXISTS excluded;" 2>/dev/null || true
+        sudo mysql -e "CREATE DATABASE IF NOT EXISTS effects;" 2>/dev/null || true
+
+        if [ -f "${INSTALL_DIR}/databases/excluded-dump.sql" ]; then
+            log_substep "Import de la base excluded..."
+            sudo mysql excluded < "${INSTALL_DIR}/databases/excluded-dump.sql" 2>/dev/null || true
+        fi
+
+        if [ -f "${INSTALL_DIR}/databases/effect-dump.sql" ]; then
+            log_substep "Import de la base effects..."
+            sudo mysql effects < "${INSTALL_DIR}/databases/effect-dump.sql" 2>/dev/null || true
+        fi
     fi
 
     log_info "Base de donnees configuree"
