@@ -22,7 +22,7 @@ set -e  # Arret en cas d'erreur
 # CONFIGURATION GITHUB
 # =============================================================================
 GITHUB_USER="rmdelcelier"                           # Compte GitHub
-GITHUB_REPO="raspy2dmd"                             # Nom du depot GitHub
+GITHUB_REPO="Raspy2DMD"                             # Nom du depot GitHub
 GITHUB_BRANCH="main"                                # Branche principale
 GITHUB_RAW_URL="https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}"
 GITHUB_API_URL="https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}"
@@ -560,33 +560,73 @@ step_install_files() {
 step_setup_medias() {
     log_step 10 "Creation de l'arborescence Medias"
 
-    # Telechargement et execution du script setup_medias.sh
-    log_substep "Telechargement du script de creation des medias..."
+    # Configuration pour l'archive Medias
+    MEDIAS_TAG="Raspy2DMD_Medias"
+    MEDIAS_ARCHIVE_NAME="Medias.7z"
+    MEDIAS_DOWNLOADED=false
 
-    # Note: l'espace dans "GitHub public" doit etre encode en %20 pour l'URL
-    SETUP_MEDIAS_URL="${GITHUB_RAW_URL}/scripts/GitHub%20public/setup_medias.sh"
+    # Tentative de telechargement de l'archive Medias depuis la release GitHub
+    log_substep "Recherche de l'archive Medias (tag: ${MEDIAS_TAG})..."
 
-    if curl -sSL "$SETUP_MEDIAS_URL" -o "$TMP_DIR/setup_medias.sh" 2>/dev/null; then
-        chmod +x "$TMP_DIR/setup_medias.sh"
-        bash "$TMP_DIR/setup_medias.sh" >> "$LOG_FILE" 2>&1
+    MEDIAS_RELEASE=$(curl -s "${GITHUB_API_URL}/releases/tags/${MEDIAS_TAG}" 2>/dev/null || echo "")
+
+    if [ -n "$MEDIAS_RELEASE" ] && echo "$MEDIAS_RELEASE" | grep -q "tag_name"; then
+        # Chercher l'archive Medias.7z dans les assets
+        MEDIAS_ARCHIVE_URL=$(echo "$MEDIAS_RELEASE" | grep -o "\"browser_download_url\"[^,]*${MEDIAS_ARCHIVE_NAME}\"" | cut -d'"' -f4 | head -1)
+
+        if [ -n "$MEDIAS_ARCHIVE_URL" ]; then
+            log_substep "Archive trouvee : ${MEDIAS_ARCHIVE_NAME}"
+            log_substep "Telechargement en cours (cela peut prendre plusieurs minutes)..."
+
+            if wget -q --show-progress "$MEDIAS_ARCHIVE_URL" -O "${TMP_DIR}/medias.7z" 2>/dev/null; then
+                log_substep "Extraction de l'archive Medias..."
+
+                # Extraire dans /Medias directement
+                mkdir -p "$MEDIAS_DIR"
+                7za x -o"${TMP_DIR}/medias_extracted" -y "${TMP_DIR}/medias.7z" >> "$LOG_FILE" 2>&1
+
+                # Copier les fichiers extraits vers /Medias
+                if [ -d "${TMP_DIR}/medias_extracted/Medias" ]; then
+                    cp -r "${TMP_DIR}/medias_extracted/Medias/"* "$MEDIAS_DIR/" 2>/dev/null || true
+                    MEDIAS_DOWNLOADED=true
+                    log_info "Fichiers Medias installes depuis l'archive GitHub"
+                elif [ -d "${TMP_DIR}/medias_extracted" ]; then
+                    cp -r "${TMP_DIR}/medias_extracted/"* "$MEDIAS_DIR/" 2>/dev/null || true
+                    MEDIAS_DOWNLOADED=true
+                    log_info "Fichiers Medias installes depuis l'archive GitHub"
+                fi
+
+                # Nettoyage
+                rm -rf "${TMP_DIR}/medias_extracted" "${TMP_DIR}/medias.7z"
+            else
+                log_warn "Echec du telechargement de l'archive Medias"
+            fi
+        else
+            log_warn "Archive ${MEDIAS_ARCHIVE_NAME} non trouvee dans la release ${MEDIAS_TAG}"
+        fi
     else
-        log_warn "Script setup_medias.sh non trouve, creation manuelle..."
+        log_warn "Release ${MEDIAS_TAG} non trouvee sur GitHub"
+    fi
 
-        # Creation manuelle de l'arborescence
-        mkdir -p "$MEDIAS_DIR"/{_Updates,Fonts,Gifs,Videos,Images,Jeux,Logs/Raspy2DMD,Meteo/{DMD,HDMI},Patterns,PerfVisualizer/{DMD,HDMI},Scores,Sounds/Jeux/{FlyBird,Pong,Snake,SpaceWars},SpecialsMoves,Textes,EDFJoursTempo/{DMD,HDMI}}
-        mkdir -p "$MEDIAS_DIR"/Raspy2DMD/{gifs_videos/{DMD,HDMI},images/{DMD,HDMI},param_img/{DMD,HDMI},update_gif/{DMD,HDMI},warn/{NoInternet/{DMD,HDMI},NoIP/{DMD,HDMI},RGBTest/{DMD,HDMI}}}
+    # Creation/completion de l'arborescence (meme si telechargement reussi, pour s'assurer que tout existe)
+    log_substep "Creation/completion de l'arborescence Medias..."
 
-        # Creation des dossiers Scores
-        for prefix in D S T; do
-            for i in {1..20}; do
-                mkdir -p "$MEDIAS_DIR/Scores/${prefix}${i}"
-            done
-            mkdir -p "$MEDIAS_DIR/Scores/${prefix}B"
+    # Creation manuelle de l'arborescence
+    mkdir -p "$MEDIAS_DIR"/{_Updates,Fonts,Gifs,Videos,Images,Jeux,Logs/Raspy2DMD,Meteo/{DMD,HDMI},Patterns,PerfVisualizer/{DMD,HDMI},Scores,Sounds/Jeux/{FlyBird,Pong,Snake,SpaceWars},SpecialsMoves,Textes,EDFJoursTempo/{DMD,HDMI}}
+    mkdir -p "$MEDIAS_DIR"/Raspy2DMD/{gifs_videos/{DMD,HDMI},images/{DMD,HDMI},param_img/{DMD,HDMI},update_gif/{DMD,HDMI},warn/{NoInternet/{DMD,HDMI},NoIP/{DMD,HDMI},RGBTest/{DMD,HDMI}}}
+
+    # Creation des dossiers Scores
+    for prefix in D S T; do
+        for i in {1..20}; do
+            mkdir -p "$MEDIAS_DIR/Scores/${prefix}${i}"
         done
+        mkdir -p "$MEDIAS_DIR/Scores/${prefix}B"
+    done
 
-        # Creation du fichier de configuration par defaut
-        if [ ! -f "$CONFIG_FILE" ]; then
-            cat > "$CONFIG_FILE" << 'CONFIGEOF'
+    # Creation du fichier de configuration par defaut (seulement s'il n'existe pas)
+    if [ ! -f "$CONFIG_FILE" ]; then
+        log_substep "Creation du fichier de configuration par defaut..."
+        cat > "$CONFIG_FILE" << 'CONFIGEOF'
 [DMDRenderer]
 cols = 64
 rows = 32
@@ -684,7 +724,6 @@ lastcallintime = 0001-01-01 00:00
 volume = 50
 output = local
 CONFIGEOF
-        fi
     fi
 
     # Permissions
