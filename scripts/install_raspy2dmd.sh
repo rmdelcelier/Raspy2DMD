@@ -553,8 +553,8 @@ pwm_bits = 11
 scan_mode = 0
 hardware_mapping = regular
 rgb_mode = RGB
-brightness = 20
-brightnesshours = 20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20
+brightness = 50
+brightnesshours = 50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50
 led_row_addr_type = 0
 center_images = 1
 multi_hub = 0
@@ -606,13 +606,13 @@ websynch = 0
 
 [Running]
 standalone = 0
-default = 0
+default = 1
 attract_mode = 0
 raspydarts = raspydarts.local
 raspydartscanal = raspydarts/dmd
 resptoraspydarts = 0
 scrollorder = 1,T
-checkforupdate = 0
+checkforupdate = 1
 activehdmi = 0
 
 [OpenWeatherMap]
