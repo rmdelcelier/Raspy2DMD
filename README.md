@@ -25,7 +25,7 @@ Transformez votre Raspberry Pi en afficheur DMD haute performance pour fléchett
 
 1. **Télécharger** l'image SD depuis https://raspydarts.wordpress.com/telechargement/ (Rubrique "Raspy2DMD" puis sur => DRIVE <=)
 2. **Graver** avec votre logiciel préféré
-3. **Relier** votre Raspberry Pi à l'ethernet ou le wifi (création d'un fichier 'wpa_supplicant.conf')
+3. **Relier** votre Raspberry Pi au réseau via l'ethernet ou au wifi (création d'un fichier 'wpa_supplicant.conf')
 4. **Insérer** la carte mini SD dans votre Raspberry Pi
 4. **Démarrer** et accéder à `http://raspy2dmd.local/`
 
