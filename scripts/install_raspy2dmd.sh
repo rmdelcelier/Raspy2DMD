@@ -561,7 +561,7 @@ step_setup_medias() {
     log_step 10 "Creation de l'arborescence Medias"
 
     # Configuration pour l'archive Medias
-    MEDIAS_TAG="Raspy2DMD_Medias"
+    MEDIAS_TAG="Medias"
     MEDIAS_ARCHIVE_NAME="Medias.7z"
     MEDIAS_DOWNLOADED=false
 
