@@ -340,24 +340,47 @@ step_install_system_deps() {
     echo ""  # Nouvelle ligne apres la barre de progression
     log_info "Dependances systeme installees"
 
-    # Installation des locales (FR, EN, ES, IT, DE)
+    # Installation des locales (FR, EN, ES, IT, DE) - toutes variantes
     log_substep "Installation des locales (FR, EN, ES, IT, DE)..."
 
     # S'assurer que locales est installe
     apt-get install -y -qq locales >> "$LOG_FILE" 2>&1 || true
 
-    # Generer les locales necessaires
+    # Generer les locales necessaires (UTF-8, ISO-8859-1, ISO-8859-15)
     LOCALES=(
+        # Francais
         "fr_FR.UTF-8"
+        "fr_FR ISO-8859-1"
+        "fr_FR.ISO-8859-15 ISO-8859-15"
+        "fr_FR@euro ISO-8859-15"
+        # Anglais US
         "en_US.UTF-8"
+        "en_US ISO-8859-1"
+        # Anglais GB
         "en_GB.UTF-8"
+        "en_GB ISO-8859-1"
+        "en_GB.ISO-8859-15 ISO-8859-15"
+        # Espagnol
         "es_ES.UTF-8"
+        "es_ES ISO-8859-1"
+        "es_ES.ISO-8859-15 ISO-8859-15"
+        "es_ES@euro ISO-8859-15"
+        # Italien
         "it_IT.UTF-8"
+        "it_IT ISO-8859-1"
+        "it_IT.ISO-8859-15 ISO-8859-15"
+        "it_IT@euro ISO-8859-15"
+        # Allemand
         "de_DE.UTF-8"
+        "de_DE ISO-8859-1"
+        "de_DE.ISO-8859-15 ISO-8859-15"
+        "de_DE@euro ISO-8859-15"
     )
 
     for locale in "${LOCALES[@]}"; do
-        sed -i "s/^# *${locale}/${locale}/" /etc/locale.gen 2>/dev/null || true
+        # Activer la locale dans /etc/locale.gen (decommenter si commentee)
+        locale_pattern=$(echo "$locale" | sed 's/\./\\./g' | sed 's/@/\\@/g')
+        sed -i "s/^# *${locale_pattern}/${locale}/" /etc/locale.gen 2>/dev/null || true
     done
 
     # Regenerer les locales
