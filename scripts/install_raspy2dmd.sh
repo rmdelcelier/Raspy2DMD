@@ -810,11 +810,16 @@ FLUSH PRIVILEGES;
 SQLEOF2
         fi
 
-        # Methode 3 (dernier recours) : ALTER USER
+        # Methode 3 : ALTER USER (recommandee)
         if ! mysql -u root -p${DB_PASSWORD} -e "SELECT 1;" &>/dev/null; then
             log_substep "Tentative avec ALTER USER..."
-            sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('raspberrypi');" 2>/dev/null || true
-            sudo mysql -e "FLUSH PRIVILEGES;" 2>/dev/null || true
+            sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('raspberrypi'); FLUSH PRIVILEGES;" 2>/dev/null || true
+        fi
+
+        # Methode 4 (dernier recours) : commande directe
+        if ! mysql -u root -p${DB_PASSWORD} -e "SELECT 1;" &>/dev/null; then
+            log_substep "Tentative avec commande directe..."
+            sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('raspberrypi'); FLUSH PRIVILEGES;"
         fi
 
         # Verification
@@ -932,6 +937,28 @@ AVAHIEOF
             dphys-swapfile setup 2>/dev/null || true
             dphys-swapfile swapon 2>/dev/null || true
         fi
+    fi
+
+    # Optimisation affichage LED Matrix : isoler le CPU 3 pour les mises a jour
+    log_substep "Configuration de l'optimisation isolcpus pour l'affichage..."
+    CMDLINE_FILE="/boot/cmdline.txt"
+    # Sur certains systemes, c'est dans /boot/firmware/cmdline.txt
+    if [ ! -f "$CMDLINE_FILE" ] && [ -f "/boot/firmware/cmdline.txt" ]; then
+        CMDLINE_FILE="/boot/firmware/cmdline.txt"
+    fi
+
+    if [ -f "$CMDLINE_FILE" ]; then
+        # Verifier si isolcpus=3 est deja present
+        if ! grep -q "isolcpus=3" "$CMDLINE_FILE"; then
+            log_substep "Ajout de isolcpus=3 dans $CMDLINE_FILE..."
+            # Ajouter isolcpus=3 a la fin de la ligne (cmdline.txt est sur une seule ligne)
+            sed -i 's/$/ isolcpus=3/' "$CMDLINE_FILE"
+            log_info "isolcpus=3 ajoute - ameliore la fluidite de l'affichage LED"
+        else
+            log_info "isolcpus=3 deja configure"
+        fi
+    else
+        log_warn "Fichier cmdline.txt non trouve, optimisation isolcpus non appliquee"
     fi
 
     log_info "Configuration finale terminee"
