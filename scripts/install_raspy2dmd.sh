@@ -214,6 +214,18 @@ step_prepare() {
     echo "OS : $OS_NAME" >> "$LOG_FILE"
     echo "" >> "$LOG_FILE"
 
+    # Creation de l'utilisateur raspy2dmd si necessaire
+    if ! id "raspy2dmd" &>/dev/null; then
+        log_substep "Creation de l'utilisateur raspy2dmd..."
+        useradd -m -s /bin/bash raspy2dmd >> "$LOG_FILE" 2>&1
+        echo "raspy2dmd:raspy2dmd" | chpasswd >> "$LOG_FILE" 2>&1
+        # Ajouter aux groupes necessaires
+        usermod -aG sudo,audio,video,gpio,i2c,spi raspy2dmd >> "$LOG_FILE" 2>&1 || true
+        log_info "Utilisateur raspy2dmd cree"
+    else
+        log_info "Utilisateur raspy2dmd existe deja"
+    fi
+
     log_info "Preparation terminee"
 }
 
@@ -327,6 +339,34 @@ step_install_system_deps() {
 
     echo ""  # Nouvelle ligne apres la barre de progression
     log_info "Dependances systeme installees"
+
+    # Installation des locales (FR, EN, ES, IT, DE)
+    log_substep "Installation des locales (FR, EN, ES, IT, DE)..."
+
+    # S'assurer que locales est installe
+    apt-get install -y -qq locales >> "$LOG_FILE" 2>&1 || true
+
+    # Generer les locales necessaires
+    LOCALES=(
+        "fr_FR.UTF-8"
+        "en_US.UTF-8"
+        "en_GB.UTF-8"
+        "es_ES.UTF-8"
+        "it_IT.UTF-8"
+        "de_DE.UTF-8"
+    )
+
+    for locale in "${LOCALES[@]}"; do
+        sed -i "s/^# *${locale}/${locale}/" /etc/locale.gen 2>/dev/null || true
+    done
+
+    # Regenerer les locales
+    locale-gen >> "$LOG_FILE" 2>&1 || true
+
+    # Definir la locale par defaut
+    update-locale LANG=fr_FR.UTF-8 >> "$LOG_FILE" 2>&1 || true
+
+    log_info "Locales installees"
 }
 
 # =============================================================================
@@ -500,9 +540,16 @@ step_install_files() {
     fi
 
     # Permissions
+    log_substep "Configuration des permissions..."
     chmod -R 755 "$INSTALL_DIR"
-    chmod +x "$INSTALL_DIR"/*.sh 2>/dev/null || true
-    chmod +x "$INSTALL_DIR"/**/*.sh 2>/dev/null || true
+
+    # Rendre tous les fichiers .sh executables
+    find "$INSTALL_DIR" -type f -name "*.sh" -exec chmod +x {} +
+
+    # Attribuer la propriete a l'utilisateur raspy2dmd
+    if id "raspy2dmd" &>/dev/null; then
+        chown -R raspy2dmd:raspy2dmd "$INSTALL_DIR"
+    fi
 
     log_info "Fichiers installes dans $INSTALL_DIR"
 }
@@ -516,7 +563,8 @@ step_setup_medias() {
     # Telechargement et execution du script setup_medias.sh
     log_substep "Telechargement du script de creation des medias..."
 
-    SETUP_MEDIAS_URL="${GITHUB_RAW_URL}/scripts/setup_medias.sh"
+    # Note: l'espace dans "GitHub public" doit etre encode en %20 pour l'URL
+    SETUP_MEDIAS_URL="${GITHUB_RAW_URL}/scripts/GitHub%20public/setup_medias.sh"
 
     if curl -sSL "$SETUP_MEDIAS_URL" -o "$TMP_DIR/setup_medias.sh" 2>/dev/null; then
         chmod +x "$TMP_DIR/setup_medias.sh"
@@ -640,7 +688,13 @@ CONFIGEOF
     fi
 
     # Permissions
+    log_substep "Configuration des permissions du dossier Medias..."
     chmod -R 777 "$MEDIAS_DIR"
+
+    # Attribuer la propriete a l'utilisateur raspy2dmd
+    if id "raspy2dmd" &>/dev/null; then
+        chown -R raspy2dmd:raspy2dmd "$MEDIAS_DIR"
+    fi
 
     log_info "Arborescence Medias creee"
 }
