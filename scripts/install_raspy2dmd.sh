@@ -40,6 +40,7 @@ LOG_FILE="/var/log/raspy2dmd_install.log"
 # =============================================================================
 # CONFIGURATION BASE DE DONNEES
 # =============================================================================
+# ATTENTION: Ces credentials doivent correspondre a ceux de DMDRenderer_Database.py
 DB_USER="root"
 DB_PASSWORD="raspberrypi"
 DB_HOST="127.0.0.1"
@@ -771,46 +772,67 @@ step_setup_database() {
     systemctl start mariadb || true
     systemctl enable mariadb || true
 
-    # Configuration du mot de passe root et passage en authentification par mot de passe
     log_substep "Configuration de MariaDB..."
 
-    # Verifier si le mot de passe est deja configure et fonctionne
+    # Sur Debian/Raspbian, root utilise unix_socket par defaut (erreur 1698)
+    # Solution : changer le plugin d'authentification de root vers mysql_native_password
+
+    # Verifier si root peut deja se connecter avec mot de passe
     if mysql -u root -p${DB_PASSWORD} -e "SELECT 1;" &>/dev/null; then
-        log_info "Mot de passe root deja configure"
+        log_info "Authentification root par mot de passe deja configuree"
     else
-        # MariaDB utilise unix_socket par defaut sur Debian/Raspbian
-        # On doit changer le plugin d'authentification pour utiliser un mot de passe
-        log_substep "Configuration de l'authentification par mot de passe..."
+        log_substep "Configuration de l'authentification root par mot de passe..."
 
-        # Essayer avec sudo mysql (methode unix_socket)
-        if sudo mysql -e "SELECT 1;" &>/dev/null; then
-            # Changer le plugin d'authentification de unix_socket vers mysql_native_password
-            sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('${DB_PASSWORD}');" 2>/dev/null || \
-            sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';" 2>/dev/null || \
-            sudo mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${DB_PASSWORD}');" 2>/dev/null || true
+        # Methode 1 : Utiliser sudo mysql pour modifier le plugin d'authentification
+        sudo mysql << 'SQLEOF'
+-- Desactiver unix_socket et activer mysql_native_password pour root
+UPDATE mysql.global_priv
+SET priv = JSON_SET(priv, '$.plugin', 'mysql_native_password', '$.authentication_string', PASSWORD('raspberrypi'))
+WHERE User = 'root' AND Host = 'localhost';
 
+-- Aussi pour 127.0.0.1 si existe
+UPDATE mysql.global_priv
+SET priv = JSON_SET(priv, '$.plugin', 'mysql_native_password', '$.authentication_string', PASSWORD('raspberrypi'))
+WHERE User = 'root' AND Host = '127.0.0.1';
+
+FLUSH PRIVILEGES;
+SQLEOF
+
+        # Methode 2 (fallback pour anciennes versions MariaDB) : utiliser mysql.user
+        if ! mysql -u root -p${DB_PASSWORD} -e "SELECT 1;" &>/dev/null; then
+            log_substep "Tentative avec methode alternative..."
+            sudo mysql << 'SQLEOF2'
+-- Ancienne methode via mysql.user
+UPDATE mysql.user SET plugin = 'mysql_native_password' WHERE User = 'root' AND Host = 'localhost';
+UPDATE mysql.user SET plugin = 'mysql_native_password' WHERE User = 'root' AND Host = '127.0.0.1';
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('raspberrypi');
+FLUSH PRIVILEGES;
+SQLEOF2
+        fi
+
+        # Methode 3 (dernier recours) : ALTER USER
+        if ! mysql -u root -p${DB_PASSWORD} -e "SELECT 1;" &>/dev/null; then
+            log_substep "Tentative avec ALTER USER..."
+            sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('raspberrypi');" 2>/dev/null || true
             sudo mysql -e "FLUSH PRIVILEGES;" 2>/dev/null || true
-            log_info "Authentification par mot de passe configuree"
-        elif mysql -u root -e "SELECT 1;" &>/dev/null; then
-            # Acces sans mot de passe (ancien comportement)
-            mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('${DB_PASSWORD}');" 2>/dev/null || \
-            mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';" 2>/dev/null || \
-            mysql -u root -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${DB_PASSWORD}');" 2>/dev/null || true
+        fi
 
-            mysql -u root -e "FLUSH PRIVILEGES;" 2>/dev/null || true
-            log_info "Authentification par mot de passe configuree"
+        # Verification
+        if mysql -u root -p${DB_PASSWORD} -e "SELECT 1;" &>/dev/null; then
+            log_info "Authentification root par mot de passe configuree avec succes"
         else
-            log_warn "Impossible de configurer le mot de passe root MariaDB"
+            log_warn "Impossible de configurer l'authentification par mot de passe pour root"
+            log_warn "L'application utilisera sudo mysql comme fallback"
         fi
     fi
 
-    # Creation des bases de donnees (essayer avec mot de passe, sinon avec sudo)
+    # Creation des bases de donnees
     log_substep "Creation des bases de donnees..."
 
+    # Essayer avec mot de passe d'abord, sinon sudo mysql
     if mysql -u root -p${DB_PASSWORD} -e "SELECT 1;" &>/dev/null; then
-        # Connexion avec mot de passe OK
-        mysql -u root -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS excluded;" 2>/dev/null || true
-        mysql -u root -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS effects;" 2>/dev/null || true
+        mysql -u root -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS excluded CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || true
+        mysql -u root -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS effects CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || true
 
         # Import des dumps SQL si disponibles
         if [ -f "${INSTALL_DIR}/databases/excluded-dump.sql" ]; then
@@ -824,9 +846,8 @@ step_setup_database() {
         fi
     else
         # Fallback avec sudo mysql
-        log_warn "Utilisation de sudo mysql pour la creation des bases"
-        sudo mysql -e "CREATE DATABASE IF NOT EXISTS excluded;" 2>/dev/null || true
-        sudo mysql -e "CREATE DATABASE IF NOT EXISTS effects;" 2>/dev/null || true
+        sudo mysql -e "CREATE DATABASE IF NOT EXISTS excluded CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || true
+        sudo mysql -e "CREATE DATABASE IF NOT EXISTS effects CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || true
 
         if [ -f "${INSTALL_DIR}/databases/excluded-dump.sql" ]; then
             log_substep "Import de la base excluded..."
@@ -837,6 +858,15 @@ step_setup_database() {
             log_substep "Import de la base effects..."
             sudo mysql effects < "${INSTALL_DIR}/databases/effect-dump.sql" 2>/dev/null || true
         fi
+    fi
+
+    # Verification finale
+    if mysql -u root -p${DB_PASSWORD} -e "SELECT 1;" &>/dev/null; then
+        log_info "Connexion MariaDB verifiee avec succes (root/${DB_PASSWORD})"
+    else
+        log_error "ATTENTION: La connexion MariaDB avec root/${DB_PASSWORD} ne fonctionne pas"
+        log_error "L'application Raspy2DMD ne pourra pas se connecter a la base de donnees"
+        log_error "Executez manuellement: sudo mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('raspberrypi'); FLUSH PRIVILEGES;\""
     fi
 
     log_info "Base de donnees configuree"
