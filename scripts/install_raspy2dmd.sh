@@ -1224,6 +1224,18 @@ SAMBAEOF
         else
             log_info "isolcpus=3 deja configure"
         fi
+
+        # Supprimer les interruptions timer sur le coeur isole (reduit le clignotement)
+        if ! grep -q "nohz_full=3" "$CMDLINE_FILE"; then
+            sed -i 's/$/ nohz_full=3/' "$CMDLINE_FILE"
+            log_info "nohz_full=3 ajoute - supprime les ticks timer sur le coeur isole"
+        fi
+
+        # Deplacer les callbacks RCU hors du coeur isole
+        if ! grep -q "rcu_nocbs=3" "$CMDLINE_FILE"; then
+            sed -i 's/$/ rcu_nocbs=3/' "$CMDLINE_FILE"
+            log_info "rcu_nocbs=3 ajoute - deplace les callbacks RCU hors du coeur isole"
+        fi
     else
         log_warn "Fichier cmdline.txt non trouve, optimisation isolcpus non appliquee"
     fi
