@@ -33,9 +33,7 @@ Plus d'information sur => https://raspydarts.wordpress.com/tutoriels-raspy2dmd/
 
 ### Option 2 : Installation automatique
 
-**Sur un Raspberry Pi avec Raspberry Pi OS Lite (32-bit -> Pi Zero au Pi 3) - Trixie minimum - déjà installé**
-**OU**
-**Sur un Raspberry Pi avec Raspberry Pi OS Lite (64-bit -> Pi 4 et plus) - Trixie minimum - déjà installé**
+**Sur un Raspberry Pi avec Raspberry Pi OS Lite (32-bit -> Pi Zero au Pi 3 | 64-bit -> Pi 4 et plus) - Trixie minimum - déjà installé**
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/rmdelcelier/raspy2dmd/main/scripts/install_raspy2dmd.sh | sudo bash
