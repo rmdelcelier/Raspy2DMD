@@ -12,6 +12,7 @@ Transformez votre Raspberry Pi en afficheur DMD haute performance pour fléchett
 - 🌐 **Interface web** : Configuration complète via navigateur
 - 📱 **Bluetooth** : Contrôle à distance
 - 🔄 **Mises à jour automatiques** : Toujours à jour
+- ↔️ **Connectivité** : Wifi, Ethernet, USB et Bluetooth
 
 ## 📚 Documentation
 

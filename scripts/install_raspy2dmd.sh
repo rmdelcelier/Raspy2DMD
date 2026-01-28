@@ -319,7 +319,7 @@ step_install_system_deps() {
         # Audio
         portaudio19-dev libsndfile1 libsndfile1-dev alsa-utils
         # Reseau
-        avahi-daemon avahi-utils
+        avahi-daemon avahi-utils dnsmasq
         # MQTT
         mosquitto mosquitto-clients
         # Base de donnees
@@ -1025,6 +1025,24 @@ AVAHIEOF
             dphys-swapfile setup 2>/dev/null || true
             dphys-swapfile swapon 2>/dev/null || true
         fi
+    fi
+
+    # Configuration du mode USB Gadget (OTG)
+    log_substep "Configuration du mode USB Gadget (OTG)..."
+    if [ -f "${INSTALL_DIR}/system/usb_gadget_setup.sh" ]; then
+        # Rendre le script executable
+        chmod +x "${INSTALL_DIR}/system/usb_gadget_setup.sh"
+        chmod +x "${INSTALL_DIR}/system/usb_gadget_connected.sh" 2>/dev/null || true
+        chmod +x "${INSTALL_DIR}/system/usb_gadget_disconnected.sh" 2>/dev/null || true
+
+        # Executer le setup USB Gadget (detecte automatiquement le support OTG)
+        bash "${INSTALL_DIR}/system/usb_gadget_setup.sh" >> "$LOG_FILE" 2>&1 && {
+            log_info "Mode USB Gadget configure (sous-reseau 10.0.0.1/24)"
+        } || {
+            log_warn "Mode USB Gadget non configure (modele non compatible ou erreur)"
+        }
+    else
+        log_warn "Script usb_gadget_setup.sh non trouve, mode USB Gadget non configure"
     fi
 
     # Configuration des partages reseau Samba
