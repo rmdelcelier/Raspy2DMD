@@ -886,31 +886,88 @@ step_install_npm_dependencies() {
         rm -rf "$INSTALL_DIR/web/node_modules"
     fi
 
+    # Sur Pi Zero, augmenter le swap AVANT npm install (npm + compilation native = gourmand en RAM)
+    if [ "$PI_ARCH" = "armv6" ] && [ -f "/etc/dphys-swapfile" ]; then
+        CURRENT_SWAP=$(grep "^CONF_SWAPSIZE=" /etc/dphys-swapfile 2>/dev/null | cut -d= -f2)
+        if [ -n "$CURRENT_SWAP" ] && [ "$CURRENT_SWAP" -lt 512 ] 2>/dev/null; then
+            log_substep "Augmentation du swap a 512MB pour la compilation npm..."
+            sed -i 's/CONF_SWAPSIZE=.*/CONF_SWAPSIZE=512/' /etc/dphys-swapfile
+            dphys-swapfile setup 2>/dev/null || true
+            dphys-swapfile swapon 2>/dev/null || true
+        fi
+    fi
+
     # Installer les dependances npm en tant qu'utilisateur raspy2dmd
     log_substep "Installation des packages npm (peut prendre quelques minutes)..."
 
+    # Desactiver set -e temporairement pour gerer les erreurs npm manuellement
+    # (sinon le script meurt avant d'atteindre le fallback)
+    set +e
+
     # Executer npm install en tant qu'utilisateur raspy2dmd pour eviter les problemes de permissions
+    NPM_SUCCESS=false
     if id "raspy2dmd" &>/dev/null; then
-        # Utiliser npm ci si package-lock.json existe, sinon npm install
+        # Creer le cache npm pour l'utilisateur raspy2dmd
+        RASPY_HOME=$(getent passwd raspy2dmd | cut -d: -f6)
+        mkdir -p "${RASPY_HOME}/.npm" 2>/dev/null || true
+        chown -R raspy2dmd:raspy2dmd "${RASPY_HOME}/.npm" 2>/dev/null || true
+
+        # Tentative 1 : npm ci si package-lock.json existe, sinon npm install
+        # Afficher la sortie en temps reel avec tee (comme pour pip)
         if [ -f "$INSTALL_DIR/web/package-lock.json" ]; then
-            sudo -u raspy2dmd bash -c "cd '$INSTALL_DIR/web' && npm ci --production" >> "$LOG_FILE" 2>&1
+            log_substep "Tentative avec npm ci --production..."
+            sudo -u raspy2dmd bash -c "cd '$INSTALL_DIR/web' && npm ci --production 2>&1" | tee -a "$LOG_FILE"
+            NPM_EXIT=${PIPESTATUS[0]}
         else
-            sudo -u raspy2dmd bash -c "cd '$INSTALL_DIR/web' && npm install --production" >> "$LOG_FILE" 2>&1
+            log_substep "Tentative avec npm install --production..."
+            sudo -u raspy2dmd bash -c "cd '$INSTALL_DIR/web' && npm install --production 2>&1" | tee -a "$LOG_FILE"
+            NPM_EXIT=${PIPESTATUS[0]}
         fi
 
-        if [ $? -eq 0 ]; then
-            log_info "Dependances npm installees avec succes"
+        if [ $NPM_EXIT -eq 0 ]; then
+            NPM_SUCCESS=true
         else
+            # Tentative 2 : npm install avec --legacy-peer-deps
             log_warn "Erreur lors de l'installation des dependances npm"
             log_warn "Tentative avec npm install --legacy-peer-deps..."
-            sudo -u raspy2dmd bash -c "cd '$INSTALL_DIR/web' && npm install --production --legacy-peer-deps" >> "$LOG_FILE" 2>&1 || log_error "Installation npm echouee"
+            sudo -u raspy2dmd bash -c "cd '$INSTALL_DIR/web' && npm install --production --legacy-peer-deps 2>&1" | tee -a "$LOG_FILE"
+            NPM_EXIT=${PIPESTATUS[0]}
+
+            if [ $NPM_EXIT -eq 0 ]; then
+                NPM_SUCCESS=true
+            else
+                # Tentative 3 : en tant que root (dernier recours)
+                log_warn "Echec en tant que raspy2dmd, tentative en tant que root..."
+                cd "$INSTALL_DIR/web"
+                npm install --production --legacy-peer-deps 2>&1 | tee -a "$LOG_FILE"
+                NPM_EXIT=${PIPESTATUS[0]}
+                cd - > /dev/null
+                if [ $NPM_EXIT -eq 0 ]; then
+                    NPM_SUCCESS=true
+                    # Remettre les permissions
+                    chown -R raspy2dmd:raspy2dmd "$INSTALL_DIR/web/node_modules" 2>/dev/null || true
+                fi
+            fi
         fi
     else
         # Fallback si l'utilisateur raspy2dmd n'existe pas encore
         log_warn "Utilisateur raspy2dmd non trouve, installation en tant que root"
         cd "$INSTALL_DIR/web"
-        npm install --production >> "$LOG_FILE" 2>&1 || log_error "Installation npm echouee"
+        npm install --production 2>&1 | tee -a "$LOG_FILE"
+        NPM_EXIT=${PIPESTATUS[0]}
         cd - > /dev/null
+        [ $NPM_EXIT -eq 0 ] && NPM_SUCCESS=true
+    fi
+
+    # Reactiver set -e
+    set -e
+
+    if [ "$NPM_SUCCESS" = true ]; then
+        log_info "Dependances npm installees avec succes"
+    else
+        log_error "Installation npm echouee apres toutes les tentatives"
+        log_error "Consultez le log : $LOG_FILE"
+        log_warn "L'interface web pourrait ne pas fonctionner correctement"
     fi
 
     log_info "Installation npm terminee"
@@ -1335,14 +1392,19 @@ RCLOCALEOF
     fi
 
     # Optimisation pour Pi Zero
+    # Note: L'augmentation du swap est deja faite a l'etape 9c (step_install_npm_dependencies)
+    # avant npm install pour eviter les OOM lors de la compilation native
     if echo "$PI_MODEL" | grep -qi "zero"; then
         log_substep "Application des optimisations pour Pi Zero..."
 
-        # Augmentation du swap
+        # S'assurer que le swap est bien a 512MB (au cas ou l'etape 9c aurait ete sautee)
         if [ -f "/etc/dphys-swapfile" ]; then
-            sed -i 's/CONF_SWAPSIZE=.*/CONF_SWAPSIZE=512/' /etc/dphys-swapfile
-            dphys-swapfile setup 2>/dev/null || true
-            dphys-swapfile swapon 2>/dev/null || true
+            CURRENT_SWAP=$(grep "^CONF_SWAPSIZE=" /etc/dphys-swapfile 2>/dev/null | cut -d= -f2)
+            if [ -n "$CURRENT_SWAP" ] && [ "$CURRENT_SWAP" -lt 512 ] 2>/dev/null; then
+                sed -i 's/CONF_SWAPSIZE=.*/CONF_SWAPSIZE=512/' /etc/dphys-swapfile
+                dphys-swapfile setup 2>/dev/null || true
+                dphys-swapfile swapon 2>/dev/null || true
+            fi
         fi
     fi
 
