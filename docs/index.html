@@ -780,6 +780,15 @@
                 <div class="nav-item" onclick="showSection('rtc')">Module RTC</div>
             </div>
         </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title" onclick="toggleSection(this)">
+                1️⃣2️⃣ Connectivité
+            </div>
+            <div class="nav-items">
+                <div class="nav-item" onclick="showSection('usb')">USB Gadget Mode</div>
+            </div>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -1684,27 +1693,56 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "gif|demo|0||.gif,.GIF"<br>
             <div class="command-card">
                 <div class="command-title">rand - Affichage aléatoire</div>
                 <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
-                
+
                 <div class="command-section">
                     <h4>Format</h4>
-                    <div class="command-format">rand|&lt;type&gt;</div>
+                    <div class="command-format">rand|&lt;type&gt;|[occurrence]|[directory]</div>
                 </div>
 
                 <div class="command-section">
                     <h4>Paramètres</h4>
                     <ul>
                         <li><strong>type</strong> : "gif" ou "image"</li>
+                        <li><strong>occurrence</strong> (optionnel) : nombre de fichiers à afficher (défaut : 1)</li>
+                        <li><strong>directory</strong> (optionnel) : dossier dans lequel piocher aléatoirement
+                            <ul>
+                                <li>Chemin complet : <code>/Medias/Gifs/MonDossier</code> → utilisé tel quel</li>
+                                <li>Chemin relatif : <code>/MonDossier</code> ou <code>MonDossier</code> → résolu depuis le répertoire de base du type (ex: <code>/Medias/Gifs/MonDossier</code>)</li>
+                                <li>Si le dossier n'existe pas → erreur</li>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
 
                 <div class="command-section">
                     <h4>Exemples</h4>
                     <div class="example-code">
-<span class="comment"># GIF aléatoire :</span>
+<span class="comment"># GIF aléatoire (tous les dossiers) :</span>
 mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rand|gif"<br>
 
-<span class="comment"># Image aléatoire :</span>
+<span class="comment"># 3 GIFs aléatoires :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rand|gif|3"<br>
+
+<span class="comment"># GIF aléatoire depuis un sous-dossier (chemin relatif) :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rand|gif|/MonDossier"<br>
+
+<span class="comment"># 3 GIFs aléatoires depuis un sous-dossier :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rand|gif|3|/MonDossier"<br>
+
+<span class="comment"># GIF aléatoire depuis un chemin complet :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rand|gif|/Medias/Gifs/MonDossier"<br>
+
+<span class="comment"># Image aléatoire (tous les dossiers) :</span>
 mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rand|image"<br>
+
+<span class="comment"># 3 images aléatoires :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rand|image|3"<br>
+
+<span class="comment"># Image aléatoire depuis un sous-dossier :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rand|image|/MonDossier"<br>
+
+<span class="comment"># 3 images aléatoires depuis un sous-dossier :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rand|image|3|/MonDossier"<br>
                     </div>
                 </div>
 
@@ -1712,6 +1750,8 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rand|image"<br>
                     <h4>Notes</h4>
                     <ul>
                         <li>Respecte les exclusions</li>
+                        <li>Les GIFs utilisent un pool sans répétition (chaque GIF est affiché une fois avant de recommencer)</li>
+                        <li>Si un dossier est spécifié, le pool de GIFs est mis à jour avec uniquement les fichiers de ce dossier</li>
                     </ul>
                 </div>
             </div>
@@ -2588,6 +2628,143 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "sound|applause.ogg"<br>
                 <div class="command-section">
                     <h4>Description</h4>
                     <p>Raspy2DMD supporte les modules RTC (DS1307, DS3231, PCF8523, etc.) pour maintenir l'heure même sans connexion réseau. Le module RTC se connecte via I2C. La détection se fait automatiquement.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONNECTIVITÉ USB -->
+        <div class="content-section" id="usb">
+            <h2 class="section-title">🔌 Connectivité - USB Gadget Mode</h2>
+
+            <div class="command-card">
+                <div class="command-title">Connexion réseau directe via câble USB (OTG)</div>
+                <span class="badge badge-configuration">Module optionnel</span>
+                <span class="badge badge-no-stop">Automatique</span>
+
+                <div class="command-section">
+                    <h4>Description</h4>
+                    <p>Raspy2DMD supporte le mode <strong>USB Gadget</strong> (OTG) qui transforme le Raspberry Pi en carte réseau Ethernet USB.
+                    En branchant un simple câble USB entre le Pi et un ordinateur, une connexion réseau directe s'établit automatiquement,
+                    permettant d'accéder au site web interne sans WiFi ni Ethernet.</p>
+                    <p>L'adresse IP du Pi sur cette interface est <code>10.0.0.1</code>. L'ordinateur connecté reçoit automatiquement
+                    une adresse IP via DHCP (plage <code>10.0.0.2</code> à <code>10.0.0.10</code>).</p>
+                </div>
+
+                <div class="command-section">
+                    <h4>Modèles compatibles</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Modèle</th>
+                                    <th>Support OTG</th>
+                                    <th>Port utilisé</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Pi Zero / Zero W / Zero WH</td>
+                                    <td>✅ Oui</td>
+                                    <td>Micro-USB OTG</td>
+                                </tr>
+                                <tr>
+                                    <td>Pi Zero 2 W</td>
+                                    <td>✅ Oui</td>
+                                    <td>Micro-USB OTG</td>
+                                </tr>
+                                <tr>
+                                    <td>Pi 4B</td>
+                                    <td>✅ Oui</td>
+                                    <td>USB-C</td>
+                                </tr>
+                                <tr>
+                                    <td>Pi 5</td>
+                                    <td>✅ Oui</td>
+                                    <td>USB-C</td>
+                                </tr>
+                                <tr>
+                                    <td>Pi 3B / 3B+</td>
+                                    <td>❌ Non</td>
+                                    <td>-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4>Fonctionnement</h4>
+                    <ul>
+                        <li><strong>Activation automatique</strong> : configuré à l'installation sur les modèles compatibles</li>
+                        <li><strong>Détection par udev</strong> : quand le câble USB est branché, l'interface <code>usb0</code> apparaît et une règle udev déclenche l'affichage de l'IP sur le DMD</li>
+                        <li><strong>DHCP automatique</strong> : le Pi fournit une adresse IP au PC hôte via dnsmasq</li>
+                        <li><strong>mDNS</strong> : Avahi annonce automatiquement <code>raspy2dmd.local</code> sur l'interface USB</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4>Accès au site web via USB</h4>
+                    <div class="example-code">
+                        <span style="color: #6c757d;">// Par IP statique</span><br>
+                        http://10.0.0.1/<br><br>
+                        <span style="color: #6c757d;">// Par mDNS (nom d'hôte)</span><br>
+                        http://raspy2dmd.local/
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4>Configuration réseau</h4>
+                    <ul>
+                        <li><strong>IP du Pi (usb0)</strong> : <code>10.0.0.1/24</code></li>
+                        <li><strong>Plage DHCP</strong> : <code>10.0.0.2</code> à <code>10.0.0.10</code></li>
+                        <li><strong>Masque</strong> : <code>255.255.255.0</code></li>
+                        <li><strong>Bail DHCP</strong> : 12 heures</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4>Notification sur le DMD</h4>
+                    <p>Lorsqu'un câble USB est branché et que l'interface <code>usb0</code> est détectée :</p>
+                    <ul>
+                        <li><strong>Connexion</strong> : le DMD affiche <code>USB: 10.0.0.1</code> pendant quelques secondes</li>
+                        <li><strong>Déconnexion</strong> : le DMD affiche <code>USB deconnecte</code></li>
+                    </ul>
+                    <p>Ces notifications sont envoyées via MQTT par les scripts udev.</p>
+                    <div class="info-box">
+                        <strong>ℹ️ Boot avec câble branché</strong> : Au démarrage, le module USB est chargé avant que le broker MQTT et le serveur DMD ne soient prêts. Le script de notification s'exécute en arrière-plan et attend que MQTT soit disponible (polling toutes les 5 secondes, max 120 secondes) avant d'afficher l'IP. Le message apparaît donc après le gif de bienvenue, une fois les services démarrés.
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4>Affichage dans le bandeau web</h4>
+                    <p>Le bandeau supérieur du site web affiche désormais les adresses IP par type d'interface :</p>
+                    <div class="example-code">
+                        raspy2dmd.local | WiFi : 192.168.1.10 | USB : 10.0.0.1
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4>Fichiers associés</h4>
+                    <ul>
+                        <li><code>/Raspy2DMD/system/usb_gadget_setup.sh</code> - Script d'installation et configuration</li>
+                        <li><code>/Raspy2DMD/system/usb_gadget_connected.sh</code> - Notification connexion (udev)</li>
+                        <li><code>/Raspy2DMD/system/usb_gadget_disconnected.sh</code> - Notification déconnexion (udev)</li>
+                        <li><code>/etc/udev/rules.d/99-usb-gadget.rules</code> - Règle udev de détection</li>
+                        <li><code>/etc/dnsmasq.d/usb0-gadget.conf</code> - Configuration DHCP pour usb0</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4>Notes</h4>
+                    <div class="info-box warning">
+                        <strong>⚠️ Pi Zero</strong> : Le port micro-USB OTG est le seul port USB. Un câble USB branché pour le mode gadget empêche l'utilisation d'un clavier/souris (sauf via un hub OTG).
+                    </div>
+                    <ul>
+                        <li><strong>Windows</strong> : nécessite le driver RNDIS (installé par défaut sur Windows 10/11)</li>
+                        <li><strong>macOS / Linux</strong> : reconnaissance automatique du gadget USB</li>
+                        <li><strong>Partage Internet</strong> : le PC hôte doit partager sa connexion Internet si le Pi en a besoin</li>
+                        <li><strong>Redémarrage</strong> : la première activation nécessite un redémarrage du Pi (modification de config.txt et cmdline.txt)</li>
+                    </ul>
                 </div>
             </div>
         </div>
