@@ -55,6 +55,12 @@ LOG_FILE="/var/log/raspy2dmd_install.log"
 # Mettre a jour cette valeur si une version plus recente 18.x est disponible
 NODE_VERSION_ARMv6="v18.20.5"
 
+# Version Node.js pour ARMv7 avec OS 32-bit (armhf)
+# NodeSource ne fournit plus de paquets pour armhf (uniquement amd64 et arm64)
+# On utilise les builds officiels de nodejs.org (Node.js 20 LTS)
+# Mettre a jour cette valeur si une version plus recente 20.x est disponible
+NODE_VERSION_ARMv7="v20.20.0"
+
 # =============================================================================
 # CONFIGURATION BASE DE DONNEES
 # =============================================================================
@@ -554,12 +560,58 @@ step_install_nodejs() {
             return 1
         fi
     else
-        # ARMv7+ (Pi 2, 3, 4, 5, Zero 2 W) - utiliser NodeSource avec Node.js 20
-        log_substep "Installation de Node.js 20.x depuis NodeSource..."
-        curl -fsSL https://deb.nodesource.com/setup_20.x | bash - >> "$LOG_FILE" 2>&1
-        apt-get install -y -qq nodejs >> "$LOG_FILE" 2>&1
+        # ARMv7+ (Pi 2, 3, 4, 5, Zero 2 W)
+        local DEB_ARCH=$(dpkg --print-architecture 2>/dev/null)
 
-        log_info "Node.js $(node -v) et npm $(npm -v) installes"
+        if [ "$DEB_ARCH" = "arm64" ] || [ "$DEB_ARCH" = "amd64" ]; then
+            # OS 64-bit - NodeSource fournit des paquets pour arm64 et amd64
+            log_substep "Installation de Node.js 20.x depuis NodeSource..."
+            curl -fsSL https://deb.nodesource.com/setup_20.x | bash - >> "$LOG_FILE" 2>&1
+            apt-get install -y -qq nodejs >> "$LOG_FILE" 2>&1
+
+            log_info "Node.js $(node -v) et npm $(npm -v) installes (NodeSource)"
+        else
+            # OS 32-bit (armhf) - NodeSource ne supporte plus armhf
+            # On utilise les builds officiels de nodejs.org (Node.js 20 LTS)
+            log_warn "OS 32-bit (${DEB_ARCH}) detecte - NodeSource ne supporte plus cette architecture"
+            log_substep "Installation de Node.js ${NODE_VERSION_ARMv7} depuis nodejs.org..."
+
+            NODE_FILENAME="node-${NODE_VERSION_ARMv7}-linux-armv7l"
+            NODE_URL="https://nodejs.org/dist/${NODE_VERSION_ARMv7}/${NODE_FILENAME}.tar.xz"
+
+            # Telecharger
+            log_substep "Telechargement de Node.js ${NODE_VERSION_ARMv7} pour armv7l..."
+            wget -q --show-progress "$NODE_URL" -O "/tmp/${NODE_FILENAME}.tar.xz"
+
+            if [ $? -ne 0 ]; then
+                log_error "Echec du telechargement de Node.js pour armv7l"
+                log_error "URL: $NODE_URL"
+                log_error "Verifiez la variable NODE_VERSION_ARMv7 (actuellement: $NODE_VERSION_ARMv7)"
+                return 1
+            fi
+
+            # Supprimer une eventuelle installation NodeSource incompatible
+            apt-get remove -y --purge nodejs 2>/dev/null || true
+            rm -f /etc/apt/sources.list.d/nodesource.list 2>/dev/null || true
+
+            # Extraire et installer dans /usr/local
+            log_substep "Extraction et installation..."
+            tar -xJf "/tmp/${NODE_FILENAME}.tar.xz" -C /usr/local --strip-components=1 >> "$LOG_FILE" 2>&1
+            rm -f "/tmp/${NODE_FILENAME}.tar.xz"
+
+            # Creer les liens symboliques dans /usr/bin
+            ln -sf /usr/local/bin/node /usr/bin/node 2>/dev/null || true
+            ln -sf /usr/local/bin/npm /usr/bin/npm 2>/dev/null || true
+            ln -sf /usr/local/bin/npx /usr/bin/npx 2>/dev/null || true
+
+            # Verifier que le binaire fonctionne
+            if node -e "process.exit(0)" >> "$LOG_FILE" 2>&1; then
+                log_info "Node.js $(node -v) et npm $(npm -v) installes (build officiel armv7l)"
+            else
+                log_error "Node.js installe mais ne fonctionne pas sur cette architecture"
+                return 1
+            fi
+        fi
     fi
 }
 
