@@ -47,19 +47,11 @@ CONFIG_FILE="${MEDIAS_DIR}/Raspy2DMD.cfg"
 TMP_DIR="/raspy2dmd_install_tmp"
 LOG_FILE="/var/log/raspy2dmd_install.log"
 
-# Version Node.js pour ARMv6 (Pi Zero / Pi Zero W / Pi Zero WH)
-# IMPORTANT: Node.js 20+ ne supporte PAS ARMv6 (uniquement ARMv7+)
-# Node.js 18 LTS est la derniere version supportant ARMv6 via unofficial-builds
-# Les builds officiels NodeSource ne supportent que ARMv7+
-# Les builds non-officiels sont disponibles sur unofficial-builds.nodejs.org
-# Mettre a jour cette valeur si une version plus recente 18.x est disponible
-NODE_VERSION_ARMv6="v18.20.5"
-
-# Version Node.js pour ARMv7 avec OS 32-bit (armhf)
-# NodeSource ne fournit plus de paquets pour armhf (uniquement amd64 et arm64)
-# On utilise les builds officiels de nodejs.org (Node.js 20 LTS)
-# Mettre a jour cette valeur si une version plus recente 20.x est disponible
-NODE_VERSION_ARMv7="v20.20.0"
+# Versions Node.js de fallback (utilisees si la resolution automatique echoue)
+# ARMv6 : Node.js 18 LTS (derniere version supportant ARMv6 via unofficial-builds)
+NODE_VERSION_ARMv6_FALLBACK="v18.20.5"
+# ARMv7 armhf : Node.js 20 LTS (NodeSource ne supporte plus armhf)
+NODE_VERSION_ARMv7_FALLBACK="v20.20.0"
 
 # =============================================================================
 # CONFIGURATION BASE DE DONNEES
@@ -484,6 +476,27 @@ step_install_system_deps() {
 # =============================================================================
 # ETAPE 5 : INSTALLATION DE NODE.JS
 # =============================================================================
+# Resoudre la derniere version Node.js pour une branche majeure donnee
+# Usage: resolve_latest_node_version "20" "https://nodejs.org/dist/latest-v20.x/" "v20.20.0"
+# Arg 1: version majeure (pour le pattern de recherche)
+# Arg 2: URL du repertoire latest
+# Arg 3: version de fallback si la resolution echoue
+# Retourne la version resolue (ex: "v20.20.0") via echo
+resolve_latest_node_version() {
+    local major="$1"
+    local url="$2"
+    local fallback="$3"
+
+    # Extraire la version depuis le listing du repertoire latest-vXX.x
+    local resolved=$(curl -sL --max-time 10 "$url" 2>/dev/null | grep -oP "node-v\K${major}\.[0-9]+\.[0-9]+" | head -1)
+
+    if [ -n "$resolved" ]; then
+        echo "v${resolved}"
+    else
+        echo "$fallback"
+    fi
+}
+
 step_install_nodejs() {
     log_step 5 "Installation de Node.js"
 
@@ -521,6 +534,9 @@ step_install_nodejs() {
         # On utilise les builds non-officiels de nodejs.org (Node.js 18 LTS)
         log_warn "Architecture ARMv6 detectee (Pi Zero/Zero W/Zero WH)"
         log_warn "NodeSource ne supporte pas ARMv6 - utilisation des builds non-officiels"
+
+        # Resoudre automatiquement la derniere version 18.x
+        NODE_VERSION_ARMv6=$(resolve_latest_node_version "18" "https://unofficial-builds.nodejs.org/download/release/latest-v18.x/" "$NODE_VERSION_ARMv6_FALLBACK")
         log_substep "Installation de Node.js ${NODE_VERSION_ARMv6} (derniere LTS pour ARMv6)..."
 
         NODE_FILENAME="node-${NODE_VERSION_ARMv6}-linux-armv6l"
@@ -574,6 +590,9 @@ step_install_nodejs() {
             # OS 32-bit (armhf) - NodeSource ne supporte plus armhf
             # On utilise les builds officiels de nodejs.org (Node.js 20 LTS)
             log_warn "OS 32-bit (${DEB_ARCH}) detecte - NodeSource ne supporte plus cette architecture"
+
+            # Resoudre automatiquement la derniere version 20.x
+            NODE_VERSION_ARMv7=$(resolve_latest_node_version "20" "https://nodejs.org/dist/latest-v20.x/" "$NODE_VERSION_ARMv7_FALLBACK")
             log_substep "Installation de Node.js ${NODE_VERSION_ARMv7} depuis nodejs.org..."
 
             NODE_FILENAME="node-${NODE_VERSION_ARMv7}-linux-armv7l"
