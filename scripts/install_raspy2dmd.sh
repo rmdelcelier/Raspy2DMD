@@ -1375,7 +1375,8 @@ After=network.target mariadb.service mosquitto.service
 [Service]
 Type=forking
 ExecStart=/etc/rc.local start
-TimeoutSec=0
+TimeoutStartSec=0
+TimeoutStopSec=10
 RemainAfterExit=yes
 GuessMainPID=no
 
