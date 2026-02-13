@@ -343,14 +343,14 @@ step_get_version() {
     # Recuperer les informations de cette release specifique
     RELEASE_JSON=$(curl -s "${GITHUB_API_URL}/releases/tags/${LATEST_VERSION}" 2>/dev/null)
 
-    # Recuperation de l'URL de telechargement de l'archive .tar.gz
-    DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -o '"browser_download_url": *"[^"]*\.tar\.gz"' | head -1 | sed 's/.*: *"\([^"]*\)"/\1/')
+    # Recuperation de l'URL de telechargement de l'archive .zip
+    DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -o '"browser_download_url": *"[^"]*\.zip"' | head -1 | sed 's/.*: *"\([^"]*\)"/\1/')
 
     if [ -n "$DOWNLOAD_URL" ]; then
         log_substep "Archive trouvee : $(basename "$DOWNLOAD_URL")"
         USE_BRANCH=false
     else
-        log_warn "Aucune archive .tar.gz trouvee dans la release"
+        log_warn "Aucune archive .zip trouvee dans la release"
         log_substep "Utilisation de la branche ${GITHUB_BRANCH}..."
         USE_BRANCH=true
     fi
@@ -379,7 +379,7 @@ step_install_system_deps() {
 
     PACKAGES=(
         # Outils de base
-        git curl wget p7zip-full dos2unix
+        git curl wget unzip p7zip-full dos2unix
         # Compilation
         build-essential g++ gcc make cython3 gfortran
         # Python - base
@@ -707,11 +707,12 @@ step_download_raspy2dmd() {
         log_substep "Telechargement de l'archive (cela peut prendre quelques minutes)..."
 
         if [ -n "$DOWNLOAD_URL" ]; then
-            wget -q --show-progress "$DOWNLOAD_URL" -O raspy2dmd.tar.gz
+            wget -q --show-progress "$DOWNLOAD_URL" -O raspy2dmd.zip
 
             log_substep "Extraction de l'archive..."
             mkdir -p "$TMP_DIR/extracted"
-            tar -xzf raspy2dmd.tar.gz -C "$TMP_DIR/extracted" >> "$LOG_FILE" 2>&1
+            unzip -o raspy2dmd.zip -d "$TMP_DIR/extracted" >> "$LOG_FILE" 2>&1
+            rm -f raspy2dmd.zip
             mv "$TMP_DIR/extracted" "$TMP_DIR/extracted_app"
         else
             log_warn "URL de telechargement non trouvee, utilisation de la branche"
