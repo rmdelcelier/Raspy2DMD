@@ -24,12 +24,15 @@ Transformez votre Raspberry Pi en afficheur DMD pour fléchette, jeux d'arcade e
 
 **La méthode la plus simple**
 
-1. **Suivre** les instruction à l'adresse de l'image depuis https://raspydarts.wordpress.com/telechargement/ (Rubrique "Raspy2DMD" puis sur => DRIVE <=)
-2. **Paramétrer** avec Raspberry Pi Imager
-3. **Graver** avec Raspberry Pi Imager
-4. **Relier** votre Raspberry Pi au réseau ou en USB
-5. **Insérer** la carte mini SD dans votre Raspberry Pi
-6. **Démarrer** et accéder à `http://raspy2dmd.local/`
+1. **Télécharger** Raspberry Pi Imager v2.0.6 (ou plus)
+2. **Exécuter** Raspberry Pi Imager
+3. **Cliquer** sur le bouton en bas à gauche ("Options App")
+4. **Copier/coller** le lien ci-contre dans la case "Utiliser une URL personnalisée" : https://raw.githubusercontent.com/rmdelcelier/Raspy2DMD/main/rpi-imager.json
+5. **Paramétrer** avec Raspberry Pi Imager
+6. **Graver** avec Raspberry Pi Imager
+7. **Relier** votre Raspberry Pi au réseau ou en USB
+8. **Insérer** la carte mini SD dans votre Raspberry Pi
+9. **Démarrer** et accéder à `http://raspy2dmd.local/`
 
 Plus d'information sur => https://raspydarts.wordpress.com/tutoriels-raspy2dmd/
 
