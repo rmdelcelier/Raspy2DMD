@@ -664,49 +664,37 @@ step_install_python310() {
         return 0
     fi
 
-    # Telecharger le binaire pre-compile depuis GitHub Release
-    local PYTHON310_TAG="Python310-armv6"
-    local PYTHON310_URL="https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/download/${PYTHON310_TAG}/python3.10-armv6l.tar.gz"
+    log_warn "Compilation depuis les sources (~1h sur Pi Zero WH)"
 
-    log_substep "Telechargement de Python 3.10 pre-compile..."
-    if wget -q --show-progress -O /tmp/python3.10-armv6l.tar.gz "$PYTHON310_URL" 2>&1; then
-        log_substep "Installation de Python 3.10..."
-        tar -xzf /tmp/python3.10-armv6l.tar.gz -C /
-        rm -f /tmp/python3.10-armv6l.tar.gz
-
-        if command -v python3.10 &>/dev/null; then
-            log_info "Python $(python3.10 --version) installe (pre-compile)"
-            return 0
-        fi
-        log_warn "Installation du pre-compile echouee, compilation depuis les sources..."
-    else
-        log_warn "Pre-compile non disponible, compilation depuis les sources..."
-        log_warn "Cela peut prendre 2-3 heures sur Pi Zero WH"
-    fi
-
-    # Fallback : compiler depuis les sources
     log_substep "Installation des dependances de compilation..."
     apt install -y build-essential zlib1g-dev libncurses5-dev \
         libgdbm-dev libnss3-dev libssl-dev libreadline-dev \
         libffi-dev libsqlite3-dev libbz2-dev liblzma-dev >> "$LOG_FILE" 2>&1
 
+    # Compiler dans /home au lieu de /tmp (/tmp est souvent en tmpfs/RAM,
+    # trop petit pour la compilation sur Pi Zero WH avec 512 Mo de RAM)
+    local BUILD_DIR="/home/raspy2dmd/build"
+    mkdir -p "$BUILD_DIR"
+
     log_substep "Telechargement des sources Python 3.10.16..."
-    cd /tmp
+    cd "$BUILD_DIR"
     wget -q https://www.python.org/ftp/python/3.10.16/Python-3.10.16.tgz
     tar -xzf Python-3.10.16.tgz
     cd Python-3.10.16
 
+    # Sans --enable-optimizations : le PGO compile 3 fois et genere des Go de fichiers .gcda
+    # ce qui depasse l'espace disque disponible sur Pi Zero WH (carte SD limitee)
     log_substep "Configuration de Python 3.10..."
-    ./configure --enable-optimizations --with-ensurepip=install --prefix=/usr/local >> "$LOG_FILE" 2>&1
+    ./configure --with-ensurepip=install --prefix=/usr/local >> "$LOG_FILE" 2>&1
 
-    log_warn "Compilation de Python 3.10 (1 coeur, ~2-3h sur Pi Zero WH)..."
+    log_warn "Compilation de Python 3.10 (1 coeur, ~1h sur Pi Zero WH)..."
     make -j1 >> "$LOG_FILE" 2>&1
 
     log_substep "Installation de Python 3.10 (altinstall)..."
     make altinstall >> "$LOG_FILE" 2>&1
 
     cd /
-    rm -rf /tmp/Python-3.10.16*
+    rm -rf "$BUILD_DIR"
 
     if command -v python3.10 &>/dev/null; then
         log_info "Python $(python3.10 --version) compile et installe"
