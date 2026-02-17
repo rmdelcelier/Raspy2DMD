@@ -324,9 +324,13 @@ step_get_version() {
     fi
 
     # Extraire le tag de la premiere release de l'application (la plus recente)
-    # Format attendu : vX.X.X.X (ex: v1.5.5.30)
-    # Cela exclut automatiquement Raspy2DMD_Medias et tout autre tag non-version
-    LATEST_VERSION=$(echo "$RELEASES_JSON" | grep -o '"tag_name": *"[^"]*"' | sed 's/.*: *"\([^"]*\)"/\1/' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+    # Pi Zero W/WH (ARMv6) : tag Raspy2DMD_PiZeroWH_vX.X.X.X
+    # Autres Pi : tag vX.X.X.X
+    if [ "$IS_PI_ZERO_ARMv6" = "true" ]; then
+        LATEST_VERSION=$(echo "$RELEASES_JSON" | grep -o '"tag_name": *"[^"]*"' | sed 's/.*: *"\([^"]*\)"/\1/' | grep -E '^Raspy2DMD_PiZeroWH_v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+    else
+        LATEST_VERSION=$(echo "$RELEASES_JSON" | grep -o '"tag_name": *"[^"]*"' | sed 's/.*: *"\([^"]*\)"/\1/' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+    fi
 
     if [ -z "$LATEST_VERSION" ]; then
         log_warn "Aucune release trouvee"
@@ -387,7 +391,7 @@ step_install_system_deps() {
         python3-numpy python3-cryptography python3-requests
         # Bibliotheques images
         libfreetype6-dev libjpeg-dev libpng-dev libgif-dev libwebp-dev
-        libtiff5-dev libopenjp2-7-dev zlib1g-dev
+        libopenjp2-7-dev zlib1g-dev
         libmagickwand-dev imagemagick
         # Autres bibliotheques
         libffi-dev libssl-dev libxml2-dev libxslt1-dev
@@ -419,6 +423,14 @@ step_install_system_deps() {
     done
 
     echo ""  # Nouvelle ligne apres la barre de progression
+
+    # libtiff : libtiff5-dev renomme en libtiff-dev sur Debian 12+ (Bookworm/Trixie)
+    if ! dpkg -s libtiff-dev >/dev/null 2>&1 && ! dpkg -s libtiff5-dev >/dev/null 2>&1; then
+        apt-get install -y -qq libtiff-dev >> "$LOG_FILE" 2>&1 \
+            || apt-get install -y -qq libtiff5-dev >> "$LOG_FILE" 2>&1 \
+            || log_warn "libtiff-dev non disponible (TIFF optionnel)"
+    fi
+
     log_info "Dependances systeme installees"
 
     # Installation des locales (FR, EN, ES, IT, DE) - toutes variantes
@@ -635,6 +647,76 @@ step_install_nodejs() {
 }
 
 # =============================================================================
+# ETAPE 5b : INSTALLATION DE PYTHON 3.10 (Pi Zero W/WH - ARMv6 uniquement)
+# PyArmor 9.x ne supporte pas ARMv6, seul PyArmor 7.x est compatible
+# PyArmor 7.x ne supporte pas Python 3.11+, d'ou la necessite de Python 3.10
+# =============================================================================
+step_install_python310() {
+    if [ "$IS_PI_ZERO_ARMv6" != "true" ]; then
+        return 0
+    fi
+
+    log_step "5b" "Installation de Python 3.10 pour Pi Zero WH (ARMv6)"
+
+    # Verifier si deja installe
+    if command -v python3.10 &>/dev/null; then
+        log_info "Python 3.10 deja installe : $(python3.10 --version)"
+        return 0
+    fi
+
+    # Telecharger le binaire pre-compile depuis GitHub Release
+    local PYTHON310_TAG="Python310-armv6"
+    local PYTHON310_URL="https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/download/${PYTHON310_TAG}/python3.10-armv6l.tar.gz"
+
+    log_substep "Telechargement de Python 3.10 pre-compile..."
+    if wget -q --show-progress -O /tmp/python3.10-armv6l.tar.gz "$PYTHON310_URL" 2>&1; then
+        log_substep "Installation de Python 3.10..."
+        tar -xzf /tmp/python3.10-armv6l.tar.gz -C /
+        rm -f /tmp/python3.10-armv6l.tar.gz
+
+        if command -v python3.10 &>/dev/null; then
+            log_info "Python $(python3.10 --version) installe (pre-compile)"
+            return 0
+        fi
+        log_warn "Installation du pre-compile echouee, compilation depuis les sources..."
+    else
+        log_warn "Pre-compile non disponible, compilation depuis les sources..."
+        log_warn "Cela peut prendre 2-3 heures sur Pi Zero WH"
+    fi
+
+    # Fallback : compiler depuis les sources
+    log_substep "Installation des dependances de compilation..."
+    apt install -y build-essential zlib1g-dev libncurses5-dev \
+        libgdbm-dev libnss3-dev libssl-dev libreadline-dev \
+        libffi-dev libsqlite3-dev libbz2-dev liblzma-dev >> "$LOG_FILE" 2>&1
+
+    log_substep "Telechargement des sources Python 3.10.16..."
+    cd /tmp
+    wget -q https://www.python.org/ftp/python/3.10.16/Python-3.10.16.tgz
+    tar -xzf Python-3.10.16.tgz
+    cd Python-3.10.16
+
+    log_substep "Configuration de Python 3.10..."
+    ./configure --enable-optimizations --with-ensurepip=install --prefix=/usr/local >> "$LOG_FILE" 2>&1
+
+    log_warn "Compilation de Python 3.10 (1 coeur, ~2-3h sur Pi Zero WH)..."
+    make -j1 >> "$LOG_FILE" 2>&1
+
+    log_substep "Installation de Python 3.10 (altinstall)..."
+    make altinstall >> "$LOG_FILE" 2>&1
+
+    cd /
+    rm -rf /tmp/Python-3.10.16*
+
+    if command -v python3.10 &>/dev/null; then
+        log_info "Python $(python3.10 --version) compile et installe"
+    else
+        log_error "Echec de l'installation de Python 3.10"
+        return 1
+    fi
+}
+
+# =============================================================================
 # ETAPE 6 : INSTALLATION DE LA BIBLIOTHEQUE RGB MATRIX
 # =============================================================================
 step_install_rgbmatrix() {
@@ -663,15 +745,29 @@ step_install_rgbmatrix() {
 
     log_substep "Installation des bindings Python..."
     cd bindings/python
-    make build-python PYTHON=$(which python3) >> "$LOG_FILE" 2>&1
-    make install-python PYTHON=$(which python3) >> "$LOG_FILE" 2>&1
 
-    # Test de l'installation
-    if python3 -c "from rgbmatrix import RGBMatrix" 2>/dev/null; then
-        log_info "RGB Matrix installe et fonctionnel"
+    # Sur ARMv6, compiler pour python3.10 (PyArmor 7.x necessite Python <= 3.10)
+    if [ "$IS_PI_ZERO_ARMv6" = "true" ] && command -v python3.10 &>/dev/null; then
+        log_substep "Compilation pour Python 3.10 (ARMv6)..."
+        make build-python PYTHON=$(which python3.10) >> "$LOG_FILE" 2>&1
+        make install-python PYTHON=$(which python3.10) >> "$LOG_FILE" 2>&1
+
+        if python3.10 -c "from rgbmatrix import RGBMatrix" 2>/dev/null; then
+            log_info "RGB Matrix installe pour Python 3.10"
+        else
+            log_warn "RGB Matrix : module non importable par Python 3.10"
+            log_warn "Cela peut etre normal si vous n'avez pas de matrice LED connectee"
+        fi
     else
-        log_warn "RGB Matrix installe mais le module n'est pas importable"
-        log_warn "Cela peut etre normal si vous n'avez pas de matrice LED connectee"
+        make build-python PYTHON=$(which python3) >> "$LOG_FILE" 2>&1
+        make install-python PYTHON=$(which python3) >> "$LOG_FILE" 2>&1
+
+        if python3 -c "from rgbmatrix import RGBMatrix" 2>/dev/null; then
+            log_info "RGB Matrix installe et fonctionnel"
+        else
+            log_warn "RGB Matrix installe mais le module n'est pas importable"
+            log_warn "Cela peut etre normal si vous n'avez pas de matrice LED connectee"
+        fi
     fi
 }
 
@@ -695,6 +791,18 @@ step_install_python_deps() {
         typing-extensions
     )
 
+    # Determiner la commande pip selon l'architecture
+    # Pi Zero W/WH (ARMv6) : python3.10 -m pip (PyArmor 7.x necessite Python <= 3.10)
+    # Autres Pi : pip3 (Python systeme)
+    if [ "$IS_PI_ZERO_ARMv6" = "true" ] && command -v python3.10 &>/dev/null; then
+        PIP_CMD="python3.10 -m pip"
+        PYTHON_CHECK_CMD="python3.10"
+        log_substep "Utilisation de python3.10 pour les dependances (ARMv6)"
+    else
+        PIP_CMD="pip3"
+        PYTHON_CHECK_CMD="python3"
+    fi
+
     # Verifier les packages deja installes via apt et les ajouter en pip si absents
     # (fallback au cas ou le paquet apt n'etait pas disponible)
     # Format : "nom_pip:nom_import" (le nom d'import Python peut differer du nom pip)
@@ -708,8 +816,8 @@ step_install_python_deps() {
     for entry in "${APT_FALLBACK_PACKAGES[@]}"; do
         pkg="${entry%%:*}"
         import_name="${entry##*:}"
-        if ! python3 -c "import $import_name" 2>/dev/null; then
-            log_warn "$pkg non installe via apt, ajout a la liste pip"
+        if ! $PYTHON_CHECK_CMD -c "import $import_name" 2>/dev/null; then
+            log_warn "$pkg non installe, ajout a la liste pip"
             PYTHON_PACKAGES+=("$pkg")
         fi
     done
@@ -726,7 +834,7 @@ step_install_python_deps() {
 
         # Afficher la sortie pip en temps reel avec tee
         # Utiliser PIPESTATUS[0] car "| tee" masque le code retour de pip
-        pip3 install --break-system-packages "$pkg" 2>&1 | tee -a "$LOG_FILE"
+        $PIP_CMD install --break-system-packages "$pkg" 2>&1 | tee -a "$LOG_FILE"
         PIP_EXIT=${PIPESTATUS[0]}
 
         if [ $PIP_EXIT -eq 0 ]; then
@@ -734,7 +842,7 @@ step_install_python_deps() {
         else
             log_warn "  Echec de $PKG_NAME - tentative avec --only-binary..."
             # Retenter sans compilation pour eviter les builds longs sur ARM
-            pip3 install --break-system-packages --only-binary :all: "$pkg" 2>&1 | tee -a "$LOG_FILE"
+            $PIP_CMD install --break-system-packages --only-binary :all: "$pkg" 2>&1 | tee -a "$LOG_FILE"
             PIP_EXIT=${PIPESTATUS[0]}
 
             if [ $PIP_EXIT -eq 0 ]; then
@@ -987,12 +1095,12 @@ step_install_npm_dependencies() {
         # Tentative 1 : npm ci si package-lock.json existe, sinon npm install
         # Afficher la sortie en temps reel avec tee (comme pour pip)
         if [ -f "$INSTALL_DIR/web/package-lock.json" ]; then
-            log_substep "Tentative avec npm ci --production..."
-            sudo -u raspy2dmd bash -c "cd '$INSTALL_DIR/web' && npm ci --production 2>&1" | tee -a "$LOG_FILE"
+            log_substep "Tentative avec npm ci --omit=dev..."
+            sudo -u raspy2dmd bash -c "cd '$INSTALL_DIR/web' && npm ci --omit=dev 2>&1" | tee -a "$LOG_FILE"
             NPM_EXIT=${PIPESTATUS[0]}
         else
-            log_substep "Tentative avec npm install --production..."
-            sudo -u raspy2dmd bash -c "cd '$INSTALL_DIR/web' && npm install --production 2>&1" | tee -a "$LOG_FILE"
+            log_substep "Tentative avec npm install --omit=dev..."
+            sudo -u raspy2dmd bash -c "cd '$INSTALL_DIR/web' && npm install --omit=dev 2>&1" | tee -a "$LOG_FILE"
             NPM_EXIT=${PIPESTATUS[0]}
         fi
 
@@ -1002,7 +1110,7 @@ step_install_npm_dependencies() {
             # Tentative 2 : npm install avec --legacy-peer-deps
             log_warn "Erreur lors de l'installation des dependances npm"
             log_warn "Tentative avec npm install --legacy-peer-deps..."
-            sudo -u raspy2dmd bash -c "cd '$INSTALL_DIR/web' && npm install --production --legacy-peer-deps 2>&1" | tee -a "$LOG_FILE"
+            sudo -u raspy2dmd bash -c "cd '$INSTALL_DIR/web' && npm install --omit=dev --legacy-peer-deps 2>&1" | tee -a "$LOG_FILE"
             NPM_EXIT=${PIPESTATUS[0]}
 
             if [ $NPM_EXIT -eq 0 ]; then
@@ -1011,7 +1119,7 @@ step_install_npm_dependencies() {
                 # Tentative 3 : en tant que root (dernier recours)
                 log_warn "Echec en tant que raspy2dmd, tentative en tant que root..."
                 cd "$INSTALL_DIR/web"
-                npm install --production --legacy-peer-deps 2>&1 | tee -a "$LOG_FILE"
+                npm install --omit=dev --legacy-peer-deps 2>&1 | tee -a "$LOG_FILE"
                 NPM_EXIT=${PIPESTATUS[0]}
                 cd - > /dev/null
                 if [ $NPM_EXIT -eq 0 ]; then
@@ -1025,7 +1133,7 @@ step_install_npm_dependencies() {
         # Fallback si l'utilisateur raspy2dmd n'existe pas encore
         log_warn "Utilisateur raspy2dmd non trouve, installation en tant que root"
         cd "$INSTALL_DIR/web"
-        npm install --production 2>&1 | tee -a "$LOG_FILE"
+        npm install --omit=dev 2>&1 | tee -a "$LOG_FILE"
         NPM_EXIT=${PIPESTATUS[0]}
         cd - > /dev/null
         [ $NPM_EXIT -eq 0 ] && NPM_SUCCESS=true
@@ -1968,6 +2076,7 @@ main() {
     step_update_system
     step_install_system_deps
     step_install_nodejs
+    step_install_python310
     step_install_rgbmatrix
     step_install_python_deps
     step_download_raspy2dmd
