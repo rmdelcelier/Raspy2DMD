@@ -962,6 +962,17 @@ step_install_files() {
         chown -R raspy2dmd:raspy2dmd "$INSTALL_DIR"
     fi
 
+    # Supprimer les scripts de mise a jour s'ils sont presents dans l'archive
+    # Ces fichiers (SQL, RASPBIAN, RC.LOCAL) sont destines aux mises a jour incrementales
+    # et ne doivent pas rester apres une installation fraiche (le script d'installation
+    # gere deja la creation des bases de donnees, rc.local, etc.)
+    for update_script in "SQL" "RASPBIAN" "RC.LOCAL"; do
+        if [ -f "$INSTALL_DIR/scripts/$update_script" ]; then
+            rm -f "$INSTALL_DIR/scripts/$update_script"
+            log_substep "Script de mise a jour '$update_script' supprime (non necessaire pour une installation fraiche)"
+        fi
+    done
+
     log_info "Fichiers installes dans $INSTALL_DIR"
 }
 
