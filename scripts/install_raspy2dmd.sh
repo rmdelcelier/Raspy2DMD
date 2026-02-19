@@ -1224,7 +1224,25 @@ step_setup_medias() {
     # Creation du fichier de configuration par defaut (seulement s'il n'existe pas)
     if [ ! -f "$CONFIG_FILE" ]; then
         log_substep "Creation du fichier de configuration par defaut..."
-        cat > "$CONFIG_FILE" << 'CONFIGEOF'
+
+        # Determiner pwm_lsb_nanoseconds optimal selon le modele de Pi detecte
+        # (memes valeurs que la logique anti-flicker du backend Python)
+        if echo "$PI_MODEL" | grep -qi "Zero 2"; then
+            PWM_LSB=350
+        elif echo "$PI_MODEL" | grep -qi "Zero"; then
+            PWM_LSB=400
+        elif echo "$PI_MODEL" | grep -qi "Pi 5\|5 Model"; then
+            PWM_LSB=200
+        elif echo "$PI_MODEL" | grep -qi "Pi 4\|4 Model"; then
+            PWM_LSB=250
+        elif echo "$PI_MODEL" | grep -qi "Pi 3\|3 Model"; then
+            PWM_LSB=300
+        else
+            PWM_LSB=200
+        fi
+        log_substep "pwm_lsb_nanoseconds = $PWM_LSB (modele : $PI_MODEL)"
+
+        cat > "$CONFIG_FILE" << CONFIGEOF
 [DMDRenderer]
 cols = 64
 rows = 32
@@ -1233,9 +1251,10 @@ pictureheight = 32
 led_chain = 2
 vertical_parallel_chain = 1
 gpio_slowdown = 4
-pwm_lsb_nanoseconds = 200
-limit_refresh_rate_hz = 180
+pwm_lsb_nanoseconds = $PWM_LSB
+limit_refresh_rate_hz = 100
 pwm_bits = 10
+pwm_dither_bits = 0
 scan_mode = 0
 hardware_mapping = regular
 rgb_mode = RGB
