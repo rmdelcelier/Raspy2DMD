@@ -1854,10 +1854,14 @@ SAMBAEOF
             log_info "Partages Samba deja configures"
         fi
 
+        # Forcer l'authentification (pas d'acces invité) dans la section [global]
+        grep -q 'map to guest' /etc/samba/smb.conf || sed -i '/^\[global\]/a map to guest = never' /etc/samba/smb.conf
+        log_info "Samba : map to guest = never configure"
+
         # Creer l'utilisateur Samba raspy2dmd (base de mots de passe separee de Linux)
-        # -a : ajouter l'utilisateur, -s : mode non-interactif (mot de passe via stdin)
-        echo -e "raspy2dmd\nraspy2dmd" | smbpasswd -a -s raspy2dmd 2>/dev/null || true
-        log_info "Utilisateur Samba raspy2dmd cree"
+        # printf garantit le \n meme sous dash/sh (contrairement a echo -e)
+        printf 'raspy2dmd\nraspy2dmd\n' | smbpasswd -a -s raspy2dmd 2>/dev/null || true
+        log_info "Utilisateur Samba raspy2dmd cree (login: raspy2dmd / mdp: raspy2dmd)"
 
         # Samba configure mais desactive par defaut (l'utilisateur l'active via l'interface web)
         systemctl disable smbd.service 2>/dev/null || true
