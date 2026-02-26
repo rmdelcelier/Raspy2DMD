@@ -5,14 +5,14 @@
   },
   "os_list": [
     {
-      "name": "Raspy2DMD v1.5.5.75",
+      "name": "Raspy2DMD v1.5.5.79",
       "description": "DMD Display Controller - Pi Zero 2 W / Pi 3 / Pi 4 / Pi 5",
       "icon": "https://raw.githubusercontent.com/rmdelcelier/Raspy2DMD/main/web/public/images/favicon.png",
-      "url": "https://github.com/rmdelcelier/Raspy2DMD/releases/download/Image/Raspy2DMD_v1.5.5.75.img.xz",
-      "extract_size": 7266107904,
-      "extract_sha256": "9b0a3f86ab4f95c63a42d7a924a1f428f6e7a8e96150084dbc54eeaed58dbe84",
-      "image_download_size": 1327394572,
-      "release_date": "2026-02-13",
+      "url": "https://github.com/rmdelcelier/Raspy2DMD/releases/download/Image/Raspy2DMD_v1.5.5.79.img.xz",
+      "extract_size": 7636111872,
+      "extract_sha256": "84b98dba007d58c780e8ed715edd765fcef726df78c342fa38c40a0635556b9c",
+      "image_download_size": 1365160112,
+      "release_date": "2026-02-26",
       "init_format": "systemd",
       "devices": ["pi5-32bit", "pi4-32bit", "pi3-32bit", "pi2-32bit"],
       "matching_type": "inclusive"
