@@ -1332,7 +1332,7 @@ maxcharacter = 22
 [ClockRenderer]
 defaultfont_clock = Impact.ttf
 defaultfontcolor_clock = 0,0,255
-defaultfontcolor_clockshadow = 255,0,0
+defaultfontcolor_clockshadow = 0,0,0
 clockbackgroundimage = OldGame.png
 posx_date = 4.0
 posy_date = 0.0
