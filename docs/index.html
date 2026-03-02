@@ -643,7 +643,6 @@
     <div id="sidebar">
         <div id="sidebar-header">
             <h1>📋 Raspy2DMD</h1>
-            <div class="version">Version 1.5.5.28 - 17/11/2025</div>
         </div>
 
         <div class="search-box">
@@ -705,7 +704,6 @@
                 <div class="nav-item" onclick="showSection('gifPath')">gifPath - GIF chemin complet</div>
                 <div class="nav-item" onclick="showSection('gifText')">gifText - GIF + Texte</div>
                 <div class="nav-item" onclick="showSection('rand')">rand - Aléatoire</div>
-                <div class="nav-item" onclick="showSection('demo')">demo - Mode démo</div>
             </div>
         </div>
 
@@ -1163,10 +1161,10 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "msg|SCORE: 180||"<br>
                 
                 <div class="command-section">
                     <h4>Format</h4>
-                    <div class="command-format">msg01|&lt;texte&gt;|[sens]|[itérations]</div>
-                    <div class="command-format">msg02|&lt;texte&gt;|[sens]|[itérations]</div>
+                    <div class="command-format">msg01|&lt;texte&gt;|[sens]|[itérations]|[gif]|[son]</div>
+                    <div class="command-format">msg02|&lt;texte&gt;|[sens]|[itérations]|[gif]|[son]</div>
                     <div class="command-format">...</div>
-                    <div class="command-format">msg99|&lt;texte&gt;|[sens]|[itérations]</div>
+                    <div class="command-format">msg99|&lt;texte&gt;|[sens]|[itérations]|[gif]|[son]</div>
                 </div>
 
                 <div class="command-section">
@@ -1176,6 +1174,8 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "msg|SCORE: 180||"<br>
                         <li><strong>texte</strong> : Texte à afficher</li>
                         <li><strong>sens</strong> : left, right, up, down (optionnel)</li>
                         <li><strong>itérations</strong> : Nombre de répétition (optionnel)</li>
+                        <li><strong>gif</strong> : Affiche ou non du gif s'il y en a un (0 ou 1 - 1 par défaut) (optionnel)</li>
+                        <li><strong>son</strong> : Joue ou non le son s'il y en a un (0 ou 1 - 1 par défaut) (optionnel)</li>
                     </ul>
                 </div>
 
@@ -1188,8 +1188,17 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "msg1|GAME OVER"<br>
 <span class="comment"># Message personnalisé 3 avec défilement  :</span>
 mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "msg03|WINNER|up"<br>
 
+<span class="comment"># Message personnalisé 4 et non affichage du gif du message :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "msg04|BOUUUUH|||0"<br>
+
 <span class="comment"># Message personnalisé 5 avec défilement et 5 fois de suite :</span>
 mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "msg05|WINNER|right|5"<br>
+
+<span class="comment"># Message personnalisé 6 et affichage du gif du message et pas de son :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "msg06|Super!|||1|0"<br>
+
+<span class="comment"># Message personnalisé 7 et non affichage du gif du message et pas de son :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "msg07|Génial!|||0|0"<br>
                     </div>
                 </div>
 
@@ -1753,29 +1762,6 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rand|image|3|/MonDossier"<br>
                         <li>Les GIFs utilisent un pool sans répétition (chaque GIF est affiché une fois avant de recommencer)</li>
                         <li>Si un dossier est spécifié, le pool de GIFs est mis à jour avec uniquement les fichiers de ce dossier</li>
                     </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="content-section" id="demo">
-            <h2 class="section-title">4️⃣ Images & GIFs - demo</h2>
-            <div class="command-card">
-                <div class="command-title">demo - Mode démonstration</div>
-                <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
-                
-                <div class="command-section">
-                    <h4>Format</h4>
-                    <div class="command-format">demo|</div>
-                </div>
-
-                <div class="command-section">
-                    <h4>Description</h4>
-                    <p>Active le mode démonstration avec affichage aléatoire continu de GIFs et images</p>
-                </div>
-
-                <div class="command-section">
-                    <h4>Exemple</h4>
-                    <div class="example-code">mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "demo|"</div>
                 </div>
             </div>
         </div>
@@ -2673,6 +2659,16 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "sound|applause.ogg"<br>
                                     <td>Micro-USB OTG</td>
                                 </tr>
                                 <tr>
+                                    <td>Pi 3A / 3A+</td>
+                                    <td>❌ Non</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Pi 3B / 3B+</td>
+                                    <td>❌ Non</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
                                     <td>Pi 4B</td>
                                     <td>✅ Oui</td>
                                     <td>USB-C</td>
@@ -2681,11 +2677,6 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "sound|applause.ogg"<br>
                                     <td>Pi 5</td>
                                     <td>✅ Oui</td>
                                     <td>USB-C</td>
-                                </tr>
-                                <tr>
-                                    <td>Pi 3B / 3B+</td>
-                                    <td>❌ Non</td>
-                                    <td>-</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -2713,23 +2704,8 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "sound|applause.ogg"<br>
                 </div>
 
                 <div class="command-section">
-                    <h4>Configuration réseau</h4>
-                    <ul>
-                        <li><strong>IP du Pi (usb0)</strong> : <code>10.0.0.1/24</code></li>
-                        <li><strong>Plage DHCP</strong> : <code>10.0.0.2</code> à <code>10.0.0.10</code></li>
-                        <li><strong>Masque</strong> : <code>255.255.255.0</code></li>
-                        <li><strong>Bail DHCP</strong> : 12 heures</li>
-                    </ul>
-                </div>
-
-                <div class="command-section">
                     <h4>Notification sur le DMD</h4>
-                    <p>Lorsqu'un câble USB est branché et que l'interface <code>usb0</code> est détectée :</p>
-                    <ul>
-                        <li><strong>Connexion</strong> : le DMD affiche <code>USB: 10.0.0.1</code> pendant quelques secondes</li>
-                        <li><strong>Déconnexion</strong> : le DMD affiche <code>USB deconnecte</code></li>
-                    </ul>
-                    <p>Ces notifications sont envoyées via MQTT par les scripts udev.</p>
+                    <p>Ces notifications sont envoyées via MQTT.</p>
                     <div class="info-box">
                         <strong>ℹ️ Boot avec câble branché</strong> : Au démarrage, le module USB est chargé avant que le broker MQTT et le serveur DMD ne soient prêts. Le script de notification s'exécute en arrière-plan et attend que MQTT soit disponible (polling toutes les 5 secondes, max 120 secondes) avant d'afficher l'IP. Le message apparaît donc après le gif de bienvenue, une fois les services démarrés.
                     </div>
@@ -2744,26 +2720,15 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "sound|applause.ogg"<br>
                 </div>
 
                 <div class="command-section">
-                    <h4>Fichiers associés</h4>
-                    <ul>
-                        <li><code>/Raspy2DMD/system/usb_gadget_setup.sh</code> - Script d'installation et configuration</li>
-                        <li><code>/Raspy2DMD/system/usb_gadget_connected.sh</code> - Notification connexion (udev)</li>
-                        <li><code>/Raspy2DMD/system/usb_gadget_disconnected.sh</code> - Notification déconnexion (udev)</li>
-                        <li><code>/etc/udev/rules.d/99-usb-gadget.rules</code> - Règle udev de détection</li>
-                        <li><code>/etc/dnsmasq.d/usb0-gadget.conf</code> - Configuration DHCP pour usb0</li>
-                    </ul>
-                </div>
-
-                <div class="command-section">
                     <h4>Notes</h4>
                     <div class="info-box warning">
                         <strong>⚠️ Pi Zero</strong> : Le port micro-USB OTG est le seul port USB. Un câble USB branché pour le mode gadget empêche l'utilisation d'un clavier/souris (sauf via un hub OTG).
                     </div>
                     <ul>
+                        <li><strong>⚠️ Redémarrage</strong> : la première activation nécessite un redémarrage du Pi (modification de config.txt et cmdline.txt)</li>
                         <li><strong>Windows</strong> : nécessite le driver RNDIS (installé par défaut sur Windows 10/11)</li>
                         <li><strong>macOS / Linux</strong> : reconnaissance automatique du gadget USB</li>
                         <li><strong>Partage Internet</strong> : le PC hôte doit partager sa connexion Internet si le Pi en a besoin</li>
-                        <li><strong>Redémarrage</strong> : la première activation nécessite un redémarrage du Pi (modification de config.txt et cmdline.txt)</li>
                     </ul>
                 </div>
             </div>
@@ -3001,13 +2966,6 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             <div class="command-card">
                 <h3>Utilisation de l'espace complet de la mini SD</h3>
                 Lors du premier démarrage, Raspy2DMD récupèrera l'espace complet disponible sur la mini SD.<br>
-            </div>
-			
-            <div class="command-card">
-                <h3>Extension de l'espace disponible</h3>
-                Dans le cas où vous avez fait une image de votre SD et que vous avez changé de capacité de carte mini SD, il est possible de déclencher l'augmentation de l'espace disponible pour Raspy2DMD.<br>
-				Il vous sufit de déposer un fichier <code>expand</code> <strong>(sans aucune extension)</strong> à la racine de l'image.<br>
-				Au prochain démarrage, Raspy2DMD devrait occuper tout l'espace disponible de votre mini SD.<br>
             </div>
 			
             <div class="command-card">
