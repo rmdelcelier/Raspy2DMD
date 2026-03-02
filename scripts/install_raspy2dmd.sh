@@ -1363,6 +1363,9 @@ checkforupdate = 1
 activehdmi = 0
 
 [OpenWeatherMap]
+meteo_previ_text_pct = 20
+meteo_previ_icon_pct = 60
+meteo_previ_watermark_size = 44
 callevery = 15
 seeduring = 4
 lat = 0.0
