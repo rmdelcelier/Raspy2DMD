@@ -1471,11 +1471,14 @@ SQLEXCLUDED
 CREATE DATABASE IF NOT EXISTS effects CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE effects;
 
-CREATE TABLE IF NOT EXISTS `effect` (
+CREATE TABLE `effect` (
   `id` int(20) NOT NULL AUTO_INCREMENT,
   `active` tinyint(1) NOT NULL DEFAULT 1,
   `name` varchar(255) NOT NULL DEFAULT '',
   `sound` varchar(255) NOT NULL DEFAULT '',
+  `font` varchar(100) DEFAULT '',
+  `fontBackColor` varchar(20) DEFAULT '',
+  `pattern` varchar(100) DEFAULT '',
   `text` varchar(255) NOT NULL DEFAULT '',
   `color` varchar(255) NOT NULL DEFAULT '',
   `sens` varchar(100) NOT NULL DEFAULT '',
@@ -1483,16 +1486,16 @@ CREATE TABLE IF NOT EXISTS `effect` (
   `video` varchar(255) NOT NULL DEFAULT '',
   `image` varchar(255) NOT NULL DEFAULT '',
   UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT IGNORE INTO `effect` (`id`, `active`, `name`, `sound`, `text`, `color`, `sens`, `gif`, `video`, `image`) VALUES
-(1,1,'Texte','','Test !','','','','',''),
-(2,1,'TexteGif','','PAN !','','','Effets/explosion.gif','',''),
-(3,1,'Son','perfect-fart.ogg','','','','','',''),
-(4,1,'TexteSon','perfect-fart.ogg','Prout','','','','',''),
-(5,1,'TextGifSon','perfect-fart.ogg','Prout','','','Effets/explosion.gif','',''),
-(6,1,'Gif','','','','','Effets/explosion.gif','',''),
-(7,1,'GifSon','perfect-fart.ogg','','','','Effets/explosion.gif','','');
+INSERT INTO `effect` VALUES
+(1,1,'Texte','','Impact.ttf','','10.png','Test !','','rotate','','',''),
+(2,1,'TexteGif','','8bit.TTF','','19.png','PAN !','','fix','Effets/explosion.gif','',''),
+(3,1,'Son','duck.ogg','8bit.ttf','0;0;0','','','255;0;0','fix','','',''),
+(4,1,'TexteSon','duck.ogg','Becker.ttf','255;255;255','','Coin!','187;0;255','fix','','',''),
+(5,1,'TextGifSon','duck.ogg','Impact.ttf','0;0;0','','Coin!','255;0;0','fix','Effets/explosion.gif','',''),
+(6,1,'Gif','','8bit.ttf','0;0;0','','','255;0;0','fix','Effets/explosion.gif','',''),
+(7,1,'GifSon','nope.ogg','Impact.ttf','0;0;0','','','255;0;0','fix','Effets/explosion.gif','','');
 SQLEFFECTS
 
     log_substep "Base effects creee"
