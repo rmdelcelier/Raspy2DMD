@@ -1770,9 +1770,9 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rand|image|3|/MonDossier"<br>
         <div class="content-section" id="time">
             <h2 class="section-title">5️⃣ Automatique - time</h2>
             <div class="command-card">
-                <div class="command-title">time - Afficher l'horloge</div>
+                <div class="command-title">time - Afficher l'horloge (date + heure)</div>
                 <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
-                
+
                 <div class="command-section">
                     <h4>Format</h4>
                     <div class="command-format">time|&lt;start/stop&gt;</div>
@@ -1793,8 +1793,70 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rand|image|3|/MonDossier"<br>
                 <div class="command-section">
                     <h4>Notes</h4>
                     <ul>
-                        <li>Affiche l'heure actuelle en continu</li>
+                        <li>Affiche la date et l'heure selon le mode configuré dans la page /horloge</li>
                         <li>Peut être personnalisée via la configuration</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-title">date - Afficher uniquement la date</div>
+                <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
+
+                <div class="command-section">
+                    <h4>Format</h4>
+                    <div class="command-format">date|&lt;start/stop&gt;</div>
+                </div>
+
+                <div class="command-section">
+                    <h4>Paramètres</h4>
+                    <ul>
+                        <li><strong>start/stop</strong> : start (ou stop)</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4>Exemples</h4>
+<div class="example-code">mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "date|start"</div>
+                </div>
+
+                <div class="command-section">
+                    <h4>Notes</h4>
+                    <ul>
+                        <li>Affiche uniquement la date pendant la durée définie par <strong>timeshow_date</strong> (page /horloge)</li>
+                        <li>Indépendant du mode d'affichage configuré — affiche toujours la date seule</li>
+                        <li>Disponible aussi comme élément du carrousel attract mode (code <strong>D</strong>)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="command-card">
+                <div class="command-title">hour - Afficher uniquement l'heure</div>
+                <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
+
+                <div class="command-section">
+                    <h4>Format</h4>
+                    <div class="command-format">hour|&lt;start/stop&gt;</div>
+                </div>
+
+                <div class="command-section">
+                    <h4>Paramètres</h4>
+                    <ul>
+                        <li><strong>start/stop</strong> : start (ou stop)</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4>Exemples</h4>
+<div class="example-code">mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "hour|start"</div>
+                </div>
+
+                <div class="command-section">
+                    <h4>Notes</h4>
+                    <ul>
+                        <li>Affiche uniquement l'heure pendant la durée définie par <strong>timeshow_hours</strong> (page /horloge)</li>
+                        <li>Indépendant du mode d'affichage configuré — affiche toujours l'heure seule</li>
+                        <li>Disponible aussi comme élément du carrousel attract mode (code <strong>H</strong>)</li>
                     </ul>
                 </div>
             </div>
