@@ -7,7 +7,7 @@ Transformez votre Raspberry Pi en afficheur DMD pour fléchette, jeux d'arcade e
 
 - 🎯 **Support multi-résolutions** : 128x32, 192x64 et formats personnalisés
 - 🎨 **Affichage haute qualité** : Gifs, images, animations, texte, etc
-- 🔈 **Lecture de son** : ogg
+- 🔈 **Lecture de son** : ogg, mp3, flac, wav
 - 🎮 **Mini jeux intégrés** : Snake, Space Wars, Flappy Bird, Pong
 - 🌐 **Interface web** : Configuration complète via navigateur
 - 📱 **Bluetooth** : Contrôle à distance

@@ -1647,6 +1647,17 @@ RCLOCALEOF
         log_info "Service rc-local.service active"
     fi
 
+    # Service de migration automatique wpa_supplicant.conf → NetworkManager
+    log_substep "Installation du service migrate_wpa..."
+    if [ -f "${INSTALL_DIR}/system/migrate_wpa.service" ]; then
+        cp "${INSTALL_DIR}/system/migrate_wpa.service" /etc/systemd/system/
+        systemctl daemon-reload 2>/dev/null || true
+        systemctl enable migrate_wpa.service 2>/dev/null || true
+        log_info "Service migrate_wpa.service active (migration wpa_supplicant.conf au boot)"
+    else
+        log_warn "migrate_wpa.service non trouve, migration wpa_supplicant.conf non configuree"
+    fi
+
     # Optimisation pour Pi Zero
     # Note: L'augmentation du swap est deja faite a l'etape 9c (step_install_npm_dependencies)
     # avant npm install pour eviter les OOM lors de la compilation native
