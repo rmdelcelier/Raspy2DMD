@@ -1658,6 +1658,17 @@ RCLOCALEOF
         log_warn "migrate_wpa.service non trouve, migration wpa_supplicant.conf non configuree"
     fi
 
+    # Installation du watchdog cron (surveille DMD, Web, Boutons)
+    log_substep "Installation du watchdog cron des services Raspy2DMD..."
+    if [ -f "${INSTALL_DIR}/system/watchdog.sh" ]; then
+        chmod +x "${INSTALL_DIR}/system/watchdog.sh"
+        CRON_JOB="* * * * * /bin/bash /Raspy2DMD/system/watchdog.sh"
+        (crontab -l 2>/dev/null | grep -v 'watchdog'; echo "$CRON_JOB") | crontab - 2>/dev/null || true
+        # Supprimer le fichier de machines de développement (non destiné à la production)
+        rm -f "${INSTALL_DIR}/system/dev_machines.txt" 2>/dev/null || true
+        log_info "Watchdog installe (cron toutes les minutes, DMD + Web + Boutons)"
+    fi
+
     # Optimisation pour Pi Zero
     # Note: L'augmentation du swap est deja faite a l'etape 9c (step_install_npm_dependencies)
     # avant npm install pour eviter les OOM lors de la compilation native
