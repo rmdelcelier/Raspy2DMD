@@ -787,6 +787,15 @@
                 <div class="nav-item" onclick="showSection('usb')">USB Gadget Mode</div>
             </div>
         </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title" onclick="toggleSection(this)">
+                1️⃣3️⃣ Visualiseur Audio
+            </div>
+            <div class="nav-items">
+                <div class="nav-item" onclick="showSection('audiovis')">audiovis - Visualiseur</div>
+            </div>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -2660,6 +2669,153 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "sound|applause.ogg"<br>
                         <li><strong>Easy</strong> : Gravité faible, peu d'astéroïdes, vaisseaux plus maniables</li>
                         <li><strong>Medium</strong> : Gravité moyenne, astéroïdes modérés, équilibre standard</li>
                         <li><strong>Hard</strong> : Gravité forte, nombreux astéroïdes, vaisseaux difficiles à contrôler</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISUALISEUR AUDIO -->
+        <div class="content-section" id="audiovis">
+            <h2 class="section-title">🎙️ Visualiseur Audio</h2>
+
+            <div class="command-card">
+                <div class="command-title">audiovis - Visualiseur audio réactif sur le DMD</div>
+                <span class="badge badge-stop">Mode exclusif possible</span>
+
+                <div class="command-section">
+                    <h4>Description</h4>
+                    <p>Le visualiseur audio capture le son d'un microphone USB en temps réel et l'affiche sous forme graphique sur le DMD. Cinq modes visuels sont disponibles, avec un gain réglable et une intégration dans l'attract mode.</p>
+                    <p><strong>Prérequis :</strong> Un microphone USB branché sur le Raspberry Pi.</p>
+                    <p><strong>Fréquence d'échantillonnage :</strong> 11 025 Hz — FFT jusqu'à 5 512 Hz (couvre toute la plage audio musicale utile).</p>
+                </div>
+
+                <div class="command-section">
+                    <h4>Commandes MQTT</h4>
+                    <ul>
+                        <li><span class="topic">raspy2dmd</span> <span class="command">audiovis|start</span> - Démarre le visualiseur avec les paramètres sauvegardés</li>
+                        <li><span class="topic">raspy2dmd</span> <span class="command">audiovis|start|[mode]|[gain]</span> - Démarre avec mode et gain spécifiques</li>
+                        <li><span class="topic">raspy2dmd</span> <span class="command">audiovis|stop</span> - Arrête le visualiseur</li>
+                        <li><span class="topic">raspy2dmd</span> <span class="command">audiovis|mode|[mode]</span> - Change le mode visuel à chaud</li>
+                        <li><span class="topic">raspy2dmd</span> <span class="command">audiovis|gain|[valeur]</span> - Modifie le gain à chaud (0–100)</li>
+                        <li><span class="topic">raspy2dmd</span> <span class="command">audiovis|device|[index]</span> - Change le périphérique audio à chaud</li>
+                    </ul>
+                    <div class="example-box">
+                        <strong>Exemples :</strong>
+                        <ul>
+                            <li><span class="command">audiovis|start</span> - Démarre avec les paramètres configurés</li>
+                            <li><span class="command">audiovis|start|eq_8|60</span> - Démarre en mode égaliseur 8 bandes, gain 60</li>
+                            <li><span class="command">audiovis|mode|waveform</span> - Passe en mode waveform sans redémarrer</li>
+                            <li><span class="command">audiovis|gain|80</span> - Augmente le gain à 80</li>
+                            <li><span class="command">audiovis|stop</span> - Arrête la visualisation</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4>Modes visuels</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Identifiant</th>
+                                <th>Nom</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>db_meter</code></td>
+                                <td>📊 Décibelmètre</td>
+                                <td>Barre horizontale unique 0–100 dB, dégradé vert→rouge, avec graduations et valeur dB affichée</td>
+                            </tr>
+                            <tr>
+                                <td><code>vu_meter</code></td>
+                                <td>↔️ VU-mètre</td>
+                                <td>Deux barres symétriques gauche/droite (stéréo ou mono miroir), avec indicateurs de crête à décroissance exponentielle</td>
+                            </tr>
+                            <tr>
+                                <td><code>eq_8</code></td>
+                                <td>🎛️ Égaliseur 8 bandes</td>
+                                <td>8 colonnes verticales de 16px de large, couvrant 20 Hz à 5 kHz, avec couleurs spécifiques par bande de fréquence et indicateurs de crête</td>
+                            </tr>
+                            <tr>
+                                <td><code>eq_32</code></td>
+                                <td>🎚️ Égaliseur 32 bandes</td>
+                                <td>32 colonnes verticales de 4px de large, espacées logarithmiquement de 20 Hz à 5 kHz, dégradé violet→blanc, avec indicateurs de crête</td>
+                            </tr>
+                            <tr>
+                                <td><code>waveform</code></td>
+                                <td>〰️ Waveform</td>
+                                <td>Forme d'onde défilante horizontalement, symétrique (haut et bas), avec couleurs arc-en-ciel selon l'amplitude</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="command-section">
+                    <h4>Paramètre Gain</h4>
+                    <p>Le gain amplifie le signal audio avant analyse FFT. Il permet d'adapter la sensibilité selon le volume ambiant et la distance au microphone.</p>
+                    <table>
+                        <thead>
+                            <tr><th>Valeur</th><th>Multiplicateur</th><th>Usage recommandé</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>0</td><td>25×</td><td>Environnement très bruyant</td></tr>
+                            <tr><td>50</td><td>75×</td><td>Volume ambiant normal</td></tr>
+                            <tr><td>100</td><td>125×</td><td>Microphone éloigné / son faible</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="command-section">
+                    <h4>Mode exclusif</h4>
+                    <p>Quand le mode exclusif est activé dans les paramètres, le visualiseur audio filtre toutes les trames MQTT reçues pendant son fonctionnement, à l'exception de :</p>
+                    <ul>
+                        <li><span class="command">rebt|</span> — Redémarrage du système</li>
+                        <li><span class="command">shutdwn|</span> — Extinction du système</li>
+                        <li><span class="command">audiovis|stop</span> — Arrêt du visualiseur</li>
+                        <li>Actions du serveur de boutons GPIO (ButtonsServer)</li>
+                        <li>Actions du serveur Bluetooth (BluetoothServer)</li>
+                    </ul>
+                    <p>À l'arrêt du visualiseur, le fonctionnement normal reprend automatiquement.</p>
+                </div>
+
+                <div class="command-section">
+                    <h4>Intégration dans l'Attract Mode</h4>
+                    <p>Le visualiseur audio peut être inclus dans la rotation de l'attract mode. La durée d'affichage (en secondes) est configurable depuis l'interface web <strong>/audiovis</strong>.</p>
+                    <ul>
+                        <li>Durée <code>0</code> (défaut) : non inclus dans l'attract mode</li>
+                        <li>Durée <code>N</code> secondes : le visualiseur est affiché pendant N secondes lors de chaque passage dans le carrousel</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4>Configuration INI — Section [AudioVisualizer]</h4>
+                    <table>
+                        <thead>
+                            <tr><th>Paramètre</th><th>Valeurs</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>mode</code></td><td>db_meter, vu_meter, eq_8, eq_32, waveform</td><td>Mode visuel par défaut</td></tr>
+                            <tr><td><code>gain</code></td><td>0–100</td><td>Gain microphone (25×–125×)</td></tr>
+                            <tr><td><code>device</code></td><td>auto ou index numérique</td><td>Périphérique audio (<code>auto</code> = premier micro USB détecté)</td></tr>
+                            <tr><td><code>noise_gate</code></td><td>0–100</td><td>Filtre de bruit de fond — en dessous du seuil, le signal est considéré comme silence (0 = désactivé)</td></tr>
+                            <tr><td><code>mirror</code></td><td>0 ou 1</td><td>Barres EQ symétriques depuis le centre (modes eq_8, eq_32, eq_full uniquement)</td></tr>
+                            <tr><td><code>exclusive_mode</code></td><td>0 ou 1</td><td>Filtre les autres trames MQTT pendant la visualisation</td></tr>
+                            <tr><td><code>attract_duration</code></td><td>0–3600 (secondes)</td><td>Durée dans l'attract mode (0 = désactivé)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="command-section">
+                    <h4>Interface Web</h4>
+                    <p>Une page de configuration dédiée est accessible depuis la section <strong>Contenu et médias</strong> de l'accueil :</p>
+                    <ul>
+                        <li><strong>Démarrer / Arrêter</strong> le visualiseur directement depuis le navigateur</li>
+                        <li><strong>Sélection du mode</strong> visuel par boutons avec prévisualisation des icônes</li>
+                        <li><strong>Curseur de gain</strong> avec envoi à chaud si le visualiseur est actif</li>
+                        <li><strong>Sélection du périphérique</strong> avec bouton Actualiser pour détecter les nouveaux micros branchés</li>
+                        <li><strong>Options avancées</strong> : mode exclusif, durée attract mode</li>
+                        <li><strong>Sauvegarde</strong> persistante dans le fichier de configuration</li>
                     </ul>
                 </div>
             </div>
