@@ -388,7 +388,7 @@ step_install_system_deps() {
         python3 python3-pip python3-dev python3-venv python3-setuptools python3-wheel
         python3-pil python3-pil.imagetk
         # Python - paquets apt pre-compiles (evite la compilation pip longue sur ARM)
-        python3-numpy python3-cryptography python3-requests
+        python3-numpy python3-cryptography python3-requests python3-feedparser
         # Bibliotheques images
         libfreetype6-dev libjpeg-dev libpng-dev libgif-dev libwebp-dev
         libopenjp2-7-dev zlib1g-dev
@@ -960,11 +960,12 @@ step_install_files() {
         chown -R raspy2dmd:raspy2dmd "$INSTALL_DIR"
     fi
 
-    # Supprimer les scripts de mise a jour s'ils sont presents dans l'archive
-    # Ces fichiers (SQL, RASPBIAN, RC.LOCAL) sont destines aux mises a jour incrementales
-    # et ne doivent pas rester apres une installation fraiche (le script d'installation
-    # gere deja la creation des bases de donnees, rc.local, etc.)
-    for update_script in "SQL" "RASPBIAN" "RC.LOCAL"; do
+    # Supprimer RASPBIAN et RC.LOCAL : l'installation fraiche gere deja rc.local et la
+    # configuration systeme. Ces fichiers servent uniquement aux mises a jour incrementales.
+    # SQL est conserve : il sera execute apres le setup MariaDB (etape 11), car install
+    # ne cree pas toutes les tables (calendar_event, rss_feed, etc.) ; le script SQL embarque
+    # ces creations/migrations.
+    for update_script in "RASPBIAN" "RC.LOCAL"; do
         if [ -f "$INSTALL_DIR/scripts/$update_script" ]; then
             rm -f "$INSTALL_DIR/scripts/$update_script"
             log_substep "Script de mise a jour '$update_script' supprime (non necessaire pour une installation fraiche)"
@@ -1220,7 +1221,7 @@ step_setup_medias() {
     log_substep "Creation/completion de l'arborescence Medias..."
 
     # Creation manuelle de l'arborescence
-    mkdir -p "$MEDIAS_DIR"/{_Updates,Fonts,Gifs,Videos,Images,Jeux,Logs/Raspy2DMD,Meteo/{DMD,HDMI},Patterns,PerfVisualizer/{DMD,HDMI},Scores,Sounds/Jeux/{FlyBird,Pong,Snake,SpaceWars},SpecialsMoves,Textes,EDFJoursTempo/{DMD,HDMI}}
+    mkdir -p "$MEDIAS_DIR"/{_Updates,Fonts,Gifs,Videos,Images,Jeux,Logs/Raspy2DMD,Meteo/{DMD,HDMI},Patterns,PerfVisualizer/{DMD,HDMI},Scores,Sounds/Jeux/{FlyBird,Pong,Snake,SpaceWars},SpecialsMoves,Textes,EDFJoursTempo/{DMD,HDMI},.rss_cache}
     mkdir -p "$MEDIAS_DIR"/Raspy2DMD/{gifs_videos/{DMD,HDMI},images/{DMD,HDMI},param_img/{DMD,HDMI},update_gif/{DMD,HDMI},warn/{NoInternet/{DMD,HDMI},NoIP/{DMD,HDMI},RGBTest/{DMD,HDMI}}}
 
     # Creation des dossiers Scores
@@ -1498,6 +1499,23 @@ SQLTYPOS
     else
         log_error "ATTENTION: La connexion MariaDB avec ${DB_USER} ne fonctionne pas"
         log_error "L'application Raspy2DMD ne pourra pas se connecter a la base de donnees"
+    fi
+
+    # Execution du script SQL embarque (scripts/SQL) - cree calendar_event, rss_feed, etc.
+    # Sur une installation fraiche, install ne cree que effect/font/excluded.* ; le SQL
+    # contient les CREATE TABLE / ALTER TABLE pour les tables ajoutees apres coup.
+    # --force : continuer meme si une instruction echoue (les ADD COLUMN IF NOT EXISTS
+    # sont idempotents, mais une instruction tot dans le fichier ne doit pas bloquer le reste).
+    SQL_SCRIPT="$INSTALL_DIR/scripts/SQL"
+    if [ -f "$SQL_SCRIPT" ]; then
+        log_substep "Execution du script SQL embarque..."
+        if mysql --force -u ${DB_USER} -p${DB_PASSWORD} < "$SQL_SCRIPT" >> "$LOG_FILE" 2>&1; then
+            log_info "Script SQL execute avec succes"
+        else
+            log_error "Erreurs lors de l'execution du script SQL (voir $LOG_FILE)"
+        fi
+        rm -f "$SQL_SCRIPT"
+        log_substep "Script SQL supprime apres execution"
     fi
 
     log_info "Base de donnees configuree"

@@ -791,6 +791,7 @@
             <div class="nav-items">
                 <div class="nav-item" onclick="showSection('score')" data-i18n="nav.item.score">score - Afficher score</div>
                 <div class="nav-item" onclick="showSection('edfJoursTempo')" data-i18n="nav.item.edfJoursTempo">edfJoursTempo - Jours Tempo</div>
+                <div class="nav-item" onclick="showSection('rss')" data-i18n="nav.item.rss">rss - Flux RSS</div>
             </div>
         </div>
 
@@ -2311,6 +2312,58 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "sound|applause.ogg"<br>
             </div>
         </div>
 
+        <div class="content-section" id="rss">
+            <h2 class="section-title" data-i18n="sec.rss.title">9️⃣ Divers - rss</h2>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.rss.title">rss - Afficher un flux RSS</div>
+                <span class="badge badge-stop" data-i18n="badge.stop">Stop l'attract mode avant affichage</span>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">rss|&lt;id&gt;</div>
+                    <div class="command-format">rss|&lt;id&gt;|fetch</div>
+                    <div class="command-format">rss|refresh</div>
+                    <div class="command-format">rss|test|&lt;json&gt;</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.rss.li_id"><strong>id</strong> : Identifiant numérique du flux RSS (depuis la base de données)</li>
+                        <li data-i18n-html="sec.rss.li_fetch"><strong>fetch</strong> : Force le rafraîchissement du cache du flux spécifié</li>
+                        <li data-i18n-html="sec.rss.li_refresh"><strong>refresh</strong> : Rafraîchit le cache de tous les flux actifs</li>
+                        <li data-i18n-html="sec.rss.li_test"><strong>test</strong> : Prévisualise un flux avec une configuration JSON temporaire</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Afficher le flux RSS #1</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rss|1"<br>
+<br>
+<span class="comment"># Forcer le rafraîchissement du flux #1</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rss|1|fetch"<br>
+<br>
+<span class="comment"># Rafraîchir tous les flux</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rss|refresh"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.rss.li_db">Les flux sont configurés via l'interface web (/rss)</li>
+                        <li data-i18n="sec.rss.li_cache">Les articles sont mis en cache dans /Medias/.rss_cache/</li>
+                        <li data-i18n="sec.rss.li_attract">Intégré dans l'attract mode avec la lettre 'R' dans l'ordre de défilement</li>
+                        <li data-i18n="sec.rss.li_modes">Deux modes d'affichage : une ligne ou deux lignes</li>
+                        <li data-i18n="sec.rss.li_rotation">Mode rotation : un flux à la fois (round-robin) ou tous les flux actifs à la suite</li>
+                        <li data-i18n="sec.rss.li_offline">Mode hors-ligne configurable : cache, texte d'erreur, ou ignorer</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
 		<!-- JEUX -->
         <div class="content-section" id="snake">
             <h2 class="section-title" data-i18n="sec.snake.title">🐍 Snake</h2>
@@ -3275,7 +3328,7 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "sound|applause.ogg"<br>
                             </tr>
                             <tr>
                                 <td data-i18n="sec.recap.td_cat_weather"><strong>Météo</strong></td>
-                                <td>meteo, meteoPrevi, edfJoursTempo, perf</td>
+                                <td>meteo, meteoPrevi, edfJoursTempo, rss, perf</td>
                             </tr>
                             <tr>
                                 <td data-i18n="sec.recap.td_cat_effects"><strong>Effets</strong></td>
@@ -3867,6 +3920,20 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.edfJoursTempo.title": "edfJoursTempo - Jours Tempo EDF",
             "sec.edfJoursTempo.p_desc": "Affiche les jours Tempo EDF (bleu/blanc/rouge)",
             "sec.edfJoursTempo.li_france": "Spécifique France (tarif Tempo EDF)",
+            // --- RSS ---
+            "nav.item.rss": "rss - Flux RSS",
+            "sec.rss.title": "9️⃣ Divers - rss",
+            "cmd.rss.title": "rss - Afficher un flux RSS",
+            "sec.rss.li_id": "<strong>id</strong> : Identifiant numérique du flux RSS (depuis la base de données)",
+            "sec.rss.li_fetch": "<strong>fetch</strong> : Force le rafraîchissement du cache du flux spécifié",
+            "sec.rss.li_refresh": "<strong>refresh</strong> : Rafraîchit le cache de tous les flux actifs",
+            "sec.rss.li_test": "<strong>test</strong> : Prévisualise un flux avec une configuration JSON temporaire",
+            "sec.rss.li_db": "Les flux sont configurés via l'interface web (/rss)",
+            "sec.rss.li_cache": "Les articles sont mis en cache dans /Medias/.rss_cache/",
+            "sec.rss.li_attract": "Intégré dans l'attract mode avec la lettre 'R' dans l'ordre de défilement",
+            "sec.rss.li_modes": "Deux modes d'affichage : une ligne ou deux lignes",
+            "sec.rss.li_rotation": "Mode rotation : un flux à la fois (round-robin) ou tous les flux actifs à la suite",
+            "sec.rss.li_offline": "Mode hors-ligne configurable : cache, texte d'erreur, ou ignorer",
             // --- SNAKE ---
             "sec.snake.title": "🐍 Snake",
             "cmd.snake.title": "snake - Le classique jeu Snake",
@@ -4463,6 +4530,21 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.edfJoursTempo.title": "edfJoursTempo - EDF Tempo Days",
             "sec.edfJoursTempo.p_desc": "Displays EDF Tempo days (blue/white/red)",
             "sec.edfJoursTempo.li_france": "France-specific (EDF Tempo tariff)",
+            // --- RSS ---
+            "nav.item.rss": "rss - RSS Feed",
+            "sec.rss.title": "9️⃣ Miscellaneous - rss",
+            "cmd.rss.title": "rss - Display an RSS feed",
+            "sec.rss.li_id": "<strong>id</strong>: Numeric identifier of the RSS feed (from database)",
+            "sec.rss.li_fetch": "<strong>fetch</strong>: Force refresh of the specified feed cache",
+            "sec.rss.li_refresh": "<strong>refresh</strong>: Refresh the cache of all active feeds",
+            "sec.rss.li_test": "<strong>test</strong>: Preview a feed with a temporary JSON configuration",
+            "sec.rss.li_db": "Feeds are configured via the web interface (/rss)",
+            "sec.rss.li_cache": "Articles are cached in /Medias/.rss_cache/",
+            "sec.rss.li_attract": "Integrated in attract mode with the letter 'R' in the scroll order",
+            "sec.rss.li_modes": "Two display modes: single line or two lines",
+            "sec.rss.li_rotation": "Rotation mode: one feed at a time (round-robin) or all active feeds in sequence",
+            "sec.rss.li_offline": "Configurable offline mode: cache, error text, or skip",
+            // --- SNAKE ---
             "sec.snake.title": "🐍 Snake",
             "cmd.snake.title": "snake - The classic Snake game",
             "sec.snake.p_intro": "Snake is the classic snake game where the snake grows by eating food.",
@@ -5048,6 +5130,21 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.edfJoursTempo.title": "edfJoursTempo - EDF Tempo-Tage",
             "sec.edfJoursTempo.p_desc": "Zeigt EDF Tempo-Tage an (blau/weiß/rot)",
             "sec.edfJoursTempo.li_france": "Frankreich-spezifisch (EDF Tempo-Tarif)",
+            // --- RSS ---
+            "nav.item.rss": "rss - RSS-Feed",
+            "sec.rss.title": "9️⃣ Verschiedenes - rss",
+            "cmd.rss.title": "rss - RSS-Feed anzeigen",
+            "sec.rss.li_id": "<strong>id</strong>: Numerischer Bezeichner des RSS-Feeds (aus der Datenbank)",
+            "sec.rss.li_fetch": "<strong>fetch</strong>: Erzwingt die Aktualisierung des Caches des angegebenen Feeds",
+            "sec.rss.li_refresh": "<strong>refresh</strong>: Aktualisiert den Cache aller aktiven Feeds",
+            "sec.rss.li_test": "<strong>test</strong>: Vorschau eines Feeds mit einer temporären JSON-Konfiguration",
+            "sec.rss.li_db": "Feeds werden über die Weboberfläche konfiguriert (/rss)",
+            "sec.rss.li_cache": "Artikel werden in /Medias/.rss_cache/ zwischengespeichert",
+            "sec.rss.li_attract": "Im Attract-Modus mit dem Buchstaben 'R' in der Scroll-Reihenfolge integriert",
+            "sec.rss.li_modes": "Zwei Anzeigemodi: einzeilig oder zweizeilig",
+            "sec.rss.li_rotation": "Rotationsmodus: ein Feed nach dem anderen (Round-Robin) oder alle aktiven Feeds nacheinander",
+            "sec.rss.li_offline": "Konfigurierbarer Offline-Modus: Cache, Fehlertext oder überspringen",
+            // --- SNAKE ---
             "sec.snake.title": "🐍 Snake",
             "cmd.snake.title": "snake - Das klassische Snake-Spiel",
             "sec.snake.p_intro": "Snake ist das klassische Schlangenspiel, bei dem die Schlange durch das Fressen von Nahrung wächst.",
@@ -5633,6 +5730,21 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.edfJoursTempo.title": "edfJoursTempo - Días Tempo EDF",
             "sec.edfJoursTempo.p_desc": "Muestra los días Tempo EDF (azul/blanco/rojo)",
             "sec.edfJoursTempo.li_france": "Específico de Francia (tarifa Tempo EDF)",
+            // --- RSS ---
+            "nav.item.rss": "rss - Flujo RSS",
+            "sec.rss.title": "9️⃣ Varios - rss",
+            "cmd.rss.title": "rss - Mostrar un flujo RSS",
+            "sec.rss.li_id": "<strong>id</strong>: Identificador numérico del flujo RSS (desde la base de datos)",
+            "sec.rss.li_fetch": "<strong>fetch</strong>: Fuerza la actualización del caché del flujo especificado",
+            "sec.rss.li_refresh": "<strong>refresh</strong>: Actualiza el caché de todos los flujos activos",
+            "sec.rss.li_test": "<strong>test</strong>: Vista previa de un flujo con una configuración JSON temporal",
+            "sec.rss.li_db": "Los flujos se configuran a través de la interfaz web (/rss)",
+            "sec.rss.li_cache": "Los artículos se almacenan en caché en /Medias/.rss_cache/",
+            "sec.rss.li_attract": "Integrado en el modo attract con la letra 'R' en el orden de desplazamiento",
+            "sec.rss.li_modes": "Dos modos de visualización: una línea o dos líneas",
+            "sec.rss.li_rotation": "Modo rotación: un flujo a la vez (round-robin) o todos los flujos activos en secuencia",
+            "sec.rss.li_offline": "Modo sin conexión configurable: caché, texto de error o ignorar",
+            // --- SNAKE ---
             "sec.snake.title": "🐍 Snake",
             "cmd.snake.title": "snake - El clásico juego Snake",
             "sec.snake.p_intro": "Snake es el clásico juego de la serpiente que crece comiendo alimento.",
@@ -6218,6 +6330,21 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.edfJoursTempo.title": "edfJoursTempo - Giorni Tempo EDF",
             "sec.edfJoursTempo.p_desc": "Mostra i giorni Tempo EDF (blu/bianco/rosso)",
             "sec.edfJoursTempo.li_france": "Specifico Francia (tariffa Tempo EDF)",
+            // --- RSS ---
+            "nav.item.rss": "rss - Feed RSS",
+            "sec.rss.title": "9️⃣ Varie - rss",
+            "cmd.rss.title": "rss - Visualizzare un feed RSS",
+            "sec.rss.li_id": "<strong>id</strong>: Identificatore numerico del feed RSS (dal database)",
+            "sec.rss.li_fetch": "<strong>fetch</strong>: Forza l'aggiornamento della cache del feed specificato",
+            "sec.rss.li_refresh": "<strong>refresh</strong>: Aggiorna la cache di tutti i feed attivi",
+            "sec.rss.li_test": "<strong>test</strong>: Anteprima di un feed con una configurazione JSON temporanea",
+            "sec.rss.li_db": "I feed sono configurati tramite l'interfaccia web (/rss)",
+            "sec.rss.li_cache": "Gli articoli sono memorizzati nella cache in /Medias/.rss_cache/",
+            "sec.rss.li_attract": "Integrato nella modalità attract con la lettera 'R' nell'ordine di scorrimento",
+            "sec.rss.li_modes": "Due modalità di visualizzazione: una riga o due righe",
+            "sec.rss.li_rotation": "Modalità rotazione: un feed alla volta (round-robin) o tutti i feed attivi in sequenza",
+            "sec.rss.li_offline": "Modalità offline configurabile: cache, testo di errore o ignora",
+            // --- SNAKE ---
             "sec.snake.title": "🐍 Snake",
             "cmd.snake.title": "snake - Il classico gioco Snake",
             "sec.snake.p_intro": "Snake è il classico gioco del serpente che cresce mangiando cibo.",
