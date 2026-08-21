@@ -411,6 +411,8 @@ step_install_system_deps() {
         mosquitto mosquitto-clients
         # Base de donnees
         mariadb-server mariadb-client
+        # Surveillance de fichiers (chown evenementiel via inotifywait - anti-flicker)
+        inotify-tools
         # Affichage
         fbi
     )
@@ -787,6 +789,7 @@ step_install_python_deps() {
         soundfile
         webcolors
         typing-extensions
+        pyserial
     )
 
     # Determiner la commande pip selon l'architecture
@@ -1221,8 +1224,10 @@ step_setup_medias() {
     log_substep "Creation/completion de l'arborescence Medias..."
 
     # Creation manuelle de l'arborescence
-    mkdir -p "$MEDIAS_DIR"/{_Updates,Fonts,Gifs,Videos,Images,Jeux,Logs/Raspy2DMD,Meteo/{DMD,HDMI},Patterns,PerfVisualizer/{DMD,HDMI},Scores,Sounds/Jeux/{FlyBird,Pong,Snake,SpaceWars},SpecialsMoves,Textes,EDFJoursTempo/{DMD,HDMI},.rss_cache}
+    mkdir -p "$MEDIAS_DIR"/{_Updates,FirmwarePico,Fonts,Gifs,Videos,Images,Jeux,Logs/Raspy2DMD,Meteo/{DMD,HDMI},Patterns,PerfVisualizer/{DMD,HDMI},Scores,Sounds/Jeux/{FlyBird,Pong,Snake,SpaceWars},SpecialsMoves,Textes,EDFJoursTempo/{DMD,HDMI},.rss_cache}
     mkdir -p "$MEDIAS_DIR"/Raspy2DMD/{gifs_videos/{DMD,HDMI},images/{DMD,HDMI},param_img/{DMD,HDMI},update_gif/{DMD,HDMI},warn/{NoInternet/{DMD,HDMI},NoIP/{DMD,HDMI},RGBTest/{DMD,HDMI}}}
+    # Copier les firmwares Pico dans /Medias/FirmwarePico/ (accessibles via Samba + page /pico)
+    cp /Raspy2DMD/firmware_Pico/*.uf2 "$MEDIAS_DIR/FirmwarePico/" 2>/dev/null || true
 
     # Creation des dossiers Scores
     for prefix in D S T; do
@@ -1355,6 +1360,11 @@ lastcallintime = 0001-01-01 00:00
 enabled = 0
 volume = 50
 output = local
+
+[Pico]
+pico_auto_detect = 0
+pico_display_enabled = 0
+pico_reconnect_timeout = 5
 CONFIGEOF
     fi
 
@@ -1468,6 +1478,74 @@ INSERT INTO `effect` VALUES
 (5,1,'TextGifSon','duck.ogg','Impact.ttf','0;0;0','','Coin!','255;0;0','fix','Effets/explosion.gif','',''),
 (6,1,'Gif','','8bit.ttf','0;0;0','','','255;0;0','fix','Effets/explosion.gif','',''),
 (7,1,'GifSon','nope.ogg','Impact.ttf','0;0;0','','','255;0;0','fix','Effets/explosion.gif','','');
+
+-- Tables Followers
+CREATE TABLE IF NOT EXISTS follower_platform (
+  id            INT           NOT NULL AUTO_INCREMENT,
+  platform_key  VARCHAR(50)   NOT NULL,
+  display_name  VARCHAR(100)  NOT NULL DEFAULT '',
+  logo_filename VARCHAR(100)  NOT NULL DEFAULT '',
+  api_type      VARCHAR(50)   NOT NULL DEFAULT 'custom',
+  enabled       TINYINT       NOT NULL DEFAULT 1,
+  display_order INT           NOT NULL DEFAULT 0,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_platform_key (platform_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO follower_platform (platform_key, display_name, logo_filename, api_type, enabled, display_order) VALUES
+('youtube',   'YouTube',   'youtube.png',   'youtube',   1, 1),
+('instagram', 'Instagram', 'instagram.png', 'instagram', 1, 2),
+('x',         'X',         'x.png',         'x',         1, 3),
+('facebook',  'Facebook',  'facebook.png',  'facebook',  1, 4),
+('discord',   'Discord',   'discord.png',   'discord',   1, 5),
+('twitch',    'Twitch',    'twitch.png',    'twitch',    1, 6);
+
+CREATE TABLE IF NOT EXISTS follower_api_config (
+  platform_key  VARCHAR(50)   NOT NULL,
+  api_key       TEXT          DEFAULT NULL,
+  api_secret    VARCHAR(500)  DEFAULT NULL,
+  oauth_token   TEXT          DEFAULT NULL,
+  api_endpoint  VARCHAR(500)  DEFAULT NULL,
+  refresh_interval INT        NOT NULL DEFAULT 3600,
+  PRIMARY KEY (platform_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO follower_api_config (platform_key, refresh_interval) VALUES
+('youtube',   3600),
+('instagram', 3600),
+('x',         3600),
+('facebook',  3600),
+('discord',   3600),
+('twitch',    3600);
+
+CREATE TABLE IF NOT EXISTS follower_account (
+  id               INT           NOT NULL AUTO_INCREMENT,
+  platform_key     VARCHAR(50)   NOT NULL,
+  handle           VARCHAR(200)  NOT NULL DEFAULT '',
+  display_name     VARCHAR(100)  NOT NULL DEFAULT '',
+  enabled          TINYINT       NOT NULL DEFAULT 1,
+  display_mode     ENUM('complet','minimaliste') NOT NULL DEFAULT 'complet',
+  font             VARCHAR(100)  NOT NULL DEFAULT 'Impact.ttf',
+  font_color       VARCHAR(20)   NOT NULL DEFAULT '255,255,255',
+  bg_color         VARCHAR(20)   NOT NULL DEFAULT '0,0,0',
+  pattern          VARCHAR(100)  NOT NULL DEFAULT '',
+  font_size        INT           NOT NULL DEFAULT 0,
+  x_offset         INT           NOT NULL DEFAULT 0,
+  y_offset         INT           NOT NULL DEFAULT 0,
+  font_size_line2  INT           NOT NULL DEFAULT 0,
+  x_offset_line2   INT           NOT NULL DEFAULT 0,
+  y_offset_line2   INT           NOT NULL DEFAULT 0,
+  count_format     VARCHAR(10)   NOT NULL DEFAULT 'short',
+  count_suffix     VARCHAR(50)   NOT NULL DEFAULT '',
+  account_order    INT           NOT NULL DEFAULT 0,
+  follower_count   BIGINT        NOT NULL DEFAULT 0,
+  logo_filename    VARCHAR(100)  NOT NULL DEFAULT '',
+  logo_size        INT           NOT NULL DEFAULT 0,
+  logo_x_offset    INT           NOT NULL DEFAULT 0,
+  logo_y_offset    INT           NOT NULL DEFAULT 0,
+  last_updated     DATETIME      DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 SQLEFFECTS
 
     log_substep "Base effects creee"
@@ -1694,6 +1772,14 @@ RCLOCALEOF
         log_warn "Script usb_gadget_setup.sh non trouve, mode USB Gadget non configure"
     fi
 
+    # Regle udev Pico co-processeur : empeche ModemManager de sonder /dev/ttyACM*
+    # Sans ca, ModemManager s'empare du port 10-30s a chaque demarrage du Pico -> connexion ratee
+    log_substep "Configuration udev pour le co-processeur Pico..."
+    echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="2e8a", ENV{ID_MM_DEVICE_IGNORE}="1"' \
+        > /etc/udev/rules.d/99-pico.rules
+    udevadm control --reload-rules 2>/dev/null || true
+    log_info "Regle udev Pico configuree (/etc/udev/rules.d/99-pico.rules)"
+
     # Configuration des partages reseau Samba
     log_substep "Configuration des partages reseau Samba..."
     apt-get install -y -qq samba samba-common >> "$LOG_FILE" 2>&1 || log_warn "Samba non installe"
@@ -1853,6 +1939,16 @@ create mask = 0777
 directory mask = 0777
 read only = No
 
+[FirmwarePico]
+comment = Dossier des firmwares Pico pour Raspy2DMD
+path = /Medias/FirmwarePico
+writable = yes
+valid users = raspy2dmd
+force user = raspy2dmd
+create mask = 0777
+directory mask = 0777
+read only = No
+
 [Videos]
 comment = Dossier des videos pour Raspy2DMD
 path = /Medias/Videos
@@ -1915,6 +2011,14 @@ SAMBAEOF
         if ! grep -q "rcu_nocbs=3" "$CMDLINE_FILE"; then
             sed -i 's/$/ rcu_nocbs=3/' "$CMDLINE_FILE"
             log_info "rcu_nocbs=3 ajoute - deplace les callbacks RCU hors du coeur isole"
+        fi
+
+        # Rediriger TOUTES les IRQ materielle hors du coeur isole (reduction clignotement maximale)
+        # Sans ca, les IRQ WiFi/SD/USB/DMA peuvent interrompre le thread de rafraichissement LED
+        # meme avec SCHED_FIFO priority 99, causant des variations de luminosite visibles
+        if ! grep -q "irqaffinity=0-2" "$CMDLINE_FILE"; then
+            sed -i 's/$/ irqaffinity=0-2/' "$CMDLINE_FILE"
+            log_info "irqaffinity=0-2 ajoute - toutes les IRQ materielles redirigees hors CPU 3"
         fi
     else
         log_warn "Fichier cmdline.txt non trouve, optimisation isolcpus non appliquee"

@@ -751,6 +751,7 @@
 				<div class="nav-item" onclick="showSection('msgcarrou')" data-i18n="nav.item.msgcarrou">msgcarrou - Carrousel de texte</div>
                 <div class="nav-item" onclick="showSection('time')" data-i18n="nav.item.time">time - Horloge</div>
                 <div class="nav-item" onclick="showSection('waiter')" data-i18n="nav.item.waiter">waiter - Animation attente</div>
+                <div class="nav-item" onclick="showSection('minuteur')" data-i18n="nav.item.minuteur">minuteur - Chronomètre / Minuteur</div>
             </div>
         </div>
 
@@ -792,6 +793,7 @@
                 <div class="nav-item" onclick="showSection('score')" data-i18n="nav.item.score">score - Afficher score</div>
                 <div class="nav-item" onclick="showSection('edfJoursTempo')" data-i18n="nav.item.edfJoursTempo">edfJoursTempo - Jours Tempo</div>
                 <div class="nav-item" onclick="showSection('rss')" data-i18n="nav.item.rss">rss - Flux RSS</div>
+                <div class="nav-item" onclick="showSection('abo')" data-i18n="nav.item.abo">abo - Followers</div>
             </div>
         </div>
 
@@ -1647,7 +1649,7 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score|D2 - T20 - S1"<br>
                 
                 <div class="command-section">
                     <h4 data-i18n="lbl.format">Format</h4>
-                    <div class="command-format">img|&lt;fichier.png&gt;|[durée]|[fallback]|[extensions]</div>
+                    <div class="command-format">img|&lt;fichier.png&gt;|[durée]|[fallback]|[extensions]|[fit]|[center]</div>
                 </div>
 
                 <div class="command-section">
@@ -1657,6 +1659,8 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score|D2 - T20 - S1"<br>
                         <li data-i18n-html="sec.img.li_duree"><strong>durée</strong> : Durée d'affichage en secondes (0 = durée illimitée) (optionnel)</li>
                         <li data-i18n-html="sec.img.li_fallback"><strong>fallback</strong> : Image de secours si introuvable ('' = vide si pas d'image) (optionnel)</li>
                         <li data-i18n-html="sec.img.li_ext"><strong>extensions</strong> : Extensions à essayer, séparées par virgules (optionnel)</li>
+                        <li data-i18n-html="sec.img.li_fit"><strong>fit</strong> : 1 = étirer l'image aux dimensions exactes du DMD (peut déformer) (optionnel, défaut : 0)</li>
+                        <li data-i18n-html="sec.img.li_center"><strong>center</strong> : 1 = réduire proportionnellement si trop grande et centrer sur le DMD (optionnel, défaut : 0)</li>
                     </ul>
                 </div>
 
@@ -1674,6 +1678,12 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "img|special.png|3|default.png"<br>
 
 <span class="comment"># Image sans connaitre son extension en proposant les extensions multiples :</span>
 mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "img|logo|0||.png,.PNG,.jpg,.jpeg"<br>
+<br>
+<span class="comment"># Image étalée pour remplir tout le DMD (peut déformer) :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "img|banner.png|5|||1|0"<br>
+<br>
+<span class="comment"># Image centrée et réduite pour tenir dans le DMD sans déformation :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "img|photo.jpg|5|||0|1"<br>
                     </div>
                 </div>
 
@@ -1683,6 +1693,8 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "img|logo|0||.png,.PNG,.jpg,.jpeg"<
                         <li data-i18n="sec.img.li_note_path">Cherche dans /Medias/Images/</li>
                         <li data-i18n="sec.img.li_note_ext">Supporte les extensions multiples</li>
                         <li data-i18n="sec.img.li_note_fallback">Image de secours si image introuvable</li>
+                        <li data-i18n="sec.img.li_note_fit_center">Sans fit ni center : l'image s'affiche à sa taille native en position (0,0) — si elle dépasse les dimensions du DMD, elle est tronquée</li>
+                        <li data-i18n="sec.img.li_note_fit_priority">fit et center sont mutuellement exclusifs — fit est prioritaire si les deux sont à 1</li>
                     </ul>
                 </div>
             </div>
@@ -1998,6 +2010,70 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rand|image|3|/MonDossier"<br>
                     <ul>
                         <li data-i18n="sec.waiter.li_anim">Affiche une animation d'attente (parfois appelée "attract mode", mais l'attract mode réel se déclenche et se configure dans le Paramétrage)</li>
                         <li data-i18n-html="sec.waiter.li_order">L'ordre de ce qui sera affiché <strong>doit être configuré dans le Paramétrage</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- MINUTEUR / CHRONOMÈTRE -->
+        <div class="content-section" id="minuteur">
+            <h2 class="section-title" data-i18n="sec.minuteur.title">5️⃣ Horloge & Animations - minuteur</h2>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.minuteur.title">minuteur - Chronomètre / Minuteur</div>
+                <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">minuteur|start|[chrono|timer]</div>
+                    <div class="command-format">minuteur|startstop</div>
+                    <div class="command-format">minuteur|reset</div>
+                    <div class="command-format">minuteur|set_duration|&lt;secondes&gt;</div>
+                    <div class="command-format">minuteur|set_mode|[chrono|timer]</div>
+                    <div class="command-format">minuteur|quit</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.minuteur.li_start"><strong>start|chrono</strong> : Ouvre une session en mode chronomètre (compte à partir de 0)</li>
+                        <li data-i18n-html="sec.minuteur.li_start_timer"><strong>start|timer</strong> : Ouvre une session en mode minuteur (décompte depuis la durée configurée)</li>
+                        <li data-i18n-html="sec.minuteur.li_startstop"><strong>startstop</strong> : Bascule démarrage / pause</li>
+                        <li data-i18n-html="sec.minuteur.li_reset"><strong>reset</strong> : Réinitialise le chronomètre ou le minuteur</li>
+                        <li data-i18n-html="sec.minuteur.li_set_duration"><strong>set_duration|N</strong> : Change la durée du minuteur (N secondes)</li>
+                        <li data-i18n-html="sec.minuteur.li_set_mode"><strong>set_mode|chrono|timer</strong> : Bascule entre les deux modes sans fermer la session</li>
+                        <li data-i18n-html="sec.minuteur.li_quit"><strong>quit</strong> : Ferme la session et retourne à l'état précédent</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Démarrer un chronomètre :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "minuteur|start|chrono"<br>
+<br>
+<span class="comment"># Démarrer un minuteur (durée configurée dans /minuteur) :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "minuteur|start|timer"<br>
+<br>
+<span class="comment"># Démarrer / Mettre en pause :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "minuteur|startstop"<br>
+<br>
+<span class="comment"># Réinitialiser :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "minuteur|reset"<br>
+<br>
+<span class="comment"># Définir une durée de 90 secondes pour le minuteur :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "minuteur|set_duration|90"<br>
+<br>
+<span class="comment"># Fermer la session :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "minuteur|quit"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.minuteur.li_note_web">Configurable et contrôlable depuis l'interface web (/minuteur)</li>
+                        <li data-i18n="sec.minuteur.li_note_stop">La commande quit retourne au fonctionnement normal (attract mode si configuré)</li>
+                        <li data-i18n="sec.minuteur.li_note_mode_default">Si le mode n'est pas précisé dans start, le mode par défaut configuré dans /minuteur est utilisé</li>
                     </ul>
                 </div>
             </div>
@@ -2359,6 +2435,63 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "rss|refresh"<br>
                         <li data-i18n="sec.rss.li_modes">Deux modes d'affichage : une ligne ou deux lignes</li>
                         <li data-i18n="sec.rss.li_rotation">Mode rotation : un flux à la fois (round-robin) ou tous les flux actifs à la suite</li>
                         <li data-i18n="sec.rss.li_offline">Mode hors-ligne configurable : cache, texte d'erreur, ou ignorer</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section" id="abo">
+            <h2 class="section-title" data-i18n="sec.abo.title">9️⃣ Divers - abo</h2>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.abo.title">abo - Afficher les Followers</div>
+                <span class="badge badge-stop" data-i18n="badge.stop">Stop l'attract mode avant affichage</span>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">abo|show</div>
+                    <div class="command-format">abo|show|complet</div>
+                    <div class="command-format">abo|show|minimaliste</div>
+                    <div class="command-format">abo|show|&lt;platform_key&gt;</div>
+                    <div class="command-format">abo|refresh</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.abo.li_show"><strong>show</strong> : Affiche les compteurs de tous les comptes configurés et actifs</li>
+                        <li data-i18n-html="sec.abo.li_complet"><strong>show|complet</strong> : Force le mode d'affichage "complet" (logo + nom + compteur)</li>
+                        <li data-i18n-html="sec.abo.li_minimaliste"><strong>show|minimaliste</strong> : Force le mode d'affichage "minimaliste" (logo + compteur, jusqu'à 4 par page)</li>
+                        <li data-i18n-html="sec.abo.li_platform"><strong>show|&lt;platform_key&gt;</strong> : Affiche uniquement les comptes de la plateforme indiquée (ex: youtube, twitch)</li>
+                        <li data-i18n-html="sec.abo.li_refresh"><strong>refresh</strong> : Force la mise à jour des compteurs via les API configurées</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Afficher tous les compteurs</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "abo|show"<br>
+<br>
+<span class="comment"># Afficher en mode minimaliste</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "abo|show|minimaliste"<br>
+<br>
+<span class="comment"># Afficher uniquement YouTube</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "abo|show|youtube"<br>
+<br>
+<span class="comment"># Rafraîchir les compteurs</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "abo|refresh"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.abo.li_config">Les comptes sont configurés via l'interface web (/followers)</li>
+                        <li data-i18n="sec.abo.li_attract">Intégré dans l'attract mode avec la lettre 'A' dans l'ordre de défilement</li>
+                        <li data-i18n="sec.abo.li_modes">Mode complet : un compte à la fois. Mode minimaliste : jusqu'à 4 comptes par page</li>
+                        <li data-i18n="sec.abo.li_cache">Les compteurs sont mis en cache — en cas d'erreur API, la dernière valeur connue est affichée</li>
+                        <li data-i18n="sec.abo.li_platforms">Plateformes prises en charge : YouTube, Instagram, X (Twitter), Facebook, Discord, Twitch, et plateformes personnalisées</li>
+                        <li data-i18n="sec.abo.li_instagram">Instagram : API publique indisponible depuis 2020 — compteurs non récupérables automatiquement</li>
                     </ul>
                 </div>
             </div>
@@ -3819,9 +3952,13 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.img.li_duree": "<strong>durée</strong> : Durée d'affichage en secondes (0 = durée illimitée) (optionnel)",
             "sec.img.li_fallback": "<strong>fallback</strong> : Image de secours si introuvable ('' = vide si pas d'image) (optionnel)",
             "sec.img.li_ext": "<strong>extensions</strong> : Extensions à essayer, séparées par virgules (optionnel)",
+            "sec.img.li_fit": "<strong>fit</strong> : 1 = étirer l'image aux dimensions exactes du DMD (peut déformer) (optionnel, défaut : 0)",
+            "sec.img.li_center": "<strong>center</strong> : 1 = réduire proportionnellement si trop grande et centrer sur le DMD (optionnel, défaut : 0)",
             "sec.img.li_note_path": "Cherche dans /Medias/Images/",
             "sec.img.li_note_ext": "Supporte les extensions multiples",
             "sec.img.li_note_fallback": "Image de secours si image introuvable",
+            "sec.img.li_note_fit_center": "Sans fit ni center : l'image s'affiche à sa taille native en position (0,0) — si elle dépasse les dimensions du DMD, elle est tronquée",
+            "sec.img.li_note_fit_priority": "fit et center sont mutuellement exclusifs — fit est prioritaire si les deux sont à 1",
             "sec.gif.title": "4️⃣ Images & GIFs - gif",
             "cmd.gif.title": "gif - Afficher un GIF animé",
             "sec.gif.li_fichier": "<strong>fichier</strong> : Nom du fichier GIF",
@@ -3868,6 +4005,19 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.waiter.title": "waiter - Animation d'attente",
             "sec.waiter.li_anim": "Affiche une animation d'attente (parfois appelée \"attract mode\", mais l'attract mode réel se déclenche et se configure dans le Paramétrage)",
             "sec.waiter.li_order": "L'ordre de ce qui sera affiché <strong>doit être configuré dans le Paramétrage</strong>",
+            "nav.item.minuteur": "minuteur - Chronomètre / Minuteur",
+            "sec.minuteur.title": "5️⃣ Horloge & Animations - minuteur",
+            "cmd.minuteur.title": "minuteur - Chronomètre / Minuteur",
+            "sec.minuteur.li_start": "<strong>start|chrono</strong> : Ouvre une session en mode chronomètre (compte à partir de 0)",
+            "sec.minuteur.li_start_timer": "<strong>start|timer</strong> : Ouvre une session en mode minuteur (décompte depuis la durée configurée)",
+            "sec.minuteur.li_startstop": "<strong>startstop</strong> : Bascule démarrage / pause",
+            "sec.minuteur.li_reset": "<strong>reset</strong> : Réinitialise le chronomètre ou le minuteur",
+            "sec.minuteur.li_set_duration": "<strong>set_duration|N</strong> : Change la durée du minuteur (N secondes)",
+            "sec.minuteur.li_set_mode": "<strong>set_mode|chrono|timer</strong> : Bascule entre les deux modes sans fermer la session",
+            "sec.minuteur.li_quit": "<strong>quit</strong> : Ferme la session et retourne à l'état précédent",
+            "sec.minuteur.li_note_web": "Configurable et contrôlable depuis l'interface web (/minuteur)",
+            "sec.minuteur.li_note_stop": "La commande quit retourne au fonctionnement normal (attract mode si configuré)",
+            "sec.minuteur.li_note_mode_default": "Si le mode n'est pas précisé dans start, le mode par défaut configuré dans /minuteur est utilisé",
             // --- MÉTÉO ---
             "sec.owmzc.title": "6️⃣ Météo - owmzc",
             "cmd.owmzc.title": "owmzc - Configuration OpenWeatherMap",
@@ -3934,6 +4084,21 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.rss.li_modes": "Deux modes d'affichage : une ligne ou deux lignes",
             "sec.rss.li_rotation": "Mode rotation : un flux à la fois (round-robin) ou tous les flux actifs à la suite",
             "sec.rss.li_offline": "Mode hors-ligne configurable : cache, texte d'erreur, ou ignorer",
+            // --- ABO (FOLLOWERS) ---
+            "nav.item.abo": "abo - Followers",
+            "sec.abo.title": "9️⃣ Divers - abo",
+            "cmd.abo.title": "abo - Afficher les Followers",
+            "sec.abo.li_show": "<strong>show</strong> : Affiche les compteurs de tous les comptes configurés et actifs",
+            "sec.abo.li_complet": "<strong>show|complet</strong> : Force le mode d'affichage \"complet\" (logo + nom + compteur)",
+            "sec.abo.li_minimaliste": "<strong>show|minimaliste</strong> : Force le mode d'affichage \"minimaliste\" (logo + compteur, jusqu'à 4 par page)",
+            "sec.abo.li_platform": "<strong>show|&lt;platform_key&gt;</strong> : Affiche uniquement les comptes de la plateforme indiquée (ex: youtube, twitch)",
+            "sec.abo.li_refresh": "<strong>refresh</strong> : Force la mise à jour des compteurs via les API configurées",
+            "sec.abo.li_config": "Les comptes sont configurés via l'interface web (/followers)",
+            "sec.abo.li_attract": "Intégré dans l'attract mode avec la lettre 'A' dans l'ordre de défilement",
+            "sec.abo.li_modes": "Mode complet : un compte à la fois. Mode minimaliste : jusqu'à 4 comptes par page",
+            "sec.abo.li_cache": "Les compteurs sont mis en cache — en cas d'erreur API, la dernière valeur connue est affichée",
+            "sec.abo.li_platforms": "Plateformes prises en charge : YouTube, Instagram, X (Twitter), Facebook, Discord, Twitch, et plateformes personnalisées",
+            "sec.abo.li_instagram": "Instagram : API publique indisponible depuis 2020 — compteurs non récupérables automatiquement",
             // --- SNAKE ---
             "sec.snake.title": "🐍 Snake",
             "cmd.snake.title": "snake - Le classique jeu Snake",
@@ -4435,9 +4600,13 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.img.li_duree": "<strong>duration</strong>: Display duration in seconds (0 = unlimited) (optional)",
             "sec.img.li_fallback": "<strong>fallback</strong>: Fallback image if not found ('' = empty) (optional)",
             "sec.img.li_ext": "<strong>extensions</strong>: Extensions to try, comma-separated (optional)",
+            "sec.img.li_fit": "<strong>fit</strong>: 1 = stretch image to exact DMD dimensions (may distort) (optional, default: 0)",
+            "sec.img.li_center": "<strong>center</strong>: 1 = proportionally scale down if too large and center on DMD (optional, default: 0)",
             "sec.img.li_note_path": "Searches in /Medias/Images/",
             "sec.img.li_note_ext": "Supports multiple extensions",
             "sec.img.li_note_fallback": "Fallback image if not found",
+            "sec.img.li_note_fit_center": "Without fit or center: image is displayed at native size at position (0,0) — if it exceeds DMD dimensions, it is cropped",
+            "sec.img.li_note_fit_priority": "fit and center are mutually exclusive — fit takes priority if both are set to 1",
             "sec.gif.title": "4️⃣ Images & GIFs - gif",
             "cmd.gif.title": "gif - Display an animated GIF",
             "sec.gif.li_fichier": "<strong>file</strong>: GIF file name",
@@ -4482,6 +4651,19 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.waiter.title": "waiter - Wait animation",
             "sec.waiter.li_anim": "Displays a wait animation (sometimes called \"attract mode\", but the real attract mode is triggered and configured in Settings)",
             "sec.waiter.li_order": "The order of what will be displayed <strong>must be configured in Settings</strong>",
+            "nav.item.minuteur": "minuteur - Stopwatch / Timer",
+            "sec.minuteur.title": "5️⃣ Clock & Animations - minuteur",
+            "cmd.minuteur.title": "minuteur - Stopwatch / Timer",
+            "sec.minuteur.li_start": "<strong>start|chrono</strong>: Opens a session in stopwatch mode (counts from 0)",
+            "sec.minuteur.li_start_timer": "<strong>start|timer</strong>: Opens a session in timer mode (countdown from configured duration)",
+            "sec.minuteur.li_startstop": "<strong>startstop</strong>: Toggle start / pause",
+            "sec.minuteur.li_reset": "<strong>reset</strong>: Resets the stopwatch or timer",
+            "sec.minuteur.li_set_duration": "<strong>set_duration|N</strong>: Sets the timer duration (N seconds)",
+            "sec.minuteur.li_set_mode": "<strong>set_mode|chrono|timer</strong>: Switches between modes without closing the session",
+            "sec.minuteur.li_quit": "<strong>quit</strong>: Closes the session and returns to previous state",
+            "sec.minuteur.li_note_web": "Configurable and controllable from the web interface (/minuteur)",
+            "sec.minuteur.li_note_stop": "The quit command returns to normal operation (attract mode if configured)",
+            "sec.minuteur.li_note_mode_default": "If mode is not specified in start, the default mode configured in /minuteur is used",
             "sec.owmzc.title": "6️⃣ Weather - owmzc",
             "cmd.owmzc.title": "owmzc - OpenWeatherMap configuration",
             "sec.owmzc.li_zip": "<strong>zip_code</strong>: Postal code",
@@ -4544,6 +4726,21 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.rss.li_modes": "Two display modes: single line or two lines",
             "sec.rss.li_rotation": "Rotation mode: one feed at a time (round-robin) or all active feeds in sequence",
             "sec.rss.li_offline": "Configurable offline mode: cache, error text, or skip",
+            // --- ABO (FOLLOWERS) ---
+            "nav.item.abo": "abo - Followers",
+            "sec.abo.title": "9️⃣ Miscellaneous - abo",
+            "cmd.abo.title": "abo - Display Followers",
+            "sec.abo.li_show": "<strong>show</strong>: Displays counters for all configured and enabled accounts",
+            "sec.abo.li_complet": "<strong>show|complet</strong>: Forces \"full\" display mode (logo + name + counter)",
+            "sec.abo.li_minimaliste": "<strong>show|minimaliste</strong>: Forces \"minimalist\" display mode (logo + counter, up to 4 per page)",
+            "sec.abo.li_platform": "<strong>show|&lt;platform_key&gt;</strong>: Shows only accounts for the specified platform (e.g. youtube, twitch)",
+            "sec.abo.li_refresh": "<strong>refresh</strong>: Forces counter update via configured APIs",
+            "sec.abo.li_config": "Accounts are configured via the web interface (/followers)",
+            "sec.abo.li_attract": "Integrated in attract mode with the letter 'A' in the scroll order",
+            "sec.abo.li_modes": "Full mode: one account at a time. Minimalist mode: up to 4 accounts per page",
+            "sec.abo.li_cache": "Counters are cached — on API error, the last known value is displayed",
+            "sec.abo.li_platforms": "Supported platforms: YouTube, Instagram, X (Twitter), Facebook, Discord, Twitch, and custom platforms",
+            "sec.abo.li_instagram": "Instagram: public API unavailable since 2020 — counters cannot be fetched automatically",
             // --- SNAKE ---
             "sec.snake.title": "🐍 Snake",
             "cmd.snake.title": "snake - The classic Snake game",
@@ -5035,9 +5232,13 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.img.li_duree": "<strong>Dauer</strong>: Anzeigedauer in Sekunden (0 = unbegrenzt) (optional)",
             "sec.img.li_fallback": "<strong>Fallback</strong>: Ersatzbild wenn nicht gefunden (optional)",
             "sec.img.li_ext": "<strong>Erweiterungen</strong>: Zu versuchende Erweiterungen, kommagetrennt (optional)",
+            "sec.img.li_fit": "<strong>fit</strong>: 1 = Bild auf genaue DMD-Abmessungen strecken (kann verzerren) (optional, Standard: 0)",
+            "sec.img.li_center": "<strong>center</strong>: 1 = proportional verkleinern wenn zu groß und auf dem DMD zentrieren (optional, Standard: 0)",
             "sec.img.li_note_path": "Sucht in /Medias/Images/",
             "sec.img.li_note_ext": "Unterstützt mehrere Erweiterungen",
             "sec.img.li_note_fallback": "Ersatzbild wenn nicht gefunden",
+            "sec.img.li_note_fit_center": "Ohne fit oder center: Bild wird in nativer Größe an Position (0,0) angezeigt — überschreitet es die DMD-Abmessungen, wird es abgeschnitten",
+            "sec.img.li_note_fit_priority": "fit und center schließen sich gegenseitig aus — fit hat Vorrang wenn beide auf 1 gesetzt sind",
             "sec.gif.title": "4️⃣ Bilder & GIFs - gif",
             "cmd.gif.title": "gif - Animiertes GIF anzeigen",
             "sec.gif.li_fichier": "<strong>Datei</strong>: GIF-Dateiname",
@@ -5082,6 +5283,19 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.waiter.title": "waiter - Wartanimation",
             "sec.waiter.li_anim": "Zeigt eine Wartanimation an",
             "sec.waiter.li_order": "Die Anzeigereihenfolge <strong>muss in den Einstellungen konfiguriert werden</strong>",
+            "nav.item.minuteur": "minuteur - Stoppuhr / Timer",
+            "sec.minuteur.title": "5️⃣ Uhr & Animationen - minuteur",
+            "cmd.minuteur.title": "minuteur - Stoppuhr / Timer",
+            "sec.minuteur.li_start": "<strong>start|chrono</strong>: Öffnet eine Sitzung im Stoppuhr-Modus (zählt ab 0)",
+            "sec.minuteur.li_start_timer": "<strong>start|timer</strong>: Öffnet eine Sitzung im Timer-Modus (Countdown von konfigurierter Dauer)",
+            "sec.minuteur.li_startstop": "<strong>startstop</strong>: Start / Pause umschalten",
+            "sec.minuteur.li_reset": "<strong>reset</strong>: Stoppuhr oder Timer zurücksetzen",
+            "sec.minuteur.li_set_duration": "<strong>set_duration|N</strong>: Timer-Dauer setzen (N Sekunden)",
+            "sec.minuteur.li_set_mode": "<strong>set_mode|chrono|timer</strong>: Zwischen Modi wechseln ohne Sitzung zu schließen",
+            "sec.minuteur.li_quit": "<strong>quit</strong>: Sitzung schließen und zum vorherigen Zustand zurückkehren",
+            "sec.minuteur.li_note_web": "Konfigurierbar und steuerbar über die Weboberfläche (/minuteur)",
+            "sec.minuteur.li_note_stop": "Der quit-Befehl kehrt zum normalen Betrieb zurück (Attract-Modus wenn konfiguriert)",
+            "sec.minuteur.li_note_mode_default": "Wenn der Modus in start nicht angegeben wird, wird der in /minuteur konfigurierte Standardmodus verwendet",
             "sec.owmzc.title": "6️⃣ Wetter - owmzc",
             "cmd.owmzc.title": "owmzc - OpenWeatherMap-Konfiguration",
             "sec.owmzc.li_zip": "<strong>Postleitzahl</strong>: Postleitzahl",
@@ -5144,6 +5358,21 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.rss.li_modes": "Zwei Anzeigemodi: einzeilig oder zweizeilig",
             "sec.rss.li_rotation": "Rotationsmodus: ein Feed nach dem anderen (Round-Robin) oder alle aktiven Feeds nacheinander",
             "sec.rss.li_offline": "Konfigurierbarer Offline-Modus: Cache, Fehlertext oder überspringen",
+            // --- ABO (FOLLOWERS) ---
+            "nav.item.abo": "abo - Followers",
+            "sec.abo.title": "9️⃣ Verschiedenes - abo",
+            "cmd.abo.title": "abo - Followers anzeigen",
+            "sec.abo.li_show": "<strong>show</strong>: Zeigt Zähler für alle konfigurierten und aktiven Konten",
+            "sec.abo.li_complet": "<strong>show|complet</strong>: Erzwingt den \"vollständigen\" Anzeigemodus (Logo + Name + Zähler)",
+            "sec.abo.li_minimaliste": "<strong>show|minimaliste</strong>: Erzwingt den \"minimalistischen\" Anzeigemodus (Logo + Zähler, bis zu 4 pro Seite)",
+            "sec.abo.li_platform": "<strong>show|&lt;platform_key&gt;</strong>: Zeigt nur Konten der angegebenen Plattform (z.B. youtube, twitch)",
+            "sec.abo.li_refresh": "<strong>refresh</strong>: Erzwingt die Zähleraktualisierung über die konfigurierten APIs",
+            "sec.abo.li_config": "Konten werden über die Weboberfläche konfiguriert (/followers)",
+            "sec.abo.li_attract": "Im Attract-Modus mit dem Buchstaben 'A' in der Scroll-Reihenfolge integriert",
+            "sec.abo.li_modes": "Vollständiger Modus: ein Konto nach dem anderen. Minimalistischer Modus: bis zu 4 Konten pro Seite",
+            "sec.abo.li_cache": "Zähler werden zwischengespeichert — bei API-Fehler wird der letzte bekannte Wert angezeigt",
+            "sec.abo.li_platforms": "Unterstützte Plattformen: YouTube, Instagram, X (Twitter), Facebook, Discord, Twitch und benutzerdefinierte Plattformen",
+            "sec.abo.li_instagram": "Instagram: öffentliche API seit 2020 nicht mehr verfügbar — Zähler können nicht automatisch abgerufen werden",
             // --- SNAKE ---
             "sec.snake.title": "🐍 Snake",
             "cmd.snake.title": "snake - Das klassische Snake-Spiel",
@@ -5635,9 +5864,13 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.img.li_duree": "<strong>duración</strong>: Duración en segundos (0 = ilimitada) (opcional)",
             "sec.img.li_fallback": "<strong>alternativa</strong>: Imagen alternativa si no se encuentra (opcional)",
             "sec.img.li_ext": "<strong>extensiones</strong>: Extensiones a probar, separadas por comas (opcional)",
+            "sec.img.li_fit": "<strong>fit</strong>: 1 = estirar la imagen a las dimensiones exactas del DMD (puede deformar) (opcional, defecto: 0)",
+            "sec.img.li_center": "<strong>center</strong>: 1 = reducir proporcionalmente si es demasiado grande y centrar en el DMD (opcional, defecto: 0)",
             "sec.img.li_note_path": "Busca en /Medias/Images/",
             "sec.img.li_note_ext": "Soporta múltiples extensiones",
             "sec.img.li_note_fallback": "Imagen alternativa si no se encuentra",
+            "sec.img.li_note_fit_center": "Sin fit ni center: la imagen se muestra en tamaño nativo en posición (0,0) — si excede las dimensiones del DMD, se recorta",
+            "sec.img.li_note_fit_priority": "fit y center son mutuamente excluyentes — fit tiene prioridad si ambos están en 1",
             "sec.gif.title": "4️⃣ Imágenes & GIFs - gif",
             "cmd.gif.title": "gif - Mostrar un GIF animado",
             "sec.gif.li_fichier": "<strong>archivo</strong>: Nombre del archivo GIF",
@@ -5682,6 +5915,19 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.waiter.title": "waiter - Animación de espera",
             "sec.waiter.li_anim": "Muestra una animación de espera",
             "sec.waiter.li_order": "El orden de lo que se mostrará <strong>debe configurarse en los Ajustes</strong>",
+            "nav.item.minuteur": "minuteur - Cronómetro / Temporizador",
+            "sec.minuteur.title": "5️⃣ Reloj & Animaciones - minuteur",
+            "cmd.minuteur.title": "minuteur - Cronómetro / Temporizador",
+            "sec.minuteur.li_start": "<strong>start|chrono</strong>: Abre una sesión en modo cronómetro (cuenta desde 0)",
+            "sec.minuteur.li_start_timer": "<strong>start|timer</strong>: Abre una sesión en modo temporizador (cuenta regresiva desde la duración configurada)",
+            "sec.minuteur.li_startstop": "<strong>startstop</strong>: Alternar inicio / pausa",
+            "sec.minuteur.li_reset": "<strong>reset</strong>: Reinicia el cronómetro o temporizador",
+            "sec.minuteur.li_set_duration": "<strong>set_duration|N</strong>: Establece la duración del temporizador (N segundos)",
+            "sec.minuteur.li_set_mode": "<strong>set_mode|chrono|timer</strong>: Cambia entre modos sin cerrar la sesión",
+            "sec.minuteur.li_quit": "<strong>quit</strong>: Cierra la sesión y regresa al estado anterior",
+            "sec.minuteur.li_note_web": "Configurable y controlable desde la interfaz web (/minuteur)",
+            "sec.minuteur.li_note_stop": "El comando quit regresa al funcionamiento normal (modo attract si está configurado)",
+            "sec.minuteur.li_note_mode_default": "Si el modo no se especifica en start, se utiliza el modo predeterminado configurado en /minuteur",
             "sec.owmzc.title": "6️⃣ Clima - owmzc",
             "cmd.owmzc.title": "owmzc - Configuración de OpenWeatherMap",
             "sec.owmzc.li_zip": "<strong>código_postal</strong>: Código postal",
@@ -5744,6 +5990,21 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.rss.li_modes": "Dos modos de visualización: una línea o dos líneas",
             "sec.rss.li_rotation": "Modo rotación: un flujo a la vez (round-robin) o todos los flujos activos en secuencia",
             "sec.rss.li_offline": "Modo sin conexión configurable: caché, texto de error o ignorar",
+            // --- ABO (FOLLOWERS) ---
+            "nav.item.abo": "abo - Followers",
+            "sec.abo.title": "9️⃣ Varios - abo",
+            "cmd.abo.title": "abo - Mostrar Followers",
+            "sec.abo.li_show": "<strong>show</strong>: Muestra contadores de todas las cuentas configuradas y activas",
+            "sec.abo.li_complet": "<strong>show|complet</strong>: Fuerza el modo de visualización \"completo\" (logo + nombre + contador)",
+            "sec.abo.li_minimaliste": "<strong>show|minimaliste</strong>: Fuerza el modo de visualización \"minimalista\" (logo + contador, hasta 4 por página)",
+            "sec.abo.li_platform": "<strong>show|&lt;platform_key&gt;</strong>: Muestra solo las cuentas de la plataforma indicada (ej: youtube, twitch)",
+            "sec.abo.li_refresh": "<strong>refresh</strong>: Fuerza la actualización de contadores a través de las APIs configuradas",
+            "sec.abo.li_config": "Las cuentas se configuran a través de la interfaz web (/followers)",
+            "sec.abo.li_attract": "Integrado en el modo attract con la letra 'A' en el orden de desplazamiento",
+            "sec.abo.li_modes": "Modo completo: una cuenta a la vez. Modo minimalista: hasta 4 cuentas por página",
+            "sec.abo.li_cache": "Los contadores se almacenan en caché — en caso de error de API se muestra el último valor conocido",
+            "sec.abo.li_platforms": "Plataformas compatibles: YouTube, Instagram, X (Twitter), Facebook, Discord, Twitch y plataformas personalizadas",
+            "sec.abo.li_instagram": "Instagram: API pública no disponible desde 2020 — contadores no recuperables automáticamente",
             // --- SNAKE ---
             "sec.snake.title": "🐍 Snake",
             "cmd.snake.title": "snake - El clásico juego Snake",
@@ -6235,9 +6496,13 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.img.li_duree": "<strong>durata</strong>: Durata in secondi (0 = illimitata) (opzionale)",
             "sec.img.li_fallback": "<strong>alternativa</strong>: Immagine alternativa se non trovata (opzionale)",
             "sec.img.li_ext": "<strong>estensioni</strong>: Estensioni da provare, separate da virgola (opzionale)",
+            "sec.img.li_fit": "<strong>fit</strong>: 1 = adattare l'immagine alle dimensioni esatte del DMD (può deformare) (opzionale, default: 0)",
+            "sec.img.li_center": "<strong>center</strong>: 1 = ridurre proporzionalmente se troppo grande e centrare sul DMD (opzionale, default: 0)",
             "sec.img.li_note_path": "Cerca in /Medias/Images/",
             "sec.img.li_note_ext": "Supporta più estensioni",
             "sec.img.li_note_fallback": "Immagine alternativa se non trovata",
+            "sec.img.li_note_fit_center": "Senza fit né center: l'immagine viene mostrata a dimensione nativa in posizione (0,0) — se supera le dimensioni del DMD, viene ritagliata",
+            "sec.img.li_note_fit_priority": "fit e center sono mutuamente esclusivi — fit ha la priorità se entrambi sono impostati a 1",
             "sec.gif.title": "4️⃣ Immagini & GIF - gif",
             "cmd.gif.title": "gif - Mostra una GIF animata",
             "sec.gif.li_fichier": "<strong>file</strong>: Nome del file GIF",
@@ -6282,6 +6547,19 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.waiter.title": "waiter - Animazione di attesa",
             "sec.waiter.li_anim": "Mostra un'animazione di attesa",
             "sec.waiter.li_order": "L'ordine di visualizzazione <strong>deve essere configurato nelle Impostazioni</strong>",
+            "nav.item.minuteur": "minuteur - Cronometro / Timer",
+            "sec.minuteur.title": "5️⃣ Orologio & Animazioni - minuteur",
+            "cmd.minuteur.title": "minuteur - Cronometro / Timer",
+            "sec.minuteur.li_start": "<strong>start|chrono</strong>: Apre una sessione in modalità cronometro (conta da 0)",
+            "sec.minuteur.li_start_timer": "<strong>start|timer</strong>: Apre una sessione in modalità timer (conto alla rovescia dalla durata configurata)",
+            "sec.minuteur.li_startstop": "<strong>startstop</strong>: Alterna avvio / pausa",
+            "sec.minuteur.li_reset": "<strong>reset</strong>: Reimposta il cronometro o il timer",
+            "sec.minuteur.li_set_duration": "<strong>set_duration|N</strong>: Imposta la durata del timer (N secondi)",
+            "sec.minuteur.li_set_mode": "<strong>set_mode|chrono|timer</strong>: Passa da una modalità all'altra senza chiudere la sessione",
+            "sec.minuteur.li_quit": "<strong>quit</strong>: Chiude la sessione e torna allo stato precedente",
+            "sec.minuteur.li_note_web": "Configurabile e controllabile dall'interfaccia web (/minuteur)",
+            "sec.minuteur.li_note_stop": "Il comando quit torna al funzionamento normale (attract mode se configurato)",
+            "sec.minuteur.li_note_mode_default": "Se la modalità non viene specificata in start, viene utilizzata la modalità predefinita configurata in /minuteur",
             "sec.owmzc.title": "6️⃣ Meteo - owmzc",
             "cmd.owmzc.title": "owmzc - Configurazione OpenWeatherMap",
             "sec.owmzc.li_zip": "<strong>codice_postale</strong>: Codice postale",
@@ -6344,6 +6622,21 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.rss.li_modes": "Due modalità di visualizzazione: una riga o due righe",
             "sec.rss.li_rotation": "Modalità rotazione: un feed alla volta (round-robin) o tutti i feed attivi in sequenza",
             "sec.rss.li_offline": "Modalità offline configurabile: cache, testo di errore o ignora",
+            // --- ABO (FOLLOWERS) ---
+            "nav.item.abo": "abo - Followers",
+            "sec.abo.title": "9️⃣ Varie - abo",
+            "cmd.abo.title": "abo - Visualizzare i Followers",
+            "sec.abo.li_show": "<strong>show</strong>: Visualizza i contatori di tutti gli account configurati e attivi",
+            "sec.abo.li_complet": "<strong>show|complet</strong>: Forza la modalità di visualizzazione \"completa\" (logo + nome + contatore)",
+            "sec.abo.li_minimaliste": "<strong>show|minimaliste</strong>: Forza la modalità di visualizzazione \"minimalista\" (logo + contatore, fino a 4 per pagina)",
+            "sec.abo.li_platform": "<strong>show|&lt;platform_key&gt;</strong>: Mostra solo gli account della piattaforma indicata (es: youtube, twitch)",
+            "sec.abo.li_refresh": "<strong>refresh</strong>: Forza l'aggiornamento dei contatori tramite le API configurate",
+            "sec.abo.li_config": "Gli account sono configurati tramite l'interfaccia web (/followers)",
+            "sec.abo.li_attract": "Integrato nella modalità attract con la lettera 'A' nell'ordine di scorrimento",
+            "sec.abo.li_modes": "Modalità completa: un account alla volta. Modalità minimalista: fino a 4 account per pagina",
+            "sec.abo.li_cache": "I contatori sono memorizzati nella cache — in caso di errore API viene mostrato l'ultimo valore noto",
+            "sec.abo.li_platforms": "Piattaforme supportate: YouTube, Instagram, X (Twitter), Facebook, Discord, Twitch e piattaforme personalizzate",
+            "sec.abo.li_instagram": "Instagram: API pubblica non disponibile dal 2020 — contatori non recuperabili automaticamente",
             // --- SNAKE ---
             "sec.snake.title": "🐍 Snake",
             "cmd.snake.title": "snake - Il classico gioco Snake",
