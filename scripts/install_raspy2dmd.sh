@@ -413,8 +413,11 @@ step_install_system_deps() {
         mariadb-server mariadb-client
         # Surveillance de fichiers (chown evenementiel via inotifywait - anti-flicker)
         inotify-tools
-        # Affichage
-        fbi
+        # Sortie HDMI : pygame (SDL2 en mode KMSDRM, sans bureau) + EGL/GLES pour l'agrandissement
+        # par le GPU. Sans libegl1/libgles2/libegl-mesa0 : « EGL not initialized », rien ne s'affiche.
+        python3-pygame libegl1 libgles2 libegl-mesa0
+        # Lecture vidéo sur l'écran HDMI (action vid|) : mpv, décodage matériel, sortie DRM
+        mpv
     )
 
     TOTAL_PACKAGES=${#PACKAGES[@]}
@@ -979,83 +982,6 @@ step_install_files() {
 }
 
 # =============================================================================
-# ETAPE 9b : COMPILATION DE OMXIV (afficheur d'images GPU)
-# =============================================================================
-step_install_omxiv() {
-    log_step "9b" "Installation de omxiv (afficheur d'images GPU)"
-
-    OMXIV_SRC="${INSTALL_DIR}/omxiv"
-
-    # Verifier que le dossier omxiv existe dans l'installation
-    if [ ! -d "$OMXIV_SRC" ]; then
-        log_warn "Dossier omxiv non trouve dans ${INSTALL_DIR}"
-        log_warn "Etape ignoree - omxiv ne sera pas disponible"
-        return 0
-    fi
-
-    # Strategie : utiliser le binaire pre-compile si present,
-    # sinon tenter la compilation depuis les sources
-    if [ -f "$OMXIV_SRC/omxiv.bin" ]; then
-        # Binaire pre-compile inclus dans la release
-        log_substep "Binaire pre-compile omxiv.bin detecte - installation directe..."
-        install -m 755 "$OMXIV_SRC/omxiv.bin" /usr/bin/omxiv
-
-        if [ -f "/usr/bin/omxiv" ]; then
-            log_info "omxiv installe depuis le binaire pre-compile"
-        else
-            log_warn "Echec de la copie de omxiv.bin vers /usr/bin"
-        fi
-    elif [ -d "/opt/vc" ] && [ -d "/opt/vc/src/hello_pi/libs/ilclient" ]; then
-        # Pas de binaire pre-compile mais VideoCore present : compiler depuis les sources
-        log_substep "Pas de binaire pre-compile, compilation depuis les sources..."
-
-        cd "$OMXIV_SRC"
-
-        # Nettoyage des anciens fichiers objets (compiles sur une autre machine)
-        log_substep "Nettoyage des anciens fichiers objets..."
-        rm -f *.o libnsbmp/*.o libnsgif/*.o 2>/dev/null || true
-        rm -rf libs/ilclient 2>/dev/null || true
-
-        # Compilation de ilclient
-        log_substep "Compilation de la bibliotheque ilclient..."
-        mkdir -p libs
-        cp -ru /opt/vc/src/hello_pi/libs/ilclient libs/
-        make -C libs/ilclient >> "$LOG_FILE" 2>&1
-
-        if [ ! -f "libs/ilclient/libilclient.a" ]; then
-            log_warn "Echec de la compilation de ilclient"
-            log_warn "omxiv ne sera pas disponible"
-            return 0
-        fi
-
-        # Compilation de omxiv
-        log_substep "Compilation de omxiv (peut prendre quelques minutes)..."
-        make clean >> "$LOG_FILE" 2>&1 || true
-        make >> "$LOG_FILE" 2>&1
-
-        if [ ! -f "omxiv.bin" ]; then
-            log_warn "Echec de la compilation de omxiv"
-            log_warn "omxiv ne sera pas disponible"
-            return 0
-        fi
-
-        # Installation
-        log_substep "Installation de omxiv dans /usr/bin/..."
-        make install >> "$LOG_FILE" 2>&1
-
-        if [ -f "/usr/bin/omxiv" ]; then
-            log_info "omxiv compile et installe avec succes"
-        else
-            log_warn "Installation de omxiv echouee"
-        fi
-    else
-        log_warn "Pas de binaire pre-compile ni de VideoCore SDK (/opt/vc)"
-        log_warn "omxiv ne sera pas disponible"
-        return 0
-    fi
-}
-
-# =============================================================================
 # ETAPE 9c : INSTALLATION DES DEPENDANCES NPM
 # =============================================================================
 step_install_npm_dependencies() {
@@ -1493,7 +1419,8 @@ CREATE TABLE IF NOT EXISTS follower_platform (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT IGNORE INTO follower_platform (platform_key, display_name, logo_filename, api_type, enabled, display_order) VALUES
-('youtube',   'YouTube',   'youtube.png',   'youtube',   1, 1),
+('youtube',       'YouTube (simple)',  'youtube.png', 'youtube',       1, 1),
+('youtube_oauth', 'YouTube (complet)', 'youtube.png', 'youtube_oauth', 1, 1),
 ('instagram', 'Instagram', 'instagram.png', 'instagram', 1, 2),
 ('x',         'X',         'x.png',         'x',         1, 3),
 ('facebook',  'Facebook',  'facebook.png',  'facebook',  1, 4),
@@ -1511,7 +1438,8 @@ CREATE TABLE IF NOT EXISTS follower_api_config (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT IGNORE INTO follower_api_config (platform_key, refresh_interval) VALUES
-('youtube',   3600),
+('youtube',       3600),
+('youtube_oauth', 3600),
 ('instagram', 3600),
 ('x',         3600),
 ('facebook',  3600),
@@ -2024,6 +1952,20 @@ SAMBAEOF
         log_warn "Fichier cmdline.txt non trouve, optimisation isolcpus non appliquee"
     fi
 
+    # Sortie HDMI : image de demarrage et console Linux masquee (reglables dans la page /hdmi)
+    log_substep "Configuration de l'ecran HDMI (image de demarrage, console Linux)..."
+    mkdir -p /Medias/HDMI
+    if [ -f "${INSTALL_DIR}/system/raspy2dmd-splash.service" ]; then
+        cp "${INSTALL_DIR}/system/raspy2dmd-splash.service" /etc/systemd/system/
+        systemctl daemon-reload 2>/dev/null || true
+        systemctl enable raspy2dmd-splash.service 2>/dev/null || true
+    fi
+    bash "${INSTALL_DIR}/system/hdmi_console.sh" apply-default >> "$LOG_FILE" 2>&1 || true
+    # Conversion de l'image de demarrage (seulement si un ecran est branche)
+    PYTHONPATH="${INSTALL_DIR}" python3 "${INSTALL_DIR}/bin/display/hdmi_splash.py" --build >> "$LOG_FILE" 2>&1 || true
+    chown -R raspy2dmd:raspy2dmd /Medias/HDMI 2>/dev/null || true
+    log_info "Ecran HDMI : image de demarrage installee, console Linux masquee"
+
     # Passe finale : s'assurer que TOUS les scripts .sh sont executables
     # (certaines etapes precedentes ont pu creer ou modifier des fichiers)
     log_substep "Verification finale des permissions des scripts..."
@@ -2274,7 +2216,6 @@ main() {
     step_install_python_deps
     step_download_raspy2dmd
     step_install_files
-    step_install_omxiv
     step_install_npm_dependencies
     step_setup_medias
     step_setup_database

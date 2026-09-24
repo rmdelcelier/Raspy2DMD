@@ -739,6 +739,7 @@
                 <div class="nav-item" onclick="showSection('gif')" data-i18n="nav.item.gif">gif - Afficher GIF</div>
                 <div class="nav-item" onclick="showSection('gifPath')" data-i18n="nav.item.gifPath">gifPath - GIF chemin complet</div>
                 <div class="nav-item" onclick="showSection('gifText')" data-i18n="nav.item.gifText">gifText - GIF + Texte</div>
+                <div class="nav-item" onclick="showSection('vid')" data-i18n="nav.item.vid">vid - Vidéo sur l'écran HDMI</div>
                 <div class="nav-item" onclick="showSection('rand')" data-i18n="nav.item.rand">rand - Aléatoire</div>
             </div>
         </div>
@@ -816,6 +817,8 @@
             </div>
             <div class="nav-items">
                 <div class="nav-item" onclick="showSection('rtc')" data-i18n="nav.item.rtc">Module RTC</div>
+                <div class="nav-item" onclick="showSection('hdmi')" data-i18n="nav.item.hdmi">Sortie HDMI</div>
+                <div class="nav-item" onclick="showSection('rp1pio')" data-i18n="nav.item.rp1pio">Raspberry Pi 5 (RP1 PIO)</div>
             </div>
         </div>
 
@@ -1812,6 +1815,42 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "gif|demo|0||.gif,.GIF"<br>
                     <ul>
                         <li data-i18n="sec.gifText.li_note_combine">Combine animation GIF et texte</li>
                         <li data-i18n="sec.gifText.li_note_overlay">Texte affiché par-dessus l'animation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section" id="vid">
+            <h2 class="section-title" data-i18n="sec.vid.title">4️⃣ Images & GIFs - vid</h2>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.vid.title">vid - Lire une vidéo sur l'écran HDMI</div>
+                <span class="badge badge-stop" data-i18n="badge.stop">Stop l'attract mode avant affichage</span>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">vid|&lt;fichier&gt;|[répétitions]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.vid.li_file"><strong>fichier</strong> : nom du fichier dans /Medias/Videos (sous-dossier possible), ou chemin complet commençant par /</li>
+                        <li data-i18n-html="sec.vid.li_iter"><strong>répétitions</strong> : nombre de lectures (optionnel, 1 par défaut)</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.example">Exemple</h4>
+                    <div class="example-code">mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "vid|intro.mp4|2"</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.vid.li_hdmi">Disponible uniquement avec la sortie « Écran HDMI » ou « DMD + écran HDMI » : les panneaux LED ne peuvent pas afficher de vidéo (en DMD + HDMI, le DMD reste noir pendant la lecture)</li>
+                        <li data-i18n="sec.vid.li_formats">Lecture par mpv avec décodage matériel (H.264 sur Pi 3/4, HEVC sur Pi 4/5) ; format conseillé : MP4 H.264 jusqu'en 1080p</li>
+                        <li data-i18n="sec.vid.li_sound">Le son suit les réglages de Raspy2DMD : sortie (HDMI ou jack), volume, son activé ou non</li>
+                        <li data-i18n="sec.vid.li_stop">Toute nouvelle commande d'affichage arrête la vidéo ; les vidéos .mp4 placées dans les dossiers des scores, des coups spéciaux ou de démarrage sont aussi lues</li>
                     </ul>
                 </div>
             </div>
@@ -3260,6 +3299,132 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "abo|refresh"<br>
             </div>
         </div>
 
+        <!-- SORTIE HDMI -->
+        <div class="content-section" id="hdmi">
+            <h2 class="section-title" data-i18n="sec.hdmi.title">📺 Matériel - Sortie HDMI</h2>
+
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.hdmi.title">Afficher Raspy2DMD sur un écran HDMI</div>
+                <span class="badge badge-configuration" data-i18n="sec.hdmi.badge_page">Tuile « Sortie HDMI »</span>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.description">Description</h4>
+                    <p data-i18n-html="sec.hdmi.p_desc">Raspy2DMD peut afficher son contenu sur un écran HDMI (télévision, moniteur) à la place du DMD, ou <strong>en même temps</strong>. L'image est calculée à la résolution du DMD puis agrandie par le processeur graphique du Pi : textes, GIF, horloge, météo, jeux et attract mode s'affichent à l'identique, sans réglage particulier.</p>
+                    <p data-i18n-html="sec.hdmi.p_config">Tout se règle dans la tuile <strong>Sortie HDMI</strong> de la page d'accueil (section Configuration). Les réglages d'image s'appliquent immédiatement ; changer de sortie redémarre Raspy2DMD (quelques secondes).</p>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.hdmi.h4_outputs">Sorties disponibles</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th data-i18n="sec.hdmi.col_output">Sortie</th>
+                                    <th data-i18n="sec.hdmi.col_desc">Description</th>
+                                    <th data-i18n="sec.hdmi.col_models">Modèles</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>DMD</td>
+                                    <td data-i18n="sec.hdmi.td_dmd">Panneaux LED (ou Raspberry Pico)</td>
+                                    <td data-i18n="sec.hdmi.td_all">Tous</td>
+                                </tr>
+                                <tr>
+                                    <td>HDMI</td>
+                                    <td data-i18n="sec.hdmi.td_hdmi">Écran HDMI seul, sans panneau LED</td>
+                                    <td data-i18n="sec.hdmi.td_all">Tous</td>
+                                </tr>
+                                <tr>
+                                    <td>DMD + HDMI</td>
+                                    <td data-i18n="sec.hdmi.td_both">Les deux en même temps, image identique</td>
+                                    <td data-i18n="sec.hdmi.td_multi">Pi à plusieurs cœurs : Zero 2 W, 3, 4, 5 (pas Zero / Zero W)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.hdmi.h4_settings">Réglages de l'image</h4>
+                    <ul>
+                        <li data-i18n-html="sec.hdmi.li_scaling"><strong>Mise à l'échelle</strong> : pixel parfait (multiple entier, bandes noires), ajusté (le plus grand possible sans déformer) ou étiré (plein écran)</li>
+                        <li data-i18n-html="sec.hdmi.li_style"><strong>Style de rendu</strong> : pixels nets, lissé, ou points LED (pixels ronds séparés, aspect d'un vrai DMD)</li>
+                        <li data-i18n-html="sec.hdmi.li_resolution"><strong>Résolution</strong> : celle préférée par l'écran, ou une résolution imposée parmi celles qu'il accepte (lues dans ses informations EDID)</li>
+                        <li data-i18n-html="sec.hdmi.li_rotation"><strong>Rotation</strong> (0, 90, 180, 270°), <strong>marges</strong> (pour les téléviseurs qui rognent les bords) et <strong>luminosité</strong></li>
+                        <li data-i18n-html="sec.hdmi.li_background"><strong>Fond</strong> autour de l'image : couleur unie ou image (assombrissable) — l'image Raspy2DMD par défaut, remplaçable par la vôtre</li>
+                        <li data-i18n-html="sec.hdmi.li_port"><strong>Port HDMI</strong> sur les Pi 4 et 5, qui en ont deux ; <strong>sans écran au démarrage</strong> : retour au DMD ou attente de l'écran</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.hdmi.h4_boot">Démarrage et console Linux</h4>
+                    <p data-i18n-html="sec.hdmi.p_console">La case <strong>Masquer la console Linux</strong> (cochée par défaut) supprime les messages du démarrage, le curseur et l'invite de connexion : l'écran ne montre que Raspy2DMD. Elle prend pleinement effet au redémarrage. En cas de besoin, une console reste disponible par <code>Ctrl+Alt+F2</code> (avec un clavier) ou par SSH.</p>
+                    <p data-i18n-html="sec.hdmi.p_splash">Une <strong>image de démarrage</strong> apparaît quelques secondes après la mise sous tension et reste affichée jusqu'à ce que Raspy2DMD prenne l'écran. Elle se change depuis la même page (image Raspy2DMD par défaut).</p>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.hdmi.h4_command">Commande hdmi</h4>
+                    <span class="badge badge-no-stop" data-i18n="badge.info">PAS DE STOP()</span>
+                    <div class="command-format">hdmi|mire[|&lt;secondes&gt;]</div>
+                    <ul>
+                        <li data-i18n-html="sec.hdmi.li_seconds"><strong>secondes</strong> : durée d'affichage de la mire, de 1 à 60 (10 par défaut)</li>
+                        <li data-i18n="sec.hdmi.li_mire">La mire montre les bords de l'écran, les couleurs et le rectangle occupé par l'image du DMD : pratique pour régler les marges</li>
+                        <li data-i18n="sec.hdmi.li_nostop">N'interrompt pas l'affichage en cours ; sans effet si la sortie HDMI n'est pas active</li>
+                    </ul>
+                    <div class="example-code">
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "hdmi|mire|15"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.hdmi.h4_conf">Configuration par MQTT</h4>
+                    <p data-i18n-html="sec.hdmi.p_conf">Les réglages sont dans la section <code>[HDMI]</code> du fichier de configuration et se modifient avec <code>conf</code> : <code>display_output</code> (dmd, hdmi, both), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.</p>
+                    <div class="example-code">
+<span class="comment"># Points LED (aspect DMD)</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "conf|HDMI|style:dots"<br>
+
+<span class="comment"># DMD + écran HDMI (redémarre Raspy2DMD)</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "conf|HDMI|display_output:both"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.hdmi.li_screen">L'écran doit être branché au démarrage du Pi, sinon Raspy2DMD revient au DMD (ou attend l'écran si ce choix est fait)</li>
+                        <li data-i18n="sec.hdmi.li_sound">Le son peut être envoyé sur l'écran HDMI depuis la même page</li>
+                        <li data-i18n-html="sec.hdmi.li_video">Vidéos : commande <code>vid</code> et onglet Vidéos de la page Répertoires (lecture par mpv, décodage matériel)</li>
+                        <li data-i18n="sec.hdmi.li_visuals">Les visuels de Raspy2DMD (démarrage, avertissements, mise à jour, paramétrage) s'affichent sur l'écran dans leur version haute résolution (dossiers …/HDMI des médias), pendant que le DMD joue la sienne</li>
+                        <li data-i18n="sec.hdmi.li_materiel">En sortie « Écran HDMI » seule, la page Matériel grise les réglages propres aux panneaux LED ; la taille du DMD reste réglable : c'est la taille de l'image affichée à l'écran</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- RASPBERRY PI 5 : BACKEND RP1 PIO -->
+        <div class="content-section" id="rp1pio">
+            <h2 class="section-title" data-i18n="sec.rp1pio.title">⚙️ Matériel - Raspberry Pi 5 (RP1 PIO)</h2>
+
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.rp1pio.title">Piloter le DMD par le bloc PIO du Pi 5</div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.description">Description</h4>
+                    <p data-i18n-html="sec.rp1pio.p_desc">Sur Raspberry Pi 5, la bibliothèque rpi-rgb-led-matrix peut piloter les panneaux par le bloc <strong>PIO</strong> de la puce RP1 au lieu du processeur (option <code>--led-rp1-pio</code>) : la charge CPU devient minimale.</p>
+                    <p data-i18n-html="sec.rp1pio.p_how">Cochez <strong>Pi 5 : piloter le DMD par le bloc PIO du RP1</strong> sur la page Matériel (affichée uniquement sur Pi 5), ou envoyez <code>conf|DMDRenderer|rp1_pio:1</code>. La matrice est recréée aussitôt, sans redémarrage.</p>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.rp1pio.li_lib">Nécessite une version de rpi-rgb-led-matrix incluant le support du Pi 5 ; sinon l'option est ignorée et un avertissement est écrit dans le journal</li>
+                        <li data-i18n="sec.rp1pio.li_other">Sans effet sur les autres modèles</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <!-- CONNECTIVITÉ USB -->
         <div class="content-section" id="usb">
             <h2 class="section-title" data-i18n="sec.usb.title">🔌 Connectivité - USB Gadget Mode</h2>
@@ -3431,6 +3596,10 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "abo|refresh"<br>
                                 <td><code>sound</code></td>
                                 <td data-i18n="sec.recap.td_sound">Jouer un son</td>
                             </tr>
+                                                    <tr>
+                                <td><code>hdmi</code></td>
+                                <td data-i18n="sec.recap.td_hdmi">Mire de test sur l'écran HDMI</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -3470,6 +3639,10 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "abo|refresh"<br>
                             <tr>
                                 <td data-i18n="sec.recap.td_cat_tests"><strong>Tests</strong></td>
                                 <td>testFont, testPattern</td>
+                            </tr>
+                                                    <tr>
+                                <td><code>vid</code></td>
+                                <td data-i18n="sec.recap.td_vid">Vidéo sur l'écran HDMI</td>
                             </tr>
                         </tbody>
                     </table>
@@ -4276,6 +4449,60 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             // --- RTC ---
             "sec.rtc.title": "🔧 Matériel - Horloge RTC",
             "cmd.rtc.title": "Gestion du module RTC (Real-Time Clock)",
+            "nav.item.vid": "vid - Vidéo sur l'écran HDMI",
+            "sec.vid.title": "4️⃣ Images & GIFs - vid",
+            "cmd.vid.title": "vid - Lire une vidéo sur l'écran HDMI",
+            "sec.vid.li_file": "<strong>fichier</strong> : nom du fichier dans /Medias/Videos (sous-dossier possible), ou chemin complet commençant par /",
+            "sec.vid.li_iter": "<strong>répétitions</strong> : nombre de lectures (optionnel, 1 par défaut)",
+            "sec.vid.li_hdmi": "Disponible uniquement avec la sortie « Écran HDMI » ou « DMD + écran HDMI » : les panneaux LED ne peuvent pas afficher de vidéo (en DMD + HDMI, le DMD reste noir pendant la lecture)",
+            "sec.vid.li_formats": "Lecture par mpv avec décodage matériel (H.264 sur Pi 3/4, HEVC sur Pi 4/5) ; format conseillé : MP4 H.264 jusqu'en 1080p",
+            "sec.vid.li_sound": "Le son suit les réglages de Raspy2DMD : sortie (HDMI ou jack), volume, son activé ou non",
+            "sec.vid.li_stop": "Toute nouvelle commande d'affichage arrête la vidéo ; les vidéos .mp4 placées dans les dossiers des scores, des coups spéciaux ou de démarrage sont aussi lues",
+            "sec.recap.td_vid": "Vidéo sur l'écran HDMI",
+            "sec.hdmi.li_visuals": "Les visuels de Raspy2DMD (démarrage, avertissements, mise à jour, paramétrage) s'affichent sur l'écran dans leur version haute résolution (dossiers …/HDMI des médias), pendant que le DMD joue la sienne",
+            "sec.hdmi.li_materiel": "En sortie « Écran HDMI » seule, la page Matériel grise les réglages propres aux panneaux LED ; la taille du DMD reste réglable : c'est la taille de l'image affichée à l'écran",
+            "nav.item.hdmi": "Sortie HDMI",
+            "nav.item.rp1pio": "Raspberry Pi 5 (RP1 PIO)",
+            "sec.hdmi.title": "📺 Matériel - Sortie HDMI",
+            "cmd.hdmi.title": "Afficher Raspy2DMD sur un écran HDMI",
+            "sec.hdmi.badge_page": "Tuile « Sortie HDMI »",
+            "sec.hdmi.p_desc": "Raspy2DMD peut afficher son contenu sur un écran HDMI (télévision, moniteur) à la place du DMD, ou <strong>en même temps</strong>. L'image est calculée à la résolution du DMD puis agrandie par le processeur graphique du Pi : textes, GIF, horloge, météo, jeux et attract mode s'affichent à l'identique, sans réglage particulier.",
+            "sec.hdmi.p_config": "Tout se règle dans la tuile <strong>Sortie HDMI</strong> de la page d'accueil (section Configuration). Les réglages d'image s'appliquent immédiatement ; changer de sortie redémarre Raspy2DMD (quelques secondes).",
+            "sec.hdmi.h4_outputs": "Sorties disponibles",
+            "sec.hdmi.col_output": "Sortie",
+            "sec.hdmi.col_desc": "Description",
+            "sec.hdmi.col_models": "Modèles",
+            "sec.hdmi.td_dmd": "Panneaux LED (ou Raspberry Pico)",
+            "sec.hdmi.td_hdmi": "Écran HDMI seul, sans panneau LED",
+            "sec.hdmi.td_both": "Les deux en même temps, image identique",
+            "sec.hdmi.td_all": "Tous",
+            "sec.hdmi.td_multi": "Pi à plusieurs cœurs : Zero 2 W, 3, 4, 5 (pas Zero / Zero W)",
+            "sec.hdmi.h4_settings": "Réglages de l'image",
+            "sec.hdmi.li_scaling": "<strong>Mise à l'échelle</strong> : pixel parfait (multiple entier, bandes noires), ajusté (le plus grand possible sans déformer) ou étiré (plein écran)",
+            "sec.hdmi.li_style": "<strong>Style de rendu</strong> : pixels nets, lissé, ou points LED (pixels ronds séparés, aspect d'un vrai DMD)",
+            "sec.hdmi.li_resolution": "<strong>Résolution</strong> : celle préférée par l'écran, ou une résolution imposée parmi celles qu'il accepte (lues dans ses informations EDID)",
+            "sec.hdmi.li_rotation": "<strong>Rotation</strong> (0, 90, 180, 270°), <strong>marges</strong> (pour les téléviseurs qui rognent les bords) et <strong>luminosité</strong>",
+            "sec.hdmi.li_background": "<strong>Fond</strong> autour de l'image : couleur unie ou image (assombrissable) — l'image Raspy2DMD par défaut, remplaçable par la vôtre",
+            "sec.hdmi.li_port": "<strong>Port HDMI</strong> sur les Pi 4 et 5, qui en ont deux ; <strong>sans écran au démarrage</strong> : retour au DMD ou attente de l'écran",
+            "sec.hdmi.h4_boot": "Démarrage et console Linux",
+            "sec.hdmi.p_console": "La case <strong>Masquer la console Linux</strong> (cochée par défaut) supprime les messages du démarrage, le curseur et l'invite de connexion : l'écran ne montre que Raspy2DMD. Elle prend pleinement effet au redémarrage. En cas de besoin, une console reste disponible par <code>Ctrl+Alt+F2</code> (avec un clavier) ou par SSH.",
+            "sec.hdmi.p_splash": "Une <strong>image de démarrage</strong> apparaît quelques secondes après la mise sous tension et reste affichée jusqu'à ce que Raspy2DMD prenne l'écran. Elle se change depuis la même page (image Raspy2DMD par défaut).",
+            "sec.hdmi.h4_command": "Commande hdmi",
+            "sec.hdmi.li_seconds": "<strong>secondes</strong> : durée d'affichage de la mire, de 1 à 60 (10 par défaut)",
+            "sec.hdmi.li_mire": "La mire montre les bords de l'écran, les couleurs et le rectangle occupé par l'image du DMD : pratique pour régler les marges",
+            "sec.hdmi.li_nostop": "N'interrompt pas l'affichage en cours ; sans effet si la sortie HDMI n'est pas active",
+            "sec.hdmi.h4_conf": "Configuration par MQTT",
+            "sec.hdmi.p_conf": "Les réglages sont dans la section <code>[HDMI]</code> du fichier de configuration et se modifient avec <code>conf</code> : <code>display_output</code> (dmd, hdmi, both), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.",
+            "sec.hdmi.li_screen": "L'écran doit être branché au démarrage du Pi, sinon Raspy2DMD revient au DMD (ou attend l'écran si ce choix est fait)",
+            "sec.hdmi.li_sound": "Le son peut être envoyé sur l'écran HDMI depuis la même page",
+            "sec.hdmi.li_video": "Vidéos : commande <code>vid</code> et onglet Vidéos de la page Répertoires (lecture par mpv, décodage matériel)",
+            "sec.recap.td_hdmi": "Mire de test sur l'écran HDMI",
+            "sec.rp1pio.title": "⚙️ Matériel - Raspberry Pi 5 (RP1 PIO)",
+            "cmd.rp1pio.title": "Piloter le DMD par le bloc PIO du Pi 5",
+            "sec.rp1pio.p_desc": "Sur Raspberry Pi 5, la bibliothèque rpi-rgb-led-matrix peut piloter les panneaux par le bloc <strong>PIO</strong> de la puce RP1 au lieu du processeur (option <code>--led-rp1-pio</code>) : la charge CPU devient minimale.",
+            "sec.rp1pio.p_how": "Cochez <strong>Pi 5 : piloter le DMD par le bloc PIO du RP1</strong> sur la page Matériel (affichée uniquement sur Pi 5), ou envoyez <code>conf|DMDRenderer|rp1_pio:1</code>. La matrice est recréée aussitôt, sans redémarrage.",
+            "sec.rp1pio.li_lib": "Nécessite une version de rpi-rgb-led-matrix incluant le support du Pi 5 ; sinon l'option est ignorée et un avertissement est écrit dans le journal",
+            "sec.rp1pio.li_other": "Sans effet sur les autres modèles",
             // --- USB ---
             "sec.usb.title": "🔌 Connectivité - USB Gadget Mode",
             "cmd.usb.title": "Connexion réseau directe via câble USB (OTG)",
@@ -4912,6 +5139,60 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.audiovis.li_webui_save": "<strong>Persistent save</strong> in the configuration file",
             "sec.rtc.title": "🔧 Hardware - RTC Clock",
             "cmd.rtc.title": "RTC module management (Real-Time Clock)",
+            "nav.item.vid": "vid - Video on the HDMI screen",
+            "sec.vid.title": "4️⃣ Images & GIFs - vid",
+            "cmd.vid.title": "vid - Play a video on the HDMI screen",
+            "sec.vid.li_file": "<strong>file</strong>: file name in /Medias/Videos (sub-folder allowed), or full path starting with /",
+            "sec.vid.li_iter": "<strong>repeats</strong>: number of plays (optional, 1 by default)",
+            "sec.vid.li_hdmi": "Only available with the \"HDMI screen\" or \"DMD + HDMI screen\" output: LED panels cannot show videos (in DMD + HDMI, the DMD stays black during playback)",
+            "sec.vid.li_formats": "Played by mpv with hardware decoding (H.264 on Pi 3/4, HEVC on Pi 4/5); recommended format: MP4 H.264 up to 1080p",
+            "sec.vid.li_sound": "Sound follows the Raspy2DMD settings: output (HDMI or jack), volume, sound on or off",
+            "sec.vid.li_stop": "Any new display command stops the video; .mp4 videos placed in the score, special move or startup folders are played too",
+            "sec.recap.td_vid": "Video on the HDMI screen",
+            "sec.hdmi.li_visuals": "Raspy2DMD visuals (startup, warnings, update, settings) are shown on the screen in their high-resolution version (…/HDMI media folders), while the DMD plays its own",
+            "sec.hdmi.li_materiel": "With the \"HDMI screen\" output alone, the Hardware page greys out settings specific to LED panels; the DMD size can still be changed: it is the size of the picture shown on the screen",
+            "nav.item.hdmi": "HDMI output",
+            "nav.item.rp1pio": "Raspberry Pi 5 (RP1 PIO)",
+            "sec.hdmi.title": "📺 Hardware - HDMI output",
+            "cmd.hdmi.title": "Show Raspy2DMD on an HDMI screen",
+            "sec.hdmi.badge_page": "\"HDMI output\" tile",
+            "sec.hdmi.p_desc": "Raspy2DMD can show its content on an HDMI screen (TV, monitor) instead of the DMD, or <strong>at the same time</strong>. The picture is computed at the DMD resolution and then enlarged by the Pi's graphics processor: texts, GIFs, clock, weather, games and attract mode look exactly the same, with no specific setup.",
+            "sec.hdmi.p_config": "Everything is set in the <strong>HDMI output</strong> tile of the home page (Configuration section). Picture settings apply immediately; changing the output restarts Raspy2DMD (a few seconds).",
+            "sec.hdmi.h4_outputs": "Available outputs",
+            "sec.hdmi.col_output": "Output",
+            "sec.hdmi.col_desc": "Description",
+            "sec.hdmi.col_models": "Models",
+            "sec.hdmi.td_dmd": "LED panels (or Raspberry Pico)",
+            "sec.hdmi.td_hdmi": "HDMI screen only, no LED panel",
+            "sec.hdmi.td_both": "Both at the same time, same picture",
+            "sec.hdmi.td_all": "All",
+            "sec.hdmi.td_multi": "Multi-core Pi: Zero 2 W, 3, 4, 5 (not Zero / Zero W)",
+            "sec.hdmi.h4_settings": "Picture settings",
+            "sec.hdmi.li_scaling": "<strong>Scaling</strong>: pixel perfect (integer multiple, black bars), fit (as large as possible without distortion) or stretched (full screen)",
+            "sec.hdmi.li_style": "<strong>Rendering style</strong>: sharp pixels, smoothed, or LED dots (separate round pixels, the look of a real DMD)",
+            "sec.hdmi.li_resolution": "<strong>Resolution</strong>: the screen's preferred one, or a forced resolution among those it accepts (read from its EDID data)",
+            "sec.hdmi.li_rotation": "<strong>Rotation</strong> (0, 90, 180, 270°), <strong>margins</strong> (for TVs that crop the edges) and <strong>brightness</strong>",
+            "sec.hdmi.li_background": "<strong>Background</strong> around the picture: solid colour or image (can be dimmed) — the Raspy2DMD image by default, replaceable with your own",
+            "sec.hdmi.li_port": "<strong>HDMI port</strong> on the Pi 4 and 5, which have two; <strong>no screen at startup</strong>: fall back to the DMD or wait for the screen",
+            "sec.hdmi.h4_boot": "Startup and Linux console",
+            "sec.hdmi.p_console": "The <strong>Hide the Linux console</strong> box (checked by default) removes startup messages, the cursor and the login prompt: the screen only shows Raspy2DMD. It fully applies at the next restart. If needed, a console is still available with <code>Ctrl+Alt+F2</code> (with a keyboard) or through SSH.",
+            "sec.hdmi.p_splash": "A <strong>startup image</strong> appears a few seconds after power-on and stays until Raspy2DMD takes over the screen. It can be changed from the same page (Raspy2DMD image by default).",
+            "sec.hdmi.h4_command": "hdmi command",
+            "sec.hdmi.li_seconds": "<strong>seconds</strong>: how long the test pattern is shown, 1 to 60 (10 by default)",
+            "sec.hdmi.li_mire": "The test pattern shows the screen edges, the colours and the rectangle used by the DMD picture: handy for adjusting margins",
+            "sec.hdmi.li_nostop": "Does not interrupt the current display; no effect if the HDMI output is not active",
+            "sec.hdmi.h4_conf": "Configuration through MQTT",
+            "sec.hdmi.p_conf": "Settings are in the <code>[HDMI]</code> section of the configuration file and are changed with <code>conf</code>: <code>display_output</code> (dmd, hdmi, both), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.",
+            "sec.hdmi.li_screen": "The screen must be connected when the Pi starts, otherwise Raspy2DMD falls back to the DMD (or waits for the screen if chosen)",
+            "sec.hdmi.li_sound": "Sound can be sent to the HDMI screen from the same page",
+            "sec.hdmi.li_video": "Videos: <code>vid</code> command and Videos tab of the Directories page (played by mpv, hardware decoding)",
+            "sec.recap.td_hdmi": "Test pattern on the HDMI screen",
+            "sec.rp1pio.title": "⚙️ Hardware - Raspberry Pi 5 (RP1 PIO)",
+            "cmd.rp1pio.title": "Drive the DMD with the Pi 5 PIO block",
+            "sec.rp1pio.p_desc": "On the Raspberry Pi 5, the rpi-rgb-led-matrix library can drive the panels with the <strong>PIO</strong> block of the RP1 chip instead of the processor (<code>--led-rp1-pio</code> option): CPU load becomes minimal.",
+            "sec.rp1pio.p_how": "Tick <strong>Pi 5: drive the DMD with the RP1 PIO block</strong> on the Hardware page (only shown on a Pi 5), or send <code>conf|DMDRenderer|rp1_pio:1</code>. The matrix is recreated at once, without restarting.",
+            "sec.rp1pio.li_lib": "Requires a version of rpi-rgb-led-matrix that includes Pi 5 support; otherwise the option is ignored and a warning is written to the log",
+            "sec.rp1pio.li_other": "No effect on other models",
             "sec.usb.title": "🔌 Connectivity - USB Gadget Mode",
             "cmd.usb.title": "Direct network connection via USB cable (OTG)",
             "sec.usb.h4_models": "Compatible models",
@@ -5544,6 +5825,60 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.audiovis.li_webui_save": "<strong>Dauerhafte Speicherung</strong> in der Konfigurationsdatei",
             "sec.rtc.title": "🔧 Hardware - RTC-Uhr",
             "cmd.rtc.title": "RTC-Modul-Verwaltung (Echtzeituhr)",
+            "nav.item.vid": "vid - Video auf dem HDMI-Bildschirm",
+            "sec.vid.title": "4️⃣ Bilder & GIFs - vid",
+            "cmd.vid.title": "vid - Ein Video auf dem HDMI-Bildschirm abspielen",
+            "sec.vid.li_file": "<strong>Datei</strong>: Dateiname in /Medias/Videos (Unterordner möglich) oder vollständiger Pfad, der mit / beginnt",
+            "sec.vid.li_iter": "<strong>Wiederholungen</strong>: Anzahl der Wiedergaben (optional, Standard 1)",
+            "sec.vid.li_hdmi": "Nur mit dem Ausgang „HDMI-Bildschirm“ oder „DMD + HDMI-Bildschirm“ verfügbar: LED-Panels können keine Videos anzeigen (bei DMD + HDMI bleibt der DMD während der Wiedergabe schwarz)",
+            "sec.vid.li_formats": "Wiedergabe mit mpv und Hardware-Decodierung (H.264 auf Pi 3/4, HEVC auf Pi 4/5); empfohlenes Format: MP4 H.264 bis 1080p",
+            "sec.vid.li_sound": "Der Ton folgt den Raspy2DMD-Einstellungen: Ausgang (HDMI oder Klinke), Lautstärke, Ton an oder aus",
+            "sec.vid.li_stop": "Jeder neue Anzeigebefehl stoppt das Video; .mp4-Videos in den Ordnern für Punktestände, Spezialwürfe oder Start werden ebenfalls abgespielt",
+            "sec.recap.td_vid": "Video auf dem HDMI-Bildschirm",
+            "sec.hdmi.li_visuals": "Die Raspy2DMD-Grafiken (Start, Warnungen, Update, Einstellungen) erscheinen auf dem Bildschirm in ihrer hochauflösenden Version (Medienordner …/HDMI), während der DMD seine eigene zeigt",
+            "sec.hdmi.li_materiel": "Beim Ausgang „HDMI-Bildschirm“ allein graut die Seite Hardware die Einstellungen der LED-Panels aus; die DMD-Größe bleibt einstellbar: Sie bestimmt die Größe des Bildes auf dem Bildschirm",
+            "nav.item.hdmi": "HDMI-Ausgang",
+            "nav.item.rp1pio": "Raspberry Pi 5 (RP1 PIO)",
+            "sec.hdmi.title": "📺 Hardware - HDMI-Ausgang",
+            "cmd.hdmi.title": "Raspy2DMD auf einem HDMI-Bildschirm anzeigen",
+            "sec.hdmi.badge_page": "Kachel „HDMI-Ausgang“",
+            "sec.hdmi.p_desc": "Raspy2DMD kann seine Inhalte auf einem HDMI-Bildschirm (Fernseher, Monitor) statt auf dem DMD anzeigen, oder <strong>gleichzeitig</strong>. Das Bild wird in der Auflösung des DMD berechnet und dann vom Grafikprozessor des Pi vergrößert: Texte, GIFs, Uhr, Wetter, Spiele und Attract-Modus erscheinen identisch, ohne besondere Einstellung.",
+            "sec.hdmi.p_config": "Alles wird in der Kachel <strong>HDMI-Ausgang</strong> der Startseite eingestellt (Bereich Konfiguration). Bildeinstellungen wirken sofort; ein Wechsel des Ausgangs startet Raspy2DMD neu (einige Sekunden).",
+            "sec.hdmi.h4_outputs": "Verfügbare Ausgänge",
+            "sec.hdmi.col_output": "Ausgang",
+            "sec.hdmi.col_desc": "Beschreibung",
+            "sec.hdmi.col_models": "Modelle",
+            "sec.hdmi.td_dmd": "LED-Panels (oder Raspberry Pico)",
+            "sec.hdmi.td_hdmi": "Nur HDMI-Bildschirm, ohne LED-Panel",
+            "sec.hdmi.td_both": "Beide gleichzeitig, identisches Bild",
+            "sec.hdmi.td_all": "Alle",
+            "sec.hdmi.td_multi": "Pi mit mehreren Kernen: Zero 2 W, 3, 4, 5 (nicht Zero / Zero W)",
+            "sec.hdmi.h4_settings": "Bildeinstellungen",
+            "sec.hdmi.li_scaling": "<strong>Skalierung</strong>: pixelgenau (ganzzahliges Vielfaches, schwarze Balken), eingepasst (so groß wie möglich ohne Verzerrung) oder gestreckt (Vollbild)",
+            "sec.hdmi.li_style": "<strong>Darstellungsstil</strong>: scharfe Pixel, geglättet oder LED-Punkte (getrennte runde Pixel, Optik eines echten DMD)",
+            "sec.hdmi.li_resolution": "<strong>Auflösung</strong>: die vom Bildschirm bevorzugte, oder eine erzwungene Auflösung aus den unterstützten (aus seinen EDID-Daten gelesen)",
+            "sec.hdmi.li_rotation": "<strong>Drehung</strong> (0, 90, 180, 270°), <strong>Ränder</strong> (für Fernseher, die die Ränder abschneiden) und <strong>Helligkeit</strong>",
+            "sec.hdmi.li_background": "<strong>Hintergrund</strong> um das Bild: einfarbig oder Bild (abdunkelbar) — standardmäßig das Raspy2DMD-Bild, durch ein eigenes ersetzbar",
+            "sec.hdmi.li_port": "<strong>HDMI-Anschluss</strong> beim Pi 4 und 5, die zwei haben; <strong>kein Bildschirm beim Start</strong>: Rückfall auf den DMD oder auf den Bildschirm warten",
+            "sec.hdmi.h4_boot": "Start und Linux-Konsole",
+            "sec.hdmi.p_console": "Das Kästchen <strong>Linux-Konsole ausblenden</strong> (standardmäßig aktiviert) entfernt Startmeldungen, Cursor und Anmeldeaufforderung: der Bildschirm zeigt nur Raspy2DMD. Es wirkt vollständig nach dem nächsten Neustart. Bei Bedarf bleibt eine Konsole über <code>Strg+Alt+F2</code> (mit Tastatur) oder SSH verfügbar.",
+            "sec.hdmi.p_splash": "Ein <strong>Startbild</strong> erscheint einige Sekunden nach dem Einschalten und bleibt, bis Raspy2DMD den Bildschirm übernimmt. Es lässt sich auf derselben Seite ändern (standardmäßig das Raspy2DMD-Bild).",
+            "sec.hdmi.h4_command": "Befehl hdmi",
+            "sec.hdmi.li_seconds": "<strong>Sekunden</strong>: Anzeigedauer des Testbilds, 1 bis 60 (Standard 10)",
+            "sec.hdmi.li_mire": "Das Testbild zeigt die Bildschirmränder, die Farben und das vom DMD-Bild belegte Rechteck: praktisch zum Einstellen der Ränder",
+            "sec.hdmi.li_nostop": "Unterbricht die laufende Anzeige nicht; ohne Wirkung, wenn der HDMI-Ausgang nicht aktiv ist",
+            "sec.hdmi.h4_conf": "Konfiguration über MQTT",
+            "sec.hdmi.p_conf": "Die Einstellungen stehen im Abschnitt <code>[HDMI]</code> der Konfigurationsdatei und werden mit <code>conf</code> geändert: <code>display_output</code> (dmd, hdmi, both), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.",
+            "sec.hdmi.li_screen": "Der Bildschirm muss beim Start des Pi angeschlossen sein, sonst fällt Raspy2DMD auf den DMD zurück (oder wartet, falls so gewählt)",
+            "sec.hdmi.li_sound": "Der Ton kann auf derselben Seite auf den HDMI-Bildschirm geleitet werden",
+            "sec.hdmi.li_video": "Videos: Befehl <code>vid</code> und Registerkarte Videos der Seite Verzeichnisse (Wiedergabe mit mpv, Hardware-Decodierung)",
+            "sec.recap.td_hdmi": "Testbild auf dem HDMI-Bildschirm",
+            "sec.rp1pio.title": "⚙️ Hardware - Raspberry Pi 5 (RP1 PIO)",
+            "cmd.rp1pio.title": "Den DMD über den PIO-Block des Pi 5 ansteuern",
+            "sec.rp1pio.p_desc": "Auf dem Raspberry Pi 5 kann die Bibliothek rpi-rgb-led-matrix die Panels über den <strong>PIO</strong>-Block des RP1-Chips statt über den Prozessor ansteuern (Option <code>--led-rp1-pio</code>): die CPU-Last wird minimal.",
+            "sec.rp1pio.p_how": "Aktivieren Sie <strong>Pi 5: DMD über den PIO-Block des RP1 ansteuern</strong> auf der Seite Hardware (nur auf einem Pi 5 sichtbar), oder senden Sie <code>conf|DMDRenderer|rp1_pio:1</code>. Die Matrix wird sofort neu erstellt, ohne Neustart.",
+            "sec.rp1pio.li_lib": "Erfordert eine Version von rpi-rgb-led-matrix mit Pi-5-Unterstützung; andernfalls wird die Option ignoriert und eine Warnung ins Protokoll geschrieben",
+            "sec.rp1pio.li_other": "Ohne Wirkung auf anderen Modellen",
             "sec.usb.title": "🔌 Konnektivität - USB-Gadget-Modus",
             "cmd.usb.title": "Direkte Netzwerkverbindung über USB-Kabel (OTG)",
             "sec.usb.h4_models": "Kompatible Modelle",
@@ -6176,6 +6511,60 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.audiovis.li_webui_save": "<strong>Guardado persistente</strong> en el archivo de configuración",
             "sec.rtc.title": "🔧 Hardware - Reloj RTC",
             "cmd.rtc.title": "Gestión del módulo RTC (Reloj en tiempo real)",
+            "nav.item.vid": "vid - Vídeo en la pantalla HDMI",
+            "sec.vid.title": "4️⃣ Imágenes y GIFs - vid",
+            "cmd.vid.title": "vid - Reproducir un vídeo en la pantalla HDMI",
+            "sec.vid.li_file": "<strong>archivo</strong>: nombre del archivo en /Medias/Videos (subcarpeta posible), o ruta completa que empieza por /",
+            "sec.vid.li_iter": "<strong>repeticiones</strong>: número de reproducciones (opcional, 1 por defecto)",
+            "sec.vid.li_hdmi": "Disponible solo con la salida «Pantalla HDMI» o «DMD + pantalla HDMI»: los paneles LED no pueden mostrar vídeos (en DMD + HDMI, el DMD queda en negro durante la reproducción)",
+            "sec.vid.li_formats": "Reproducción con mpv y decodificación por hardware (H.264 en Pi 3/4, HEVC en Pi 4/5); formato recomendado: MP4 H.264 hasta 1080p",
+            "sec.vid.li_sound": "El sonido sigue los ajustes de Raspy2DMD: salida (HDMI o jack), volumen, sonido activado o no",
+            "sec.vid.li_stop": "Cualquier nuevo comando de visualización detiene el vídeo; los vídeos .mp4 de las carpetas de puntuaciones, jugadas especiales o arranque también se reproducen",
+            "sec.recap.td_vid": "Vídeo en la pantalla HDMI",
+            "sec.hdmi.li_visuals": "Las imágenes de Raspy2DMD (arranque, avisos, actualización, ajustes) se muestran en la pantalla en su versión de alta resolución (carpetas …/HDMI de los medios), mientras el DMD reproduce la suya",
+            "sec.hdmi.li_materiel": "Con la salida «Pantalla HDMI» sola, la página Hardware atenúa los ajustes propios de los paneles LED; el tamaño del DMD sigue siendo ajustable: es el tamaño de la imagen mostrada",
+            "nav.item.hdmi": "Salida HDMI",
+            "nav.item.rp1pio": "Raspberry Pi 5 (RP1 PIO)",
+            "sec.hdmi.title": "📺 Hardware - Salida HDMI",
+            "cmd.hdmi.title": "Mostrar Raspy2DMD en una pantalla HDMI",
+            "sec.hdmi.badge_page": "Mosaico «Salida HDMI»",
+            "sec.hdmi.p_desc": "Raspy2DMD puede mostrar su contenido en una pantalla HDMI (televisor, monitor) en lugar del DMD, o <strong>al mismo tiempo</strong>. La imagen se calcula a la resolución del DMD y luego la amplía el procesador gráfico de la Pi: textos, GIF, reloj, meteo, juegos y attract mode se ven igual, sin ajuste especial.",
+            "sec.hdmi.p_config": "Todo se ajusta en el mosaico <strong>Salida HDMI</strong> de la página de inicio (sección Configuración). Los ajustes de imagen se aplican de inmediato; cambiar la salida reinicia Raspy2DMD (unos segundos).",
+            "sec.hdmi.h4_outputs": "Salidas disponibles",
+            "sec.hdmi.col_output": "Salida",
+            "sec.hdmi.col_desc": "Descripción",
+            "sec.hdmi.col_models": "Modelos",
+            "sec.hdmi.td_dmd": "Paneles LED (o Raspberry Pico)",
+            "sec.hdmi.td_hdmi": "Solo pantalla HDMI, sin panel LED",
+            "sec.hdmi.td_both": "Ambos a la vez, imagen idéntica",
+            "sec.hdmi.td_all": "Todos",
+            "sec.hdmi.td_multi": "Pi de varios núcleos: Zero 2 W, 3, 4, 5 (no Zero / Zero W)",
+            "sec.hdmi.h4_settings": "Ajustes de imagen",
+            "sec.hdmi.li_scaling": "<strong>Escalado</strong>: píxel perfecto (múltiplo entero, bandas negras), ajustado (lo más grande posible sin deformar) o estirado (pantalla completa)",
+            "sec.hdmi.li_style": "<strong>Estilo de renderizado</strong>: píxeles nítidos, suavizado o puntos LED (píxeles redondos separados, aspecto de un DMD real)",
+            "sec.hdmi.li_resolution": "<strong>Resolución</strong>: la preferida por la pantalla, o una resolución impuesta entre las que acepta (leídas de sus datos EDID)",
+            "sec.hdmi.li_rotation": "<strong>Rotación</strong> (0, 90, 180, 270°), <strong>márgenes</strong> (para televisores que recortan los bordes) y <strong>brillo</strong>",
+            "sec.hdmi.li_background": "<strong>Fondo</strong> alrededor de la imagen: color liso o imagen (oscurecible) — la imagen Raspy2DMD por defecto, sustituible por la suya",
+            "sec.hdmi.li_port": "<strong>Puerto HDMI</strong> en las Pi 4 y 5, que tienen dos; <strong>sin pantalla al arrancar</strong>: volver al DMD o esperar la pantalla",
+            "sec.hdmi.h4_boot": "Arranque y consola Linux",
+            "sec.hdmi.p_console": "La casilla <strong>Ocultar la consola Linux</strong> (marcada por defecto) suprime los mensajes de arranque, el cursor y el inicio de sesión: la pantalla solo muestra Raspy2DMD. Surte pleno efecto en el próximo reinicio. Si es necesario, sigue habiendo una consola con <code>Ctrl+Alt+F2</code> (con un teclado) o por SSH.",
+            "sec.hdmi.p_splash": "Una <strong>imagen de arranque</strong> aparece unos segundos después del encendido y permanece hasta que Raspy2DMD toma la pantalla. Se cambia desde la misma página (imagen Raspy2DMD por defecto).",
+            "sec.hdmi.h4_command": "Comando hdmi",
+            "sec.hdmi.li_seconds": "<strong>segundos</strong>: duración del patrón de prueba, de 1 a 60 (10 por defecto)",
+            "sec.hdmi.li_mire": "El patrón muestra los bordes de la pantalla, los colores y el rectángulo que ocupa la imagen del DMD: útil para ajustar los márgenes",
+            "sec.hdmi.li_nostop": "No interrumpe la visualización en curso; sin efecto si la salida HDMI no está activa",
+            "sec.hdmi.h4_conf": "Configuración por MQTT",
+            "sec.hdmi.p_conf": "Los ajustes están en la sección <code>[HDMI]</code> del archivo de configuración y se modifican con <code>conf</code>: <code>display_output</code> (dmd, hdmi, both), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.",
+            "sec.hdmi.li_screen": "La pantalla debe estar conectada al arrancar la Pi; si no, Raspy2DMD vuelve al DMD (o espera la pantalla si se ha elegido)",
+            "sec.hdmi.li_sound": "El sonido puede enviarse a la pantalla HDMI desde la misma página",
+            "sec.hdmi.li_video": "Vídeos: comando <code>vid</code> y pestaña Vídeos de la página Directorios (reproducción con mpv, decodificación por hardware)",
+            "sec.recap.td_hdmi": "Patrón de prueba en la pantalla HDMI",
+            "sec.rp1pio.title": "⚙️ Hardware - Raspberry Pi 5 (RP1 PIO)",
+            "cmd.rp1pio.title": "Controlar el DMD con el bloque PIO de la Pi 5",
+            "sec.rp1pio.p_desc": "En la Raspberry Pi 5, la biblioteca rpi-rgb-led-matrix puede controlar los paneles con el bloque <strong>PIO</strong> del chip RP1 en lugar del procesador (opción <code>--led-rp1-pio</code>): la carga de CPU se vuelve mínima.",
+            "sec.rp1pio.p_how": "Marque <strong>Pi 5: controlar el DMD con el bloque PIO del RP1</strong> en la página Hardware (solo visible en una Pi 5), o envíe <code>conf|DMDRenderer|rp1_pio:1</code>. La matriz se recrea al instante, sin reiniciar.",
+            "sec.rp1pio.li_lib": "Requiere una versión de rpi-rgb-led-matrix con soporte para la Pi 5; si no, la opción se ignora y se escribe un aviso en el registro",
+            "sec.rp1pio.li_other": "Sin efecto en los demás modelos",
             "sec.usb.title": "🔌 Conectividad - Modo USB Gadget",
             "cmd.usb.title": "Conexión de red directa por cable USB (OTG)",
             "sec.usb.h4_models": "Modelos compatibles",
@@ -6808,6 +7197,60 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.audiovis.li_webui_save": "<strong>Salvataggio persistente</strong> nel file di configurazione",
             "sec.rtc.title": "🔧 Hardware - Orologio RTC",
             "cmd.rtc.title": "Gestione del modulo RTC (Orologio in tempo reale)",
+            "nav.item.vid": "vid - Video sullo schermo HDMI",
+            "sec.vid.title": "4️⃣ Immagini e GIF - vid",
+            "cmd.vid.title": "vid - Riprodurre un video sullo schermo HDMI",
+            "sec.vid.li_file": "<strong>file</strong>: nome del file in /Medias/Videos (sottocartella possibile), oppure percorso completo che inizia con /",
+            "sec.vid.li_iter": "<strong>ripetizioni</strong>: numero di riproduzioni (facoltativo, 1 predefinito)",
+            "sec.vid.li_hdmi": "Disponibile solo con l'uscita «Schermo HDMI» o «DMD + schermo HDMI»: i pannelli LED non possono mostrare video (in DMD + HDMI, il DMD resta nero durante la riproduzione)",
+            "sec.vid.li_formats": "Riproduzione con mpv e decodifica hardware (H.264 su Pi 3/4, HEVC su Pi 4/5); formato consigliato: MP4 H.264 fino a 1080p",
+            "sec.vid.li_sound": "L'audio segue le impostazioni di Raspy2DMD: uscita (HDMI o jack), volume, audio attivo o no",
+            "sec.vid.li_stop": "Qualsiasi nuovo comando di visualizzazione ferma il video; anche i video .mp4 nelle cartelle dei punteggi, dei colpi speciali o di avvio vengono riprodotti",
+            "sec.recap.td_vid": "Video sullo schermo HDMI",
+            "sec.hdmi.li_visuals": "Le grafiche di Raspy2DMD (avvio, avvisi, aggiornamento, impostazioni) appaiono sullo schermo nella versione ad alta risoluzione (cartelle …/HDMI dei media), mentre il DMD mostra la propria",
+            "sec.hdmi.li_materiel": "Con la sola uscita «Schermo HDMI», la pagina Hardware disattiva le impostazioni dei pannelli LED; la dimensione del DMD resta regolabile: è la dimensione dell'immagine mostrata sullo schermo",
+            "nav.item.hdmi": "Uscita HDMI",
+            "nav.item.rp1pio": "Raspberry Pi 5 (RP1 PIO)",
+            "sec.hdmi.title": "📺 Hardware - Uscita HDMI",
+            "cmd.hdmi.title": "Mostrare Raspy2DMD su uno schermo HDMI",
+            "sec.hdmi.badge_page": "Riquadro «Uscita HDMI»",
+            "sec.hdmi.p_desc": "Raspy2DMD può mostrare i suoi contenuti su uno schermo HDMI (televisore, monitor) al posto del DMD, oppure <strong>contemporaneamente</strong>. L'immagine è calcolata alla risoluzione del DMD e poi ingrandita dal processore grafico del Pi: testi, GIF, orologio, meteo, giochi e attract mode appaiono identici, senza impostazioni particolari.",
+            "sec.hdmi.p_config": "Tutto si regola nel riquadro <strong>Uscita HDMI</strong> della pagina iniziale (sezione Configurazione). Le impostazioni dell'immagine si applicano subito; cambiare l'uscita riavvia Raspy2DMD (qualche secondo).",
+            "sec.hdmi.h4_outputs": "Uscite disponibili",
+            "sec.hdmi.col_output": "Uscita",
+            "sec.hdmi.col_desc": "Descrizione",
+            "sec.hdmi.col_models": "Modelli",
+            "sec.hdmi.td_dmd": "Pannelli LED (o Raspberry Pico)",
+            "sec.hdmi.td_hdmi": "Solo schermo HDMI, senza pannello LED",
+            "sec.hdmi.td_both": "Entrambi contemporaneamente, immagine identica",
+            "sec.hdmi.td_all": "Tutti",
+            "sec.hdmi.td_multi": "Pi multi-core: Zero 2 W, 3, 4, 5 (non Zero / Zero W)",
+            "sec.hdmi.h4_settings": "Impostazioni dell'immagine",
+            "sec.hdmi.li_scaling": "<strong>Ridimensionamento</strong>: pixel perfetto (multiplo intero, bande nere), adattato (il più grande possibile senza distorsione) o allungato (schermo intero)",
+            "sec.hdmi.li_style": "<strong>Stile di resa</strong>: pixel nitidi, levigato o punti LED (pixel rotondi separati, aspetto di un vero DMD)",
+            "sec.hdmi.li_resolution": "<strong>Risoluzione</strong>: quella preferita dallo schermo, oppure una risoluzione imposta tra quelle che accetta (lette dai suoi dati EDID)",
+            "sec.hdmi.li_rotation": "<strong>Rotazione</strong> (0, 90, 180, 270°), <strong>margini</strong> (per i televisori che tagliano i bordi) e <strong>luminosità</strong>",
+            "sec.hdmi.li_background": "<strong>Sfondo</strong> intorno all'immagine: tinta unita o immagine (oscurabile) — l'immagine Raspy2DMD predefinita, sostituibile con la propria",
+            "sec.hdmi.li_port": "<strong>Porta HDMI</strong> sui Pi 4 e 5, che ne hanno due; <strong>nessuno schermo all'avvio</strong>: ritorno al DMD o attesa dello schermo",
+            "sec.hdmi.h4_boot": "Avvio e console Linux",
+            "sec.hdmi.p_console": "La casella <strong>Nascondi la console Linux</strong> (selezionata per impostazione predefinita) elimina i messaggi di avvio, il cursore e la richiesta di accesso: lo schermo mostra solo Raspy2DMD. Ha pieno effetto al riavvio successivo. Se necessario, una console resta disponibile con <code>Ctrl+Alt+F2</code> (con una tastiera) o tramite SSH.",
+            "sec.hdmi.p_splash": "Un'<strong>immagine di avvio</strong> compare qualche secondo dopo l'accensione e resta visibile finché Raspy2DMD non prende lo schermo. Si cambia dalla stessa pagina (immagine Raspy2DMD predefinita).",
+            "sec.hdmi.h4_command": "Comando hdmi",
+            "sec.hdmi.li_seconds": "<strong>secondi</strong>: durata della schermata di prova, da 1 a 60 (10 predefinito)",
+            "sec.hdmi.li_mire": "La schermata mostra i bordi dello schermo, i colori e il rettangolo occupato dall'immagine del DMD: utile per regolare i margini",
+            "sec.hdmi.li_nostop": "Non interrompe la visualizzazione in corso; nessun effetto se l'uscita HDMI non è attiva",
+            "sec.hdmi.h4_conf": "Configurazione tramite MQTT",
+            "sec.hdmi.p_conf": "Le impostazioni sono nella sezione <code>[HDMI]</code> del file di configurazione e si modificano con <code>conf</code>: <code>display_output</code> (dmd, hdmi, both), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.",
+            "sec.hdmi.li_screen": "Lo schermo deve essere collegato all'avvio del Pi, altrimenti Raspy2DMD torna al DMD (o attende lo schermo se scelto)",
+            "sec.hdmi.li_sound": "L'audio può essere inviato allo schermo HDMI dalla stessa pagina",
+            "sec.hdmi.li_video": "Video: comando <code>vid</code> e scheda Video della pagina Cartelle (riproduzione con mpv, decodifica hardware)",
+            "sec.recap.td_hdmi": "Schermata di prova sullo schermo HDMI",
+            "sec.rp1pio.title": "⚙️ Hardware - Raspberry Pi 5 (RP1 PIO)",
+            "cmd.rp1pio.title": "Pilotare il DMD con il blocco PIO del Pi 5",
+            "sec.rp1pio.p_desc": "Sul Raspberry Pi 5, la libreria rpi-rgb-led-matrix può pilotare i pannelli con il blocco <strong>PIO</strong> del chip RP1 invece del processore (opzione <code>--led-rp1-pio</code>): il carico della CPU diventa minimo.",
+            "sec.rp1pio.p_how": "Selezionare <strong>Pi 5: pilotare il DMD con il blocco PIO del RP1</strong> nella pagina Hardware (visibile solo su un Pi 5), oppure inviare <code>conf|DMDRenderer|rp1_pio:1</code>. La matrice viene ricreata subito, senza riavvio.",
+            "sec.rp1pio.li_lib": "Richiede una versione di rpi-rgb-led-matrix con supporto per il Pi 5; altrimenti l'opzione viene ignorata e un avviso viene scritto nel registro",
+            "sec.rp1pio.li_other": "Nessun effetto sugli altri modelli",
             "sec.usb.title": "🔌 Connettività - Modalità USB Gadget",
             "cmd.usb.title": "Connessione di rete diretta via cavo USB (OTG)",
             "sec.usb.h4_models": "Modelli compatibili",
