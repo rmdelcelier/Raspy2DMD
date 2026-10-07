@@ -165,6 +165,27 @@ systemctl daemon-reload 2>/dev/null || true
 log_info "Services arretes"
 
 # =============================================================================
+# SORTIE HDMI : CONSOLE LINUX ET IMAGE DE DEMARRAGE
+# =============================================================================
+# A faire AVANT la suppression de ${INSTALL_DIR} : le script qui retablit la console
+# s'y trouve. Sans cela, l'ecran HDMI resterait sans messages de demarrage ni invite
+# de connexion (cmdline.txt, config.txt et getty@tty1 modifies par Raspy2DMD).
+pkill -f "hdmi_output.py" 2>/dev/null || true
+if [ -f "${INSTALL_DIR}/system/hdmi_console.sh" ]; then
+    if bash "${INSTALL_DIR}/system/hdmi_console.sh" show 2>/dev/null; then
+        log_info "Console Linux retablie sur l'ecran HDMI (effet complet au redemarrage)"
+    else
+        log_warn "Console Linux non retablie : verifiez console=tty1 dans cmdline.txt et 'systemctl enable getty@tty1'"
+    fi
+fi
+rm -f /boot/firmware/cmdline.txt.r2d-orig /boot/cmdline.txt.r2d-orig 2>/dev/null || true
+
+# Image de demarrage : le service pointerait sur un script supprime
+systemctl disable raspy2dmd-splash.service 2>/dev/null || true
+rm -f /etc/systemd/system/raspy2dmd-splash.service 2>/dev/null || true
+systemctl daemon-reload 2>/dev/null || true
+
+# =============================================================================
 # SUPPRESSION DU DOSSIER APPLICATION
 # =============================================================================
 if [ -d "$INSTALL_DIR" ]; then
