@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="images/Raspy2DMD.png" alt="Raspy2DMD" width="100%">
+</p>
+
 # Raspy2DMD
 **Système d'affichage DMD (Dot Matrix Display) pour Raspberry Pi en lien avec RaspyDarts, MQTT, Twitch, Recalbox, Domotique, etc**
 
