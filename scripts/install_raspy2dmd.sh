@@ -21,6 +21,10 @@
 #   Samba inchanges (Samba reste actif). Configuration : sortie Pico seul, liaison RaspyDarts
 #   sur cette machine, pas de bouton GPIO, son coupe (reglable dans l'interface web).
 #
+# Sans terminal (installation lancee par un autre programme, RaspyDarts) : ajouter --sans-question
+#   curl -sSL .../install_raspy2dmd.sh | sudo bash -s -- --pico-seul --sans-question
+#   Aucune question : installation confirmee, pas de redemarrage a la fin.
+#
 # IMPORTANT: Les fins de ligne doivent etre LF (Unix), pas CRLF (Windows)
 ##############################################################################
 
@@ -52,6 +56,9 @@ INSTALL_DIR="/Raspy2DMD"
 MEDIAS_DIR="/Medias"
 # Mode « Pico seul » : option --pico-seul (ou variable RASPY2DMD_PICO_SEUL=1)
 PICO_SEUL="${RASPY2DMD_PICO_SEUL:-0}"
+# Installation sans terminal (lancée par un autre programme, RaspyDarts) : option --sans-question
+# (ou RASPY2DMD_SANS_QUESTION=1) : aucune lecture de /dev/tty, installation confirmée, pas de redémarrage
+SANS_QUESTION="${RASPY2DMD_SANS_QUESTION:-0}"
 CONFIG_FILE="${MEDIAS_DIR}/Raspy2DMD.cfg"
 # Utiliser la partition principale / au lieu de /tmp (tmpfs en RAM trop petit)
 TMP_DIR="/raspy2dmd_install_tmp"
@@ -143,7 +150,8 @@ show_progress() {
 # BANNIERE
 # =============================================================================
 show_banner() {
-    clear
+    # Sans terminal (TERM absent), clear échoue : avec set -e, l'installation s'arrêtait là
+    clear 2>/dev/null || true
     echo -e "${CYAN}"
     cat << "BANNER"
 ╔════════════════════════════════════════════════════════════════════════════════════════╗
@@ -2231,6 +2239,13 @@ show_summary() {
     echo -e "${YELLOW}${BOLD}IMPORTANT :${NC} Un redemarrage est recommande pour finaliser l'installation"
     echo ""
 
+    # Sans question (lancé par RaspyDarts) : pas de redémarrage, l'autre programme
+    # démarre Raspy2DMD lui-même (ServerRaspy2DMD.sh et ServerRaspy2DMDWeb.sh)
+    if [ "$SANS_QUESTION" = "1" ]; then
+        log_info "Installation sans question : pas de redemarrage (Raspy2DMD demarre au prochain demarrage, ou par son watchdog)"
+        return 0
+    fi
+
     # Desactiver set -e et le trap ERR pour la section interactive
     # (le vidage du buffer et le read ne doivent pas declencher error_handler)
     set +e
@@ -2283,6 +2298,11 @@ confirm_installation() {
     echo -e "${CYAN}Temps d'installation estime : 15-45 minutes selon le modele de Pi${NC}"
     echo ""
 
+    if [ "$SANS_QUESTION" = "1" ]; then
+        log_info "Installation sans question (--sans-question) : confirmee"
+        return 0
+    fi
+
     # Utiliser /dev/tty pour lire l'entree utilisateur meme si le script est pipe
     read -p "Continuer l'installation ? (o/N) " -n 1 -r < /dev/tty
     echo
@@ -2299,8 +2319,11 @@ main() {
     for arg in "$@"; do
         case "$arg" in
             --pico-seul|--pico-only) PICO_SEUL=1 ;;
+            --sans-question|--no-prompt) SANS_QUESTION=1 ;;
         esac
     done
+    # Aucune question d'apt/debconf non plus : il n'y a pas de terminal pour y répondre
+    [ "$SANS_QUESTION" = "1" ] && export DEBIAN_FRONTEND=noninteractive
 
     show_banner
     confirm_installation
