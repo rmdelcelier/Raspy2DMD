@@ -13,6 +13,14 @@
 # Ou :
 #   wget -qO- https://raw.githubusercontent.com/USERNAME/raspy2dmd/main/scripts/install_raspy2dmd.sh | sudo bash
 #
+# Mode « Pico seul » (Raspy2DMD a cote d'un autre programme, RaspyDarts par exemple) :
+#   curl -sSL .../install_raspy2dmd.sh | sudo bash -s -- --pico-seul
+#   Les panneaux sont pilotes par un Raspberry Pico (USB) : aucun GPIO du Raspberry n'est
+#   utilise. Le systeme est laisse tel quel : pas de mise a niveau complete, pas de dnsmasq,
+#   nom de la machine, cmdline.txt, USB Gadget, migration Wi-Fi, ecran HDMI, console et
+#   Samba inchanges (Samba reste actif). Configuration : sortie Pico seul, liaison RaspyDarts
+#   sur cette machine, pas de bouton GPIO, son coupe (reglable dans l'interface web).
+#
 # IMPORTANT: Les fins de ligne doivent etre LF (Unix), pas CRLF (Windows)
 ##############################################################################
 
@@ -42,6 +50,8 @@ GH_BOT_PASSPHRASE_PARTS=("raspy" "2dmd" "-feedback" "-bot" "-2024")
 # =============================================================================
 INSTALL_DIR="/Raspy2DMD"
 MEDIAS_DIR="/Medias"
+# Mode « Pico seul » : option --pico-seul (ou variable RASPY2DMD_PICO_SEUL=1)
+PICO_SEUL="${RASPY2DMD_PICO_SEUL:-0}"
 CONFIG_FILE="${MEDIAS_DIR}/Raspy2DMD.cfg"
 # Utiliser la partition principale / au lieu de /tmp (tmpfs en RAM trop petit)
 TMP_DIR="/raspy2dmd_install_tmp"
@@ -367,8 +377,14 @@ step_update_system() {
     log_substep "Mise a jour des paquets (apt update)..."
     apt-get update -qq
 
-    log_substep "Mise a niveau des paquets (apt upgrade)..."
-    DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -qq
+    if [ "$PICO_SEUL" = "1" ]; then
+        # Machine partagee (RaspyDarts...) : pas de mise a niveau du systeme, elle pourrait
+        # changer le noyau ou le firmware dont l'autre programme depend
+        log_info "Mode Pico seul : pas de mise a niveau des paquets (apt upgrade)"
+    else
+        log_substep "Mise a niveau des paquets (apt upgrade)..."
+        DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -qq
+    fi
 
     log_info "Systeme mis a jour"
 }
@@ -420,10 +436,18 @@ step_install_system_deps() {
         mpv
     )
 
+    if [ "$PICO_SEUL" = "1" ]; then
+        # dnsmasq ne sert qu'au mode USB Gadget (non configure en Pico seul) ; installe, il
+        # demarre un serveur DNS sur la machine partagee
+        PACKAGES=("${PACKAGES[@]/dnsmasq}")
+        log_info "Mode Pico seul : dnsmasq non installe"
+    fi
+
     TOTAL_PACKAGES=${#PACKAGES[@]}
     CURRENT_PKG=0
 
     for pkg in "${PACKAGES[@]}"; do
+        [ -z "$pkg" ] && continue
         CURRENT_PKG=$((CURRENT_PKG + 1))
         show_progress $CURRENT_PKG $TOTAL_PACKAGES
         apt-get install -y -qq "$pkg" >> "$LOG_FILE" 2>&1 || log_warn "Package $pkg non installe"
@@ -1294,6 +1318,33 @@ pico_reconnect_timeout = 5
 CONFIGEOF
     fi
 
+    if [ "$PICO_SEUL" = "1" ]; then
+        # Sortie Pico seul (aucune RGBMatrix, aucun GPIO), liaison RaspyDarts sur cette machine
+        # (localhost : un client MQTT abonne a raspydarts/dmd), pas de bouton GPIO, son coupe
+        log_substep "Configuration du mode Pico seul..."
+        python3 - "$CONFIG_FILE" << 'PICOEOF'
+import configparser, sys
+path = sys.argv[1]
+config = configparser.RawConfigParser()
+config.read(path, encoding='utf-8')
+values = {
+    'HDMI': {'display_output': 'pico', 'hide_console': '0'},
+    'Pico': {'pico_auto_detect': '1', 'pico_display_enabled': '1'},
+    'Running': {'raspydarts_enabled': '1', 'raspydarts': 'localhost', 'raspydartscanal': 'raspydarts/dmd'},
+    'DMDRenderer': {'interrupteur': '0'},
+    'Sound': {'volume': '0'},
+}
+for section, keys in values.items():
+    if not config.has_section(section):
+        config.add_section(section)
+    for key, value in keys.items():
+        config.set(section, key, value)
+with open(path, 'w', encoding='utf-8') as file:
+    config.write(file)
+PICOEOF
+        log_info "Mode Pico seul : sortie Pico, RaspyDarts sur localhost, pas de bouton GPIO, son coupe"
+    fi
+
     # Permissions
     log_substep "Configuration des permissions du dossier Medias..."
     chmod -R 777 "$MEDIAS_DIR"
@@ -1582,13 +1633,19 @@ AVAHIEOF
     systemctl restart avahi-daemon 2>/dev/null || true
     systemctl enable avahi-daemon 2>/dev/null || true
 
-    # Configuration du hostname
+    # Configuration du hostname (pas en Pico seul : la machine garde son nom)
     log_substep "Configuration du hostname..."
     CURRENT_HOSTNAME=$(hostname)
-    if [ "$CURRENT_HOSTNAME" != "raspy2dmd" ]; then
+    if [ "$PICO_SEUL" = "1" ]; then
+        log_info "Mode Pico seul : nom de la machine conserve ($CURRENT_HOSTNAME)"
+    elif [ "$CURRENT_HOSTNAME" != "raspy2dmd" ]; then
         hostnamectl set-hostname raspy2dmd 2>/dev/null || true
         sed -i "s/127.0.1.1.*/127.0.1.1\traspy2dmd.local\traspy2dmd/g" /etc/hosts 2>/dev/null || true
     fi
+
+    # Ce qui existait avant (Pico seul : la desinstallation ne retire que ce qu'on a cree)
+    RC_LOCAL_EXISTAIT=0; [ -f /etc/rc.local ] && RC_LOCAL_EXISTAIT=1
+    RC_SERVICE_EXISTAIT=0; [ -f /etc/systemd/system/rc-local.service ] && RC_SERVICE_EXISTAIT=1
 
     # Copie du rc.local
     if [ -f "${INSTALL_DIR}/system/rc.local" ]; then
@@ -1641,7 +1698,9 @@ RCLOCALEOF
 
     # Service de migration automatique wpa_supplicant.conf → NetworkManager
     log_substep "Installation du service migrate_wpa..."
-    if [ -f "${INSTALL_DIR}/system/migrate_wpa.service" ]; then
+    if [ "$PICO_SEUL" = "1" ]; then
+        log_info "Mode Pico seul : migration wpa_supplicant non installee (reseau laisse tel quel)"
+    elif [ -f "${INSTALL_DIR}/system/migrate_wpa.service" ]; then
         cp "${INSTALL_DIR}/system/migrate_wpa.service" /etc/systemd/system/
         systemctl daemon-reload 2>/dev/null || true
         systemctl enable migrate_wpa.service 2>/dev/null || true
@@ -1680,7 +1739,9 @@ RCLOCALEOF
 
     # Configuration du mode USB Gadget (OTG)
     log_substep "Configuration du mode USB Gadget (OTG)..."
-    if [ -f "${INSTALL_DIR}/system/usb_gadget_setup.sh" ]; then
+    if [ "$PICO_SEUL" = "1" ]; then
+        log_info "Mode Pico seul : USB Gadget non configure (config.txt et cmdline.txt inchanges)"
+    elif [ -f "${INSTALL_DIR}/system/usb_gadget_setup.sh" ]; then
         # Rendre les scripts executables
         chmod +x "${INSTALL_DIR}/system/usb_gadget_setup.sh"
         chmod +x "${INSTALL_DIR}/system/usb_gadget_connected.sh" 2>/dev/null || true
@@ -1892,20 +1953,29 @@ SAMBAEOF
             log_info "Partages Samba deja configures"
         fi
 
-        # Forcer l'authentification (pas d'acces invité) dans la section [global]
-        grep -q 'map to guest' /etc/samba/smb.conf || sed -i '/^\[global\]/a map to guest = never' /etc/samba/smb.conf
-        log_info "Samba : map to guest = never configure"
+        # Forcer l'authentification (pas d'acces invité) dans la section [global] ; pas en
+        # Pico seul : les partages de l'autre programme (RaspyDarts) sont en acces invite
+        if [ "$PICO_SEUL" != "1" ]; then
+            grep -q 'map to guest' /etc/samba/smb.conf || sed -i '/^\[global\]/a map to guest = never' /etc/samba/smb.conf
+            log_info "Samba : map to guest = never configure"
+        fi
 
         # Creer l'utilisateur Samba raspy2dmd (base de mots de passe separee de Linux)
         # printf garantit le \n meme sous dash/sh (contrairement a echo -e)
         printf 'raspy2dmd\nraspy2dmd\n' | smbpasswd -a -s raspy2dmd 2>/dev/null || true
         log_info "Utilisateur Samba raspy2dmd cree (login: raspy2dmd / mdp: raspy2dmd)"
 
-        # Samba configure mais desactive par defaut (l'utilisateur l'active via l'interface web)
-        systemctl disable smbd.service 2>/dev/null || true
-        systemctl disable nmbd.service 2>/dev/null || true
-        systemctl stop smbd.service 2>/dev/null || true
-        systemctl stop nmbd.service 2>/dev/null || true
+        # Samba configure mais desactive par defaut (l'utilisateur l'active via l'interface web) ;
+        # en Pico seul, Samba reste actif : l'autre programme (RaspyDarts) partage ses dossiers
+        if [ "$PICO_SEUL" = "1" ]; then
+            systemctl reload smbd.service 2>/dev/null || true
+            log_info "Mode Pico seul : Samba laisse actif (partages Raspy2DMD ajoutes)"
+        else
+            systemctl disable smbd.service 2>/dev/null || true
+            systemctl disable nmbd.service 2>/dev/null || true
+            systemctl stop smbd.service 2>/dev/null || true
+            systemctl stop nmbd.service 2>/dev/null || true
+        fi
     fi
 
     # Optimisation affichage LED Matrix : isoler le CPU 3 pour les mises a jour
@@ -1918,7 +1988,10 @@ SAMBAEOF
         CMDLINE_FILE="/boot/cmdline.txt"
     fi
 
-    if [ -f "$CMDLINE_FILE" ]; then
+    if [ "$PICO_SEUL" = "1" ]; then
+        # Le Pico affiche seul : rien a isoler, et le coeur reste a l'autre programme
+        log_info "Mode Pico seul : cmdline.txt inchange (pas d'isolcpus)"
+    elif [ -f "$CMDLINE_FILE" ]; then
         # Verifier si isolcpus=3 est deja present
         if ! grep -q "isolcpus=3" "$CMDLINE_FILE"; then
             log_substep "Ajout de isolcpus=3 dans $CMDLINE_FILE..."
@@ -1955,6 +2028,11 @@ SAMBAEOF
     # Sortie HDMI : image de demarrage et console Linux masquee (reglables dans la page /hdmi)
     log_substep "Configuration de l'ecran HDMI (image de demarrage, console Linux)..."
     mkdir -p /Medias/HDMI
+    if [ "$PICO_SEUL" = "1" ]; then
+        # L'ecran appartient a l'autre programme : ni image de demarrage, ni console masquee
+        chown -R raspy2dmd:raspy2dmd /Medias/HDMI 2>/dev/null || true
+        log_info "Mode Pico seul : ecran HDMI et console Linux laisses tels quels"
+    else
     if [ -f "${INSTALL_DIR}/system/raspy2dmd-splash.service" ]; then
         cp "${INSTALL_DIR}/system/raspy2dmd-splash.service" /etc/systemd/system/
         systemctl daemon-reload 2>/dev/null || true
@@ -1965,12 +2043,22 @@ SAMBAEOF
     PYTHONPATH="${INSTALL_DIR}" python3 "${INSTALL_DIR}/bin/display/hdmi_splash.py" --build >> "$LOG_FILE" 2>&1 || true
     chown -R raspy2dmd:raspy2dmd /Medias/HDMI 2>/dev/null || true
     log_info "Ecran HDMI : image de demarrage installee, console Linux masquee"
+    fi
 
     # Passe finale : s'assurer que TOUS les scripts .sh sont executables
     # (certaines etapes precedentes ont pu creer ou modifier des fichiers)
     log_substep "Verification finale des permissions des scripts..."
     find "$INSTALL_DIR" -type f -name "*.sh" -exec chmod +x {} + 2>/dev/null
     chmod +x /etc/rc.local 2>/dev/null || true
+
+    # Pico seul : ce que l'installation a cree, pour que la desinstallation ne retire que
+    # cela (et ne retablisse pas une console qu'elle n'a jamais masquee)
+    if [ "$PICO_SEUL" = "1" ]; then
+        {
+            echo "rc_local_cree=$((1 - RC_LOCAL_EXISTAIT))"
+            echo "rc_service_cree=$((1 - RC_SERVICE_EXISTAIT))"
+        } > "${INSTALL_DIR}/.pico_seul"
+    fi
 
     log_info "Configuration finale terminee"
 }
@@ -2187,6 +2275,11 @@ confirm_installation() {
     echo "  - Configurer les bases de donnees MariaDB"
     echo "  - Configurer le demarrage automatique"
     echo ""
+    if [ "$PICO_SEUL" = "1" ]; then
+        echo -e "${YELLOW}${BOLD}Mode Pico seul${NC} : panneaux pilotes par le Raspberry Pico (USB), aucun GPIO utilise ;"
+        echo "  pas de mise a niveau du systeme ; nom, cmdline.txt, HDMI, console, reseau et Samba inchanges."
+        echo ""
+    fi
     echo -e "${CYAN}Temps d'installation estime : 15-45 minutes selon le modele de Pi${NC}"
     echo ""
 
@@ -2203,6 +2296,12 @@ confirm_installation() {
 # FONCTION PRINCIPALE
 # =============================================================================
 main() {
+    for arg in "$@"; do
+        case "$arg" in
+            --pico-seul|--pico-only) PICO_SEUL=1 ;;
+        esac
+    done
+
     show_banner
     confirm_installation
 

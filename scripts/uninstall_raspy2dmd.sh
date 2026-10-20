@@ -171,7 +171,17 @@ log_info "Services arretes"
 # s'y trouve. Sans cela, l'ecran HDMI resterait sans messages de demarrage ni invite
 # de connexion (cmdline.txt, config.txt et getty@tty1 modifies par Raspy2DMD).
 pkill -f "hdmi_output.py" 2>/dev/null || true
-if [ -f "${INSTALL_DIR}/system/hdmi_console.sh" ]; then
+# Installation « Pico seul » (--pico-seul) : console, cmdline.txt et ecran jamais modifies,
+# rc.local et son service retires seulement s'ils ont ete crees par l'installation
+PICO_SEUL_INSTALL=0; RC_LOCAL_CREE=0; RC_SERVICE_CREE=0
+if [ -f "${INSTALL_DIR}/.pico_seul" ]; then
+    PICO_SEUL_INSTALL=1
+    grep -q '^rc_local_cree=1' "${INSTALL_DIR}/.pico_seul" && RC_LOCAL_CREE=1
+    grep -q '^rc_service_cree=1' "${INSTALL_DIR}/.pico_seul" && RC_SERVICE_CREE=1
+fi
+if [ "$PICO_SEUL_INSTALL" = "1" ]; then
+    log_info "Installation Pico seul : console Linux et cmdline.txt laisses tels quels"
+elif [ -f "${INSTALL_DIR}/system/hdmi_console.sh" ]; then
     if bash "${INSTALL_DIR}/system/hdmi_console.sh" show 2>/dev/null; then
         log_info "Console Linux retablie sur l'ecran HDMI (effet complet au redemarrage)"
     else
@@ -243,6 +253,17 @@ systemctl restart avahi-daemon 2>/dev/null || true
 if [ -f "/etc/rc.local.backup" ]; then
     mv /etc/rc.local.backup /etc/rc.local
     log_info "rc.local original restaure"
+fi
+# Pico seul : rc.local et rc-local.service crees par l'installation (il n'y en avait pas)
+if [ "$RC_LOCAL_CREE" = "1" ]; then
+    rm -f /etc/rc.local 2>/dev/null || true
+    log_info "rc.local cree par l'installation supprime"
+fi
+if [ "$RC_SERVICE_CREE" = "1" ]; then
+    systemctl disable rc-local.service 2>/dev/null || true
+    rm -f /etc/systemd/system/rc-local.service 2>/dev/null || true
+    systemctl daemon-reload 2>/dev/null || true
+    log_info "rc-local.service cree par l'installation supprime"
 fi
 
 # Suppression des fichiers temporaires

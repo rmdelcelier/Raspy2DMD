@@ -818,6 +818,7 @@
             <div class="nav-items">
                 <div class="nav-item" onclick="showSection('rtc')" data-i18n="nav.item.rtc">Module RTC</div>
                 <div class="nav-item" onclick="showSection('hdmi')" data-i18n="nav.item.hdmi">Sortie HDMI</div>
+                <div class="nav-item" onclick="showSection('picoseul')" data-i18n="nav.item.picoseul">Raspberry Pico seul</div>
                 <div class="nav-item" onclick="showSection('rp1pio')" data-i18n="nav.item.rp1pio">Raspberry Pi 5 (RP1 PIO)</div>
             </div>
         </div>
@@ -3379,7 +3380,7 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "hdmi|mire|15"<br>
 
                 <div class="command-section">
                     <h4 data-i18n="sec.hdmi.h4_conf">Configuration par MQTT</h4>
-                    <p data-i18n-html="sec.hdmi.p_conf">Les réglages sont dans la section <code>[HDMI]</code> du fichier de configuration et se modifient avec <code>conf</code> : <code>display_output</code> (dmd, hdmi, both), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.</p>
+                    <p data-i18n-html="sec.hdmi.p_conf">Les réglages sont dans la section <code>[HDMI]</code> du fichier de configuration et se modifient avec <code>conf</code> : <code>display_output</code> (dmd, hdmi, both, pico), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.</p>
                     <div class="example-code">
 <span class="comment"># Points LED (aspect DMD)</span>
 mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "conf|HDMI|style:dots"<br>
@@ -3397,6 +3398,40 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "conf|HDMI|display_output:both"<br>
                         <li data-i18n-html="sec.hdmi.li_video">Vidéos : commande <code>vid</code> et onglet Vidéos de la page Répertoires (lecture par mpv, décodage matériel)</li>
                         <li data-i18n="sec.hdmi.li_visuals">Les visuels de Raspy2DMD (démarrage, avertissements, mise à jour, paramétrage) s'affichent sur l'écran dans leur version haute résolution (dossiers …/HDMI des médias), pendant que le DMD joue la sienne</li>
                         <li data-i18n="sec.hdmi.li_materiel">En sortie « Écran HDMI » seule, la page Matériel grise les réglages propres aux panneaux LED ; la taille du DMD reste réglable : c'est la taille de l'image affichée à l'écran</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- RASPBERRY PICO SEUL -->
+        <div class="content-section" id="picoseul">
+            <h2 class="section-title" data-i18n="sec.picoseul.title">🔌 Matériel - Raspberry Pico seul</h2>
+
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.picoseul.title">Raspy2DMD à côté d'un autre programme</div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.description">Description</h4>
+                    <p data-i18n-html="sec.picoseul.p_desc">La sortie <strong>Raspberry Pico seul</strong> laisse libres tous les GPIO du Raspberry : les panneaux sont pilotés par le Pico, branché en USB. Raspy2DMD peut ainsi tourner sur la même machine qu'un programme qui utilise les GPIO, comme RaspyDarts. Sans Pico branché, rien n'est affiché (il est recherché en permanence). La page Matériel grise les réglages propres au pilotage par les GPIO.</p>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.picoseul.h4_install">Installation</h4>
+                    <p data-i18n-html="sec.picoseul.p_install">Pour installer Raspy2DMD sur une machine où tourne déjà un autre programme, ajoutez l'option <code>--pico-seul</code>. Le système est laissé tel quel : pas de mise à niveau complète ; nom de la machine, réseau, <code>cmdline.txt</code>, écran HDMI, console et Samba inchangés. La configuration est prête pour RaspyDarts sur la même machine, sans bouton GPIO et son coupé (réglable dans l'interface web). La désinstallation ne retire que ce que l'installation a ajouté.</p>
+                    <div class="example-code">
+<span class="comment"># Installation « Pico seul »</span>
+curl -sSL https://raw.githubusercontent.com/rmdelcelier/Raspy2DMD/main/scripts/install_raspy2dmd.sh | sudo bash -s -- --pico-seul<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.picoseul.h4_locked">Ce qui change dans une installation « Pico seul »</h4>
+                    <ul>
+                        <li data-i18n-html="sec.picoseul.li_output">La sortie est verrouillée sur le Raspberry Pico : la page Sortie HDMI la grise et une commande <code>conf|HDMI|display_output</code> vers une autre sortie est refusée (une sortie DMD piloterait les GPIO de l'autre programme, la sortie HDMI prendrait son écran)</li>
+                        <li data-i18n-html="sec.picoseul.li_samba">Le partage réseau (Samba) appartient à l'autre programme : l'interrupteur de la page Paramètres généraux est grisé ; les dossiers de Raspy2DMD restent accessibles avec l'identifiant raspy2dmd</li>
+                        <li data-i18n="sec.picoseul.li_update">Une mise à jour automatique ne redémarre que Raspy2DMD, jamais la machine</li>
+                        <li data-i18n="sec.picoseul.li_buttons">Ni bouton GPIO ni Bluetooth : l'arrêt de la machine est commandé par l'autre programme</li>
+                        <li data-i18n-html="sec.picoseul.li_conf">Sans l'option d'installation, la sortie « Raspberry Pico seul » se choisit aussi dans la page Sortie HDMI ou par <code>conf|HDMI|display_output:pico</code> (redémarre Raspy2DMD)</li>
                     </ul>
                 </div>
             </div>
@@ -4462,6 +4497,7 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.li_visuals": "Les visuels de Raspy2DMD (démarrage, avertissements, mise à jour, paramétrage) s'affichent sur l'écran dans leur version haute résolution (dossiers …/HDMI des médias), pendant que le DMD joue la sienne",
             "sec.hdmi.li_materiel": "En sortie « Écran HDMI » seule, la page Matériel grise les réglages propres aux panneaux LED ; la taille du DMD reste réglable : c'est la taille de l'image affichée à l'écran",
             "nav.item.hdmi": "Sortie HDMI",
+            "nav.item.picoseul": "Raspberry Pico seul",
             "nav.item.rp1pio": "Raspberry Pi 5 (RP1 PIO)",
             "sec.hdmi.title": "📺 Matériel - Sortie HDMI",
             "cmd.hdmi.title": "Afficher Raspy2DMD sur un écran HDMI",
@@ -4477,6 +4513,17 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.td_both": "Les deux en même temps, image identique",
             "sec.hdmi.td_all": "Tous",
             "sec.hdmi.td_multi": "Pi à plusieurs cœurs : Zero 2 W, 3, 4, 5 (pas Zero / Zero W)",
+            "sec.picoseul.title": "🔌 Matériel - Raspberry Pico seul",
+            "cmd.picoseul.title": "Raspy2DMD à côté d'un autre programme",
+            "sec.picoseul.p_desc": "La sortie <strong>Raspberry Pico seul</strong> laisse libres tous les GPIO du Raspberry : les panneaux sont pilotés par le Pico, branché en USB. Raspy2DMD peut ainsi tourner sur la même machine qu'un programme qui utilise les GPIO, comme RaspyDarts. Sans Pico branché, rien n'est affiché (il est recherché en permanence). La page Matériel grise les réglages propres au pilotage par les GPIO.",
+            "sec.picoseul.h4_install": "Installation",
+            "sec.picoseul.p_install": "Pour installer Raspy2DMD sur une machine où tourne déjà un autre programme, ajoutez l'option <code>--pico-seul</code>. Le système est laissé tel quel : pas de mise à niveau complète ; nom de la machine, réseau, <code>cmdline.txt</code>, écran HDMI, console et Samba inchangés. La configuration est prête pour RaspyDarts sur la même machine, sans bouton GPIO et son coupé (réglable dans l'interface web). La désinstallation ne retire que ce que l'installation a ajouté.",
+            "sec.picoseul.h4_locked": "Ce qui change dans une installation « Pico seul »",
+            "sec.picoseul.li_output": "La sortie est verrouillée sur le Raspberry Pico : la page Sortie HDMI la grise et une commande <code>conf|HDMI|display_output</code> vers une autre sortie est refusée (une sortie DMD piloterait les GPIO de l'autre programme, la sortie HDMI prendrait son écran)",
+            "sec.picoseul.li_samba": "Le partage réseau (Samba) appartient à l'autre programme : l'interrupteur de la page Paramètres généraux est grisé ; les dossiers de Raspy2DMD restent accessibles avec l'identifiant raspy2dmd",
+            "sec.picoseul.li_update": "Une mise à jour automatique ne redémarre que Raspy2DMD, jamais la machine",
+            "sec.picoseul.li_buttons": "Ni bouton GPIO ni Bluetooth : l'arrêt de la machine est commandé par l'autre programme",
+            "sec.picoseul.li_conf": "Sans l'option d'installation, la sortie « Raspberry Pico seul » se choisit aussi dans la page Sortie HDMI ou par <code>conf|HDMI|display_output:pico</code> (redémarre Raspy2DMD)",
             "sec.hdmi.h4_settings": "Réglages de l'image",
             "sec.hdmi.li_scaling": "<strong>Mise à l'échelle</strong> : pixel parfait (multiple entier, bandes noires), ajusté (le plus grand possible sans déformer) ou étiré (plein écran)",
             "sec.hdmi.li_style": "<strong>Style de rendu</strong> : pixels nets, lissé, ou points LED (pixels ronds séparés, aspect d'un vrai DMD)",
@@ -4492,7 +4539,7 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.li_mire": "La mire montre les bords de l'écran, les couleurs et le rectangle occupé par l'image du DMD : pratique pour régler les marges",
             "sec.hdmi.li_nostop": "N'interrompt pas l'affichage en cours ; sans effet si la sortie HDMI n'est pas active",
             "sec.hdmi.h4_conf": "Configuration par MQTT",
-            "sec.hdmi.p_conf": "Les réglages sont dans la section <code>[HDMI]</code> du fichier de configuration et se modifient avec <code>conf</code> : <code>display_output</code> (dmd, hdmi, both), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.",
+            "sec.hdmi.p_conf": "Les réglages sont dans la section <code>[HDMI]</code> du fichier de configuration et se modifient avec <code>conf</code> : <code>display_output</code> (dmd, hdmi, both, pico), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.",
             "sec.hdmi.li_screen": "L'écran doit être branché au démarrage du Pi, sinon Raspy2DMD revient au DMD (ou attend l'écran si ce choix est fait)",
             "sec.hdmi.li_sound": "Le son peut être envoyé sur l'écran HDMI depuis la même page",
             "sec.hdmi.li_video": "Vidéos : commande <code>vid</code> et onglet Vidéos de la page Répertoires (lecture par mpv, décodage matériel)",
@@ -5152,6 +5199,7 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.li_visuals": "Raspy2DMD visuals (startup, warnings, update, settings) are shown on the screen in their high-resolution version (…/HDMI media folders), while the DMD plays its own",
             "sec.hdmi.li_materiel": "With the \"HDMI screen\" output alone, the Hardware page greys out settings specific to LED panels; the DMD size can still be changed: it is the size of the picture shown on the screen",
             "nav.item.hdmi": "HDMI output",
+            "nav.item.picoseul": "Raspberry Pico only",
             "nav.item.rp1pio": "Raspberry Pi 5 (RP1 PIO)",
             "sec.hdmi.title": "📺 Hardware - HDMI output",
             "cmd.hdmi.title": "Show Raspy2DMD on an HDMI screen",
@@ -5167,6 +5215,17 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.td_both": "Both at the same time, same picture",
             "sec.hdmi.td_all": "All",
             "sec.hdmi.td_multi": "Multi-core Pi: Zero 2 W, 3, 4, 5 (not Zero / Zero W)",
+            "sec.picoseul.title": "🔌 Hardware - Raspberry Pico only",
+            "cmd.picoseul.title": "Raspy2DMD alongside another program",
+            "sec.picoseul.p_desc": "The <strong>Raspberry Pico only</strong> output leaves all the Raspberry's GPIO free: the panels are driven by the Pico, connected over USB. Raspy2DMD can thus run on the same machine as a program that uses the GPIO, such as RaspyDarts. With no Pico connected, nothing is displayed (it is searched for continuously). The Hardware page greys out the settings specific to driving by the GPIO.",
+            "sec.picoseul.h4_install": "Installation",
+            "sec.picoseul.p_install": "To install Raspy2DMD on a machine that already runs another program, add the <code>--pico-seul</code> option. The system is left as it is: no full upgrade; machine name, network, <code>cmdline.txt</code>, HDMI screen, console and Samba unchanged. The configuration is ready for RaspyDarts on the same machine, with no GPIO button and sound muted (adjustable in the web interface). Uninstalling only removes what the installation added.",
+            "sec.picoseul.h4_locked": "What changes in a \"Pico only\" installation",
+            "sec.picoseul.li_output": "The output is locked on the Raspberry Pico: the HDMI output page greys it out and a <code>conf|HDMI|display_output</code> command to another output is refused (a DMD output would drive the other program's GPIO, the HDMI output would take its screen)",
+            "sec.picoseul.li_samba": "Network sharing (Samba) belongs to the other program: the switch on the General settings page is greyed out; Raspy2DMD's folders remain accessible with the raspy2dmd login",
+            "sec.picoseul.li_update": "An automatic update only restarts Raspy2DMD, never the machine",
+            "sec.picoseul.li_buttons": "No GPIO button and no Bluetooth: shutting down the machine is controlled by the other program",
+            "sec.picoseul.li_conf": "Without the installation option, the \"Raspberry Pico only\" output can also be chosen on the HDMI output page or with <code>conf|HDMI|display_output:pico</code> (restarts Raspy2DMD)",
             "sec.hdmi.h4_settings": "Picture settings",
             "sec.hdmi.li_scaling": "<strong>Scaling</strong>: pixel perfect (integer multiple, black bars), fit (as large as possible without distortion) or stretched (full screen)",
             "sec.hdmi.li_style": "<strong>Rendering style</strong>: sharp pixels, smoothed, or LED dots (separate round pixels, the look of a real DMD)",
@@ -5182,7 +5241,7 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.li_mire": "The test pattern shows the screen edges, the colours and the rectangle used by the DMD picture: handy for adjusting margins",
             "sec.hdmi.li_nostop": "Does not interrupt the current display; no effect if the HDMI output is not active",
             "sec.hdmi.h4_conf": "Configuration through MQTT",
-            "sec.hdmi.p_conf": "Settings are in the <code>[HDMI]</code> section of the configuration file and are changed with <code>conf</code>: <code>display_output</code> (dmd, hdmi, both), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.",
+            "sec.hdmi.p_conf": "Settings are in the <code>[HDMI]</code> section of the configuration file and are changed with <code>conf</code>: <code>display_output</code> (dmd, hdmi, both, pico), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.",
             "sec.hdmi.li_screen": "The screen must be connected when the Pi starts, otherwise Raspy2DMD falls back to the DMD (or waits for the screen if chosen)",
             "sec.hdmi.li_sound": "Sound can be sent to the HDMI screen from the same page",
             "sec.hdmi.li_video": "Videos: <code>vid</code> command and Videos tab of the Directories page (played by mpv, hardware decoding)",
@@ -5838,6 +5897,7 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.li_visuals": "Die Raspy2DMD-Grafiken (Start, Warnungen, Update, Einstellungen) erscheinen auf dem Bildschirm in ihrer hochauflösenden Version (Medienordner …/HDMI), während der DMD seine eigene zeigt",
             "sec.hdmi.li_materiel": "Beim Ausgang „HDMI-Bildschirm“ allein graut die Seite Hardware die Einstellungen der LED-Panels aus; die DMD-Größe bleibt einstellbar: Sie bestimmt die Größe des Bildes auf dem Bildschirm",
             "nav.item.hdmi": "HDMI-Ausgang",
+            "nav.item.picoseul": "Nur Raspberry Pico",
             "nav.item.rp1pio": "Raspberry Pi 5 (RP1 PIO)",
             "sec.hdmi.title": "📺 Hardware - HDMI-Ausgang",
             "cmd.hdmi.title": "Raspy2DMD auf einem HDMI-Bildschirm anzeigen",
@@ -5853,6 +5913,17 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.td_both": "Beide gleichzeitig, identisches Bild",
             "sec.hdmi.td_all": "Alle",
             "sec.hdmi.td_multi": "Pi mit mehreren Kernen: Zero 2 W, 3, 4, 5 (nicht Zero / Zero W)",
+            "sec.picoseul.title": "🔌 Hardware - Nur Raspberry Pico",
+            "cmd.picoseul.title": "Raspy2DMD neben einem anderen Programm",
+            "sec.picoseul.p_desc": "Der Ausgang <strong>Nur Raspberry Pico</strong> lässt alle GPIO des Raspberry frei: die Panels werden vom Pico angesteuert, der über USB angeschlossen ist. So kann Raspy2DMD auf derselben Maschine laufen wie ein Programm, das die GPIO nutzt, etwa RaspyDarts. Ohne angeschlossenen Pico wird nichts angezeigt (er wird ständig gesucht). Die Seite Hardware graut die Einstellungen der Ansteuerung über GPIO aus.",
+            "sec.picoseul.h4_install": "Installation",
+            "sec.picoseul.p_install": "Um Raspy2DMD auf einer Maschine zu installieren, auf der bereits ein anderes Programm läuft, die Option <code>--pico-seul</code> hinzufügen. Das System bleibt unverändert: kein vollständiges Upgrade; Rechnername, Netzwerk, <code>cmdline.txt</code>, HDMI-Bildschirm, Konsole und Samba bleiben gleich. Die Konfiguration ist für RaspyDarts auf derselben Maschine vorbereitet, ohne GPIO-Taster und mit stummem Ton (in der Weboberfläche einstellbar). Die Deinstallation entfernt nur, was die Installation hinzugefügt hat.",
+            "sec.picoseul.h4_locked": "Was sich bei einer Installation „Nur Pico“ ändert",
+            "sec.picoseul.li_output": "Die Ausgabe ist auf den Raspberry Pico festgelegt: die Seite HDMI-Ausgabe graut sie aus und ein Befehl <code>conf|HDMI|display_output</code> zu einer anderen Ausgabe wird abgelehnt (eine DMD-Ausgabe würde die GPIO des anderen Programms ansteuern, die HDMI-Ausgabe dessen Bildschirm übernehmen)",
+            "sec.picoseul.li_samba": "Die Netzwerkfreigabe (Samba) gehört dem anderen Programm: der Schalter auf der Seite Allgemeine Einstellungen ist ausgegraut; die Ordner von Raspy2DMD bleiben mit dem Benutzer raspy2dmd erreichbar",
+            "sec.picoseul.li_update": "Ein automatisches Update startet nur Raspy2DMD neu, nie den Rechner",
+            "sec.picoseul.li_buttons": "Weder GPIO-Taster noch Bluetooth: das Herunterfahren des Rechners steuert das andere Programm",
+            "sec.picoseul.li_conf": "Ohne die Installationsoption lässt sich die Ausgabe „Nur Raspberry Pico“ auch auf der Seite HDMI-Ausgabe oder mit <code>conf|HDMI|display_output:pico</code> wählen (startet Raspy2DMD neu)",
             "sec.hdmi.h4_settings": "Bildeinstellungen",
             "sec.hdmi.li_scaling": "<strong>Skalierung</strong>: pixelgenau (ganzzahliges Vielfaches, schwarze Balken), eingepasst (so groß wie möglich ohne Verzerrung) oder gestreckt (Vollbild)",
             "sec.hdmi.li_style": "<strong>Darstellungsstil</strong>: scharfe Pixel, geglättet oder LED-Punkte (getrennte runde Pixel, Optik eines echten DMD)",
@@ -5868,7 +5939,7 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.li_mire": "Das Testbild zeigt die Bildschirmränder, die Farben und das vom DMD-Bild belegte Rechteck: praktisch zum Einstellen der Ränder",
             "sec.hdmi.li_nostop": "Unterbricht die laufende Anzeige nicht; ohne Wirkung, wenn der HDMI-Ausgang nicht aktiv ist",
             "sec.hdmi.h4_conf": "Konfiguration über MQTT",
-            "sec.hdmi.p_conf": "Die Einstellungen stehen im Abschnitt <code>[HDMI]</code> der Konfigurationsdatei und werden mit <code>conf</code> geändert: <code>display_output</code> (dmd, hdmi, both), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.",
+            "sec.hdmi.p_conf": "Die Einstellungen stehen im Abschnitt <code>[HDMI]</code> der Konfigurationsdatei und werden mit <code>conf</code> geändert: <code>display_output</code> (dmd, hdmi, both, pico), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.",
             "sec.hdmi.li_screen": "Der Bildschirm muss beim Start des Pi angeschlossen sein, sonst fällt Raspy2DMD auf den DMD zurück (oder wartet, falls so gewählt)",
             "sec.hdmi.li_sound": "Der Ton kann auf derselben Seite auf den HDMI-Bildschirm geleitet werden",
             "sec.hdmi.li_video": "Videos: Befehl <code>vid</code> und Registerkarte Videos der Seite Verzeichnisse (Wiedergabe mit mpv, Hardware-Decodierung)",
@@ -6524,6 +6595,7 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.li_visuals": "Las imágenes de Raspy2DMD (arranque, avisos, actualización, ajustes) se muestran en la pantalla en su versión de alta resolución (carpetas …/HDMI de los medios), mientras el DMD reproduce la suya",
             "sec.hdmi.li_materiel": "Con la salida «Pantalla HDMI» sola, la página Hardware atenúa los ajustes propios de los paneles LED; el tamaño del DMD sigue siendo ajustable: es el tamaño de la imagen mostrada",
             "nav.item.hdmi": "Salida HDMI",
+            "nav.item.picoseul": "Solo Raspberry Pico",
             "nav.item.rp1pio": "Raspberry Pi 5 (RP1 PIO)",
             "sec.hdmi.title": "📺 Hardware - Salida HDMI",
             "cmd.hdmi.title": "Mostrar Raspy2DMD en una pantalla HDMI",
@@ -6539,6 +6611,17 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.td_both": "Ambos a la vez, imagen idéntica",
             "sec.hdmi.td_all": "Todos",
             "sec.hdmi.td_multi": "Pi de varios núcleos: Zero 2 W, 3, 4, 5 (no Zero / Zero W)",
+            "sec.picoseul.title": "🔌 Hardware - Solo Raspberry Pico",
+            "cmd.picoseul.title": "Raspy2DMD junto a otro programa",
+            "sec.picoseul.p_desc": "La salida <strong>Solo Raspberry Pico</strong> deja libres todos los GPIO de la Raspberry: los paneles los controla el Pico, conectado por USB. Raspy2DMD puede así funcionar en la misma máquina que un programa que usa los GPIO, como RaspyDarts. Sin Pico conectado, no se muestra nada (se busca continuamente). La página Hardware atenúa los ajustes propios del control por GPIO.",
+            "sec.picoseul.h4_install": "Instalación",
+            "sec.picoseul.p_install": "Para instalar Raspy2DMD en una máquina donde ya funciona otro programa, añada la opción <code>--pico-seul</code>. El sistema se deja tal cual: sin actualización completa; nombre de la máquina, red, <code>cmdline.txt</code>, pantalla HDMI, consola y Samba sin cambios. La configuración queda lista para RaspyDarts en la misma máquina, sin botón GPIO y con el sonido silenciado (ajustable en la interfaz web). La desinstalación solo quita lo que la instalación añadió.",
+            "sec.picoseul.h4_locked": "Lo que cambia en una instalación «Solo Pico»",
+            "sec.picoseul.li_output": "La salida queda fijada en la Raspberry Pico: la página Salida HDMI la atenúa y se rechaza un comando <code>conf|HDMI|display_output</code> hacia otra salida (una salida DMD controlaría los GPIO del otro programa, la salida HDMI tomaría su pantalla)",
+            "sec.picoseul.li_samba": "El uso compartido de red (Samba) pertenece al otro programa: el interruptor de la página Parámetros generales está atenuado; las carpetas de Raspy2DMD siguen accesibles con el usuario raspy2dmd",
+            "sec.picoseul.li_update": "Una actualización automática solo reinicia Raspy2DMD, nunca la máquina",
+            "sec.picoseul.li_buttons": "Ni botón GPIO ni Bluetooth: el apagado de la máquina lo controla el otro programa",
+            "sec.picoseul.li_conf": "Sin la opción de instalación, la salida «Solo Raspberry Pico» también se elige en la página Salida HDMI o con <code>conf|HDMI|display_output:pico</code> (reinicia Raspy2DMD)",
             "sec.hdmi.h4_settings": "Ajustes de imagen",
             "sec.hdmi.li_scaling": "<strong>Escalado</strong>: píxel perfecto (múltiplo entero, bandas negras), ajustado (lo más grande posible sin deformar) o estirado (pantalla completa)",
             "sec.hdmi.li_style": "<strong>Estilo de renderizado</strong>: píxeles nítidos, suavizado o puntos LED (píxeles redondos separados, aspecto de un DMD real)",
@@ -6554,7 +6637,7 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.li_mire": "El patrón muestra los bordes de la pantalla, los colores y el rectángulo que ocupa la imagen del DMD: útil para ajustar los márgenes",
             "sec.hdmi.li_nostop": "No interrumpe la visualización en curso; sin efecto si la salida HDMI no está activa",
             "sec.hdmi.h4_conf": "Configuración por MQTT",
-            "sec.hdmi.p_conf": "Los ajustes están en la sección <code>[HDMI]</code> del archivo de configuración y se modifican con <code>conf</code>: <code>display_output</code> (dmd, hdmi, both), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.",
+            "sec.hdmi.p_conf": "Los ajustes están en la sección <code>[HDMI]</code> del archivo de configuración y se modifican con <code>conf</code>: <code>display_output</code> (dmd, hdmi, both, pico), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.",
             "sec.hdmi.li_screen": "La pantalla debe estar conectada al arrancar la Pi; si no, Raspy2DMD vuelve al DMD (o espera la pantalla si se ha elegido)",
             "sec.hdmi.li_sound": "El sonido puede enviarse a la pantalla HDMI desde la misma página",
             "sec.hdmi.li_video": "Vídeos: comando <code>vid</code> y pestaña Vídeos de la página Directorios (reproducción con mpv, decodificación por hardware)",
@@ -7210,6 +7293,7 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.li_visuals": "Le grafiche di Raspy2DMD (avvio, avvisi, aggiornamento, impostazioni) appaiono sullo schermo nella versione ad alta risoluzione (cartelle …/HDMI dei media), mentre il DMD mostra la propria",
             "sec.hdmi.li_materiel": "Con la sola uscita «Schermo HDMI», la pagina Hardware disattiva le impostazioni dei pannelli LED; la dimensione del DMD resta regolabile: è la dimensione dell'immagine mostrata sullo schermo",
             "nav.item.hdmi": "Uscita HDMI",
+            "nav.item.picoseul": "Solo Raspberry Pico",
             "nav.item.rp1pio": "Raspberry Pi 5 (RP1 PIO)",
             "sec.hdmi.title": "📺 Hardware - Uscita HDMI",
             "cmd.hdmi.title": "Mostrare Raspy2DMD su uno schermo HDMI",
@@ -7225,6 +7309,17 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.td_both": "Entrambi contemporaneamente, immagine identica",
             "sec.hdmi.td_all": "Tutti",
             "sec.hdmi.td_multi": "Pi multi-core: Zero 2 W, 3, 4, 5 (non Zero / Zero W)",
+            "sec.picoseul.title": "🔌 Hardware - Solo Raspberry Pico",
+            "cmd.picoseul.title": "Raspy2DMD accanto a un altro programma",
+            "sec.picoseul.p_desc": "L'uscita <strong>Solo Raspberry Pico</strong> lascia liberi tutti i GPIO del Raspberry: i pannelli sono pilotati dal Pico, collegato via USB. Raspy2DMD può così funzionare sulla stessa macchina di un programma che usa i GPIO, come RaspyDarts. Senza Pico collegato non viene mostrato nulla (viene cercato continuamente). La pagina Hardware disattiva le impostazioni proprie del pilotaggio tramite GPIO.",
+            "sec.picoseul.h4_install": "Installazione",
+            "sec.picoseul.p_install": "Per installare Raspy2DMD su una macchina dove gira già un altro programma, aggiungere l'opzione <code>--pico-seul</code>. Il sistema resta com'è: nessun aggiornamento completo; nome della macchina, rete, <code>cmdline.txt</code>, schermo HDMI, console e Samba invariati. La configurazione è pronta per RaspyDarts sulla stessa macchina, senza pulsante GPIO e con l'audio disattivato (regolabile nell'interfaccia web). La disinstallazione rimuove solo ciò che l'installazione ha aggiunto.",
+            "sec.picoseul.h4_locked": "Cosa cambia in un'installazione «Solo Pico»",
+            "sec.picoseul.li_output": "L'uscita è bloccata sul Raspberry Pico: la pagina Uscita HDMI la disattiva e un comando <code>conf|HDMI|display_output</code> verso un'altra uscita viene rifiutato (un'uscita DMD piloterebbe i GPIO dell'altro programma, l'uscita HDMI prenderebbe il suo schermo)",
+            "sec.picoseul.li_samba": "La condivisione di rete (Samba) appartiene all'altro programma: l'interruttore della pagina Parametri generali è disattivato; le cartelle di Raspy2DMD restano accessibili con l'utente raspy2dmd",
+            "sec.picoseul.li_update": "Un aggiornamento automatico riavvia solo Raspy2DMD, mai la macchina",
+            "sec.picoseul.li_buttons": "Né pulsante GPIO né Bluetooth: lo spegnimento della macchina è comandato dall'altro programma",
+            "sec.picoseul.li_conf": "Senza l'opzione di installazione, l'uscita «Solo Raspberry Pico» si sceglie anche nella pagina Uscita HDMI o con <code>conf|HDMI|display_output:pico</code> (riavvia Raspy2DMD)",
             "sec.hdmi.h4_settings": "Impostazioni dell'immagine",
             "sec.hdmi.li_scaling": "<strong>Ridimensionamento</strong>: pixel perfetto (multiplo intero, bande nere), adattato (il più grande possibile senza distorsione) o allungato (schermo intero)",
             "sec.hdmi.li_style": "<strong>Stile di resa</strong>: pixel nitidi, levigato o punti LED (pixel rotondi separati, aspetto di un vero DMD)",
@@ -7240,7 +7335,7 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.li_mire": "La schermata mostra i bordi dello schermo, i colori e il rettangolo occupato dall'immagine del DMD: utile per regolare i margini",
             "sec.hdmi.li_nostop": "Non interrompe la visualizzazione in corso; nessun effetto se l'uscita HDMI non è attiva",
             "sec.hdmi.h4_conf": "Configurazione tramite MQTT",
-            "sec.hdmi.p_conf": "Le impostazioni sono nella sezione <code>[HDMI]</code> del file di configurazione e si modificano con <code>conf</code>: <code>display_output</code> (dmd, hdmi, both), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.",
+            "sec.hdmi.p_conf": "Le impostazioni sono nella sezione <code>[HDMI]</code> del file di configurazione e si modificano con <code>conf</code>: <code>display_output</code> (dmd, hdmi, both, pico), <code>scaling</code>, <code>style</code>, <code>dot_gap</code>, <code>rotation</code>, <code>margin</code>, <code>brightness</code>, <code>background</code>, <code>bg_color</code>, <code>bg_dim</code>, <code>resolution</code>, <code>port</code>, <code>no_screen</code>.",
             "sec.hdmi.li_screen": "Lo schermo deve essere collegato all'avvio del Pi, altrimenti Raspy2DMD torna al DMD (o attende lo schermo se scelto)",
             "sec.hdmi.li_sound": "L'audio può essere inviato allo schermo HDMI dalla stessa pagina",
             "sec.hdmi.li_video": "Video: comando <code>vid</code> e scheda Video della pagina Cartelle (riproduzione con mpv, decodifica hardware)",
