@@ -207,6 +207,20 @@ else
 fi
 
 # =============================================================================
+# PARTAGES SAMBA DE RASPY2DMD
+# =============================================================================
+# Sections dont le chemin est sous /Medias (ajoutées par l'installation) ; les autres
+# partages et [global] restent intacts (en Pico seul, Samba appartient à l'autre programme)
+if [ -f /etc/samba/smb.conf ] && grep -qE '^[[:space:]]*path[[:space:]]*=[[:space:]]*/Medias(/|$)' /etc/samba/smb.conf; then
+    cp -p /etc/samba/smb.conf /etc/samba/smb.conf.avant_desinstallation_raspy2dmd 2>/dev/null || true
+    awk 'function flush(){ if (buf != "" && !drop) printf "%s", buf; buf=""; drop=0 } /^\[/{flush()} {buf = buf $0 "\n"; if ($0 ~ /^[ \t]*path[ \t]*=[ \t]*\/Medias(\/|$)/) drop=1} END{flush()}' \
+        /etc/samba/smb.conf > /tmp/smb.conf.r2d && cat /tmp/smb.conf.r2d > /etc/samba/smb.conf
+    rm -f /tmp/smb.conf.r2d
+    systemctl reload smbd 2>/dev/null || true
+    log_info "Partages Samba de Raspy2DMD retires (copie : /etc/samba/smb.conf.avant_desinstallation_raspy2dmd)"
+fi
+
+# =============================================================================
 # SUPPRESSION DU DOSSIER MEDIAS (SI DEMANDE)
 # =============================================================================
 if [ "$KEEP_MEDIAS" = false ]; then

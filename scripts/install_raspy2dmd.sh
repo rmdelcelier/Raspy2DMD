@@ -1966,6 +1966,14 @@ SAMBAEOF
         if [ "$PICO_SEUL" != "1" ]; then
             grep -q 'map to guest' /etc/samba/smb.conf || sed -i '/^\[global\]/a map to guest = never' /etc/samba/smb.conf
             log_info "Samba : map to guest = never configure"
+        else
+            # Pico seul : partages de Raspy2DMD (chemins sous /Medias) en invite, comme ceux de
+            # l'autre programme ; force user = raspy2dmd garde les fichiers crees a raspy2dmd
+            # (la surveillance des droits de Raspy2DMD n'a rien a corriger). Meme ligne dans scripts/RASPBIAN.
+            awk '/^\[/{m=0} /^[ \t]*path[ \t]*=[ \t]*\/Medias(\/|$)/{m=1} m && /^[ \t]*valid users[ \t]*=[ \t]*raspy2dmd[ \t]*$/{print "guest ok = yes"; next} {print}' /etc/samba/smb.conf > /tmp/smb.conf.r2d \
+                && cat /tmp/smb.conf.r2d > /etc/samba/smb.conf
+            rm -f /tmp/smb.conf.r2d
+            log_info "Mode Pico seul : partages Raspy2DMD ouverts en invite (comme ceux de RaspyDarts)"
         fi
 
         # Creer l'utilisateur Samba raspy2dmd (base de mots de passe separee de Linux)
