@@ -1338,7 +1338,9 @@ config.read(path, encoding='utf-8')
 values = {
     'HDMI': {'display_output': 'pico', 'hide_console': '0'},
     'Pico': {'pico_auto_detect': '1', 'pico_display_enabled': '1'},
-    'Running': {'raspydarts_enabled': '1', 'raspydarts': 'localhost', 'raspydartscanal': 'raspydarts/dmd'},
+    # default = 0 : pas de « Web ok via http://… » au démarrage (l'adresse est dans RaspyDarts)
+    'Running': {'raspydarts_enabled': '1', 'raspydarts': 'localhost', 'raspydartscanal': 'raspydarts/dmd',
+                'default': '0'},
     'DMDRenderer': {'interrupteur': '0'},
     'Sound': {'volume': '0'},
 }
@@ -1702,6 +1704,17 @@ RCLOCALEOF
         systemctl daemon-reload 2>/dev/null || true
         systemctl enable rc-local.service 2>/dev/null || true
         log_info "Service rc-local.service active"
+    fi
+
+    # Moteur lance tot au demarrage (sans attendre le reseau ni MariaDB, comme rc.local)
+    log_substep "Installation du service raspy2dmd.service..."
+    if [ -f "${INSTALL_DIR}/system/raspy2dmd.service" ]; then
+        cp "${INSTALL_DIR}/system/raspy2dmd.service" /etc/systemd/system/
+        systemctl daemon-reload 2>/dev/null || true
+        systemctl enable raspy2dmd.service 2>/dev/null || true
+        log_info "Service raspy2dmd.service active (logo sur le DMD des le debut du demarrage)"
+    else
+        log_warn "raspy2dmd.service non trouve, le moteur sera lance par rc.local"
     fi
 
     # Service de migration automatique wpa_supplicant.conf → NetworkManager

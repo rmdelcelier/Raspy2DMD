@@ -280,6 +280,11 @@ if [ "$RC_SERVICE_CREE" = "1" ]; then
     log_info "rc-local.service cree par l'installation supprime"
 fi
 
+# Service de lancement anticipé du moteur
+systemctl disable raspy2dmd.service 2>/dev/null || true
+rm -f /etc/systemd/system/raspy2dmd.service 2>/dev/null || true
+systemctl daemon-reload 2>/dev/null || true
+
 # Suppression des fichiers temporaires
 rm -rf /tmp/raspy2dmd_* 2>/dev/null || true
 
