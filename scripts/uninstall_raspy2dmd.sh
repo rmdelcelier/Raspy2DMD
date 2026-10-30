@@ -80,7 +80,9 @@ log_error() {
 # =============================================================================
 # BANNIERE
 # =============================================================================
-clear
+# Sans terminal (TERM absent : ssh non interactif, lancement par RaspyDarts), clear
+# echoue et set -e arretait le script avant toute action
+clear 2>/dev/null || true
 echo -e "${RED}${BOLD}"
 cat << "BANNER"
 ╔══════════════════════════════════════════════════════════════════╗
@@ -145,11 +147,13 @@ if [ -f "${INSTALL_DIR}/StopAllRaspy2DMD.sh" ]; then
     bash "${INSTALL_DIR}/StopAllRaspy2DMD.sh" 2>/dev/null || true
 fi
 
-# Arret des processus restants
-pkill -f "ServerRaspy2DMD" 2>/dev/null || true
-pkill -f "node.*app.js" 2>/dev/null || true
-pkill -f "ButtonsServer" 2>/dev/null || true
-pkill -f "BluetoothServer" 2>/dev/null || true
+# Arret des processus restants. Motifs stricts : « pkill -f ServerRaspy2DMD » tuait aussi
+# tout processus dont la ligne de commande contient ce mot, dont le shell ssh qui lance
+# la desinstallation. Les [.] empechent aussi ces motifs de se reconnaitre eux-memes.
+systemctl stop raspy2dmd.service 2>/dev/null || true
+pkill -f 'bash [^ ]*/Raspy2DMD/ServerRaspy2DMD[A-Za-z]*[.]sh' 2>/dev/null || true
+pkill -f 'python[0-9.]* [^ ]*/Raspy2DMD/' 2>/dev/null || true
+pkill -f 'node [^ ]*/Raspy2DMD/web/app[.]js' 2>/dev/null || true
 
 # Arret et desactivation des services systemd
 systemctl stop raspy2dmd-mqtt 2>/dev/null || true
@@ -263,15 +267,23 @@ log_info "Nettoyage supplementaire..."
 rm -f /etc/avahi/services/raspy2dmd.service 2>/dev/null || true
 systemctl restart avahi-daemon 2>/dev/null || true
 
-# Restauration du rc.local original si sauvegarde existe
-if [ -f "/etc/rc.local.backup" ]; then
+# Watchdog cron (installe par l'installation et les mises a jour) : sans cela, cron lance
+# chaque minute un script supprime
+if crontab -l 2>/dev/null | grep -q '/Raspy2DMD/system/watchdog.sh'; then
+    crontab -l 2>/dev/null | grep -v '/Raspy2DMD/system/watchdog.sh' | crontab - 2>/dev/null || true
+    log_info "Watchdog cron retire"
+fi
+
+# rc.local. /etc/rc.local.backup est la copie faite par les mises a jour (RC.LOCAL) : un
+# ancien rc.local de Raspy2DMD, pas celui du systeme (l'installation sauvegarde sous
+# rc.local.backup.<date>)
+if [ "$RC_LOCAL_CREE" = "1" ]; then
+    # Pico seul : il n'y avait pas de rc.local avant l'installation
+    rm -f /etc/rc.local /etc/rc.local.backup 2>/dev/null || true
+    log_info "rc.local cree par l'installation supprime"
+elif [ -f "/etc/rc.local.backup" ]; then
     mv /etc/rc.local.backup /etc/rc.local
     log_info "rc.local original restaure"
-fi
-# Pico seul : rc.local et rc-local.service crees par l'installation (il n'y en avait pas)
-if [ "$RC_LOCAL_CREE" = "1" ]; then
-    rm -f /etc/rc.local 2>/dev/null || true
-    log_info "rc.local cree par l'installation supprime"
 fi
 if [ "$RC_SERVICE_CREE" = "1" ]; then
     systemctl disable rc-local.service 2>/dev/null || true

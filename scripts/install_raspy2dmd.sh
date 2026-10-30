@@ -40,16 +40,6 @@ GITHUB_RAW_URL="https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/
 GITHUB_API_URL="https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}"
 
 # =============================================================================
-# CONFIGURATION BOT GITHUB (pour le systeme de feedback)
-# Token chiffre avec openssl (AES-256-CBC) - dechiffre uniquement a l'installation
-# Le token en clair n'apparait jamais dans le code source
-# =============================================================================
-# Token chiffre (genere avec: echo -n "TOKEN" | openssl enc -aes-256-cbc -pbkdf2 -a -pass pass:PASSPHRASE)
-# Permissions requises: repo, read:org
-GH_BOT_TOKEN_ENC="U2FsdGVkX19HeCYaGgA98tJJqfbWoDBjoborTeg9ZowJg+Mc7pStAg9O1UczfLKxjhzzlTsmjr3R7XEQ4ySUHA=="
-GH_BOT_PASSPHRASE_PARTS=("raspy" "2dmd" "-feedback" "-bot" "-2024")
-
-# =============================================================================
 # CHEMINS D'INSTALLATION
 # =============================================================================
 INSTALL_DIR="/Raspy2DMD"
@@ -2093,123 +2083,24 @@ SAMBAEOF
 }
 
 # =============================================================================
-# ETAPE 13 : CONFIGURATION DU BOT GITHUB (pour le feedback)
+# ETAPE 13 : RETRAIT DE L'ANCIEN ACCES GITHUB (feedback)
+# Les retours sont desormais envoyes au serveur de telemetrie, qui cree
+# lui-meme les issues GitHub : plus aucun jeton GitHub sur les machines.
 # =============================================================================
-step_setup_github_bot() {
-    log_step 13 "Configuration du bot GitHub pour le systeme de feedback"
+step_remove_github_bot() {
+    log_step 13 "Retrait de l'ancien acces GitHub du systeme de feedback"
 
-    # Verifier si gh est installe
-    if ! command -v gh &> /dev/null; then
-        log_substep "Installation de GitHub CLI (gh)..."
-        # Ajouter le depot GitHub CLI
-        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg 2>/dev/null
-        chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-        apt-get update -qq >> "$LOG_FILE" 2>&1
-        apt-get install -y -qq gh >> "$LOG_FILE" 2>&1
-
-        if ! command -v gh &> /dev/null; then
-            log_warn "Impossible d'installer GitHub CLI - le systeme de feedback ne fonctionnera pas"
-            return 0
-        fi
-        log_info "GitHub CLI installe"
-    else
-        log_info "GitHub CLI deja installe"
-    fi
-
-    # Verifier si l'utilisateur raspy2dmd existe
-    if ! id "raspy2dmd" &>/dev/null; then
-        log_warn "Utilisateur raspy2dmd non trouve - configuration GitHub ignoree"
+    if ! command -v gh &> /dev/null || ! id "raspy2dmd" &>/dev/null; then
+        log_info "Aucun acces GitHub a retirer"
         return 0
     fi
 
-    # Creer le repertoire .config pour l'utilisateur raspy2dmd (requis par gh)
     RASPY_HOME=$(getent passwd raspy2dmd | cut -d: -f6)
-    if [ -n "$RASPY_HOME" ]; then
-        mkdir -p "${RASPY_HOME}/.config/gh"
-        chown -R raspy2dmd:raspy2dmd "${RASPY_HOME}/.config"
-    fi
-
-    # Verifier si gh est deja configure (avec timeout pour eviter blocage)
     if timeout 10 sudo -u raspy2dmd HOME="${RASPY_HOME}" gh auth status &>/dev/null 2>&1; then
-        log_info "GitHub CLI deja configure pour l'utilisateur raspy2dmd"
-        return 0
-    fi
-
-    log_substep "Configuration de l'authentification GitHub..."
-
-    # Reconstruction du passphrase a partir des parties
-    GH_PASSPHRASE=""
-    for part in "${GH_BOT_PASSPHRASE_PARTS[@]}"; do
-        GH_PASSPHRASE="${GH_PASSPHRASE}${part}"
-    done
-
-    # Dechiffrement du token dans un fichier temporaire en memoire
-    # Utilisation de /dev/shm (tmpfs en RAM) pour ne jamais ecrire sur disque
-    GH_TOKEN_TMP="/dev/shm/.gh_token_$$"
-
-    # Dechiffrer le token
-    echo "${GH_BOT_TOKEN_ENC}" | openssl enc -aes-256-cbc -pbkdf2 -a -d -pass "pass:${GH_PASSPHRASE}" > "${GH_TOKEN_TMP}" 2>/dev/null
-
-    if [ ! -s "${GH_TOKEN_TMP}" ]; then
-        log_warn "Impossible de dechiffrer le token GitHub"
-        rm -f "${GH_TOKEN_TMP}" 2>/dev/null
-        # Effacer les variables
-        unset GH_PASSPHRASE
-        return 0
-    fi
-
-    # Verifier que le token a ete dechiffre correctement (afficher la taille pour debug)
-    TOKEN_SIZE=$(wc -c < "${GH_TOKEN_TMP}" 2>/dev/null | tr -d ' ')
-    log "Token dechiffre, taille: ${TOKEN_SIZE} octets"
-
-    # Un token GitHub classique fait environ 40-93 caracteres
-    if [ "$TOKEN_SIZE" -lt 30 ] || [ "$TOKEN_SIZE" -gt 200 ]; then
-        log_warn "Taille du token suspecte (${TOKEN_SIZE} octets) - token peut-etre invalide"
-    fi
-
-    # Configurer gh pour l'utilisateur raspy2dmd
-    # IMPORTANT: Utiliser cat et pipe pour passer le token via stdin
-    # Capturer stdout et stderr pour diagnostic
-    GH_AUTH_RESULT=1
-    GH_AUTH_OUTPUT=$(timeout 30 bash -c "cat '${GH_TOKEN_TMP}' | sudo -u raspy2dmd HOME='${RASPY_HOME}' gh auth login --with-token 2>&1")
-    GH_AUTH_RESULT=$?
-
-    # Logger la sortie pour diagnostic
-    if [ -n "$GH_AUTH_OUTPUT" ]; then
-        log "gh auth login output: $GH_AUTH_OUTPUT"
-    fi
-
-    # NETTOYAGE IMMEDIAT ET COMPLET
-    # 1. Supprimer le fichier temporaire de maniere securisee
-    if [ -f "${GH_TOKEN_TMP}" ]; then
-        # Ecraser avec des zeros avant de supprimer
-        dd if=/dev/zero of="${GH_TOKEN_TMP}" bs=1 count=100 conv=notrunc 2>/dev/null || true
-        rm -f "${GH_TOKEN_TMP}"
-    fi
-
-    # 2. Effacer les variables sensibles de la memoire
-    unset GH_PASSPHRASE
-    unset GH_BOT_TOKEN_ENC
-
-    # 3. Vider l'historique bash de la session
-    history -c 2>/dev/null || true
-
-    if [ $GH_AUTH_RESULT -eq 0 ]; then
-        # Verification (avec timeout)
-        if timeout 10 sudo -u raspy2dmd HOME="${RASPY_HOME}" gh auth status &>/dev/null 2>&1; then
-            log_info "Bot GitHub configure avec succes"
-        else
-            log_warn "Configuration GitHub echouee malgre un retour OK"
-        fi
+        timeout 10 sudo -u raspy2dmd HOME="${RASPY_HOME}" gh auth logout --hostname github.com >> "$LOG_FILE" 2>&1 || true
+        log_info "Ancien acces GitHub retire"
     else
-        log_warn "Configuration GitHub echouee (code: $GH_AUTH_RESULT)"
-        # Afficher l'erreur pour diagnostic (sans le token)
-        if [ -n "$GH_AUTH_OUTPUT" ]; then
-            log_warn "Erreur: $GH_AUTH_OUTPUT"
-        fi
-        log_warn "Le systeme de feedback pourrait ne pas fonctionner"
-        log_warn "Verifiez le fichier log: $LOG_FILE"
+        log_info "Aucun acces GitHub a retirer"
     fi
 }
 
@@ -2219,11 +2110,6 @@ step_setup_github_bot() {
 cleanup() {
     log_substep "Nettoyage des fichiers temporaires..."
     rm -rf "$TMP_DIR"
-
-    # Nettoyage supplementaire des traces du token GitHub
-    rm -f /dev/shm/.gh_token_* 2>/dev/null || true
-    unset GH_BOT_TOKEN_ENC 2>/dev/null || true
-    unset GH_BOT_PASSPHRASE_PARTS 2>/dev/null || true
 }
 
 # =============================================================================
@@ -2235,8 +2121,10 @@ show_summary() {
     INSTALL_MINUTES=$((INSTALL_DURATION / 60))
     INSTALL_SECONDS=$((INSTALL_DURATION % 60))
 
-    # Recuperation de l'adresse IP
+    # Recuperation de l'adresse IP et du nom reel de la machine (raspy2dmd, sauf en
+    # Pico seul ou la machine garde son nom, ex. raspydarts)
     IP_ADDRESS=$(hostname -I | awk '{print $1}')
+    WEB_HOST="$(hostname 2>/dev/null || echo raspy2dmd).local"
 
     echo ""
     echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════════${NC}"
@@ -2247,9 +2135,9 @@ show_summary() {
     echo -e "${CYAN}Version installee    :${NC} ${LATEST_VERSION}"
     echo ""
     echo -e "${BLUE}${BOLD}Acces a l'interface web (par défaut) :${NC}"
-    echo -e "  HTTP  : ${GREEN}http://raspy2dmd.local${NC}"
+    echo -e "  HTTP  : ${GREEN}http://${WEB_HOST}${NC}"
     echo -e "          ${GREEN}http://${IP_ADDRESS}${NC}"
-    echo -e "  HTTPS : ${GREEN}https://raspy2dmd.local${NC} (certificat auto-signe)"
+    echo -e "  HTTPS : ${GREEN}https://${WEB_HOST}${NC} (certificat auto-signe)"
     echo ""
     echo -e "${BLUE}${BOLD}Fichiers installes :${NC}"
     echo -e "  Application          : ${INSTALL_DIR}"
@@ -2363,7 +2251,7 @@ main() {
     step_setup_medias
     step_setup_database
     step_final_config
-    step_setup_github_bot
+    step_remove_github_bot
 
     cleanup
     show_summary
