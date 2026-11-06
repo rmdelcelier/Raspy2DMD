@@ -315,20 +315,36 @@ step_prepare() {
 # =============================================================================
 # ETAPE 2 : RECUPERATION DE LA DERNIERE VERSION
 # =============================================================================
+# Requete a l'API GitHub, 5 essais espaces de 10 s : une panne passagere du reseau ou du DNS
+# rendait une reponse vide.
+github_api_get() {
+    local url="$1" reponse essai
+    for essai in 1 2 3 4 5; do
+        reponse=$(curl -fsS --max-time 20 "$url" 2>>"$LOG_FILE") && [ -n "$reponse" ] && { echo "$reponse"; return 0; }
+        [ "$essai" -lt 5 ] && { log_warn "API GitHub sans reponse (essai $essai/5), nouvel essai dans 10 s..." >&2; sleep 10; }
+    done
+    return 1
+}
+
+# Arret avant toute modification du systeme : la branche ${GITHUB_BRANCH} du depot public ne
+# contient pas le programme, s'en servir donnait une installation cassee
+abort_no_release() {
+    log_error "$1"
+    log_error "Raspy2DMD n'a pas ete installe et le systeme n'a pas ete modifie."
+    log_error "Verifiez la connexion Internet du Raspberry Pi (github.com), puis relancez l'installation."
+    exit 1
+}
+
 step_get_version() {
     log_step 2 "Recuperation de la derniere version"
 
     log_substep "Interrogation de l'API GitHub..."
 
     # Recuperer la liste des releases et trouver la plus recente par tag
-    RELEASES_JSON=$(curl -s "${GITHUB_API_URL}/releases" 2>/dev/null)
+    RELEASES_JSON=$(github_api_get "${GITHUB_API_URL}/releases") || RELEASES_JSON=""
 
     if [ -z "$RELEASES_JSON" ] || echo "$RELEASES_JSON" | grep -q "Not Found"; then
-        log_warn "Impossible de recuperer les releases depuis GitHub"
-        log_substep "Utilisation de la branche ${GITHUB_BRANCH}..."
-        LATEST_VERSION="dev-${GITHUB_BRANCH}"
-        USE_BRANCH=true
-        return
+        abort_no_release "Impossible de recuperer la liste des versions depuis GitHub"
     fi
 
     # Extraire le tag de la premiere release de l'application (la plus recente)
@@ -341,17 +357,13 @@ step_get_version() {
     fi
 
     if [ -z "$LATEST_VERSION" ]; then
-        log_warn "Aucune release trouvee"
-        log_substep "Utilisation de la branche ${GITHUB_BRANCH}..."
-        LATEST_VERSION="dev-${GITHUB_BRANCH}"
-        USE_BRANCH=true
-        return
+        abort_no_release "Aucune version de Raspy2DMD trouvee sur GitHub"
     fi
 
     log_info "Derniere version : $LATEST_VERSION"
 
     # Recuperer les informations de cette release specifique
-    RELEASE_JSON=$(curl -s "${GITHUB_API_URL}/releases/tags/${LATEST_VERSION}" 2>/dev/null)
+    RELEASE_JSON=$(github_api_get "${GITHUB_API_URL}/releases/tags/${LATEST_VERSION}") || RELEASE_JSON=""
 
     # Recuperation de l'URL de telechargement de l'archive .zip
     DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -o '"browser_download_url": *"[^"]*\.zip"' | head -1 | sed 's/.*: *"\([^"]*\)"/\1/')
@@ -360,9 +372,7 @@ step_get_version() {
         log_substep "Archive trouvee : $(basename "$DOWNLOAD_URL")"
         USE_BRANCH=false
     else
-        log_warn "Aucune archive .zip trouvee dans la release"
-        log_substep "Utilisation de la branche ${GITHUB_BRANCH}..."
-        USE_BRANCH=true
+        abort_no_release "Archive de la version ${LATEST_VERSION} introuvable sur GitHub"
     fi
 }
 
@@ -912,7 +922,8 @@ step_download_raspy2dmd() {
         log_substep "Telechargement de l'archive (cela peut prendre quelques minutes)..."
 
         if [ -n "$DOWNLOAD_URL" ]; then
-            wget -q --show-progress "$DOWNLOAD_URL" -O raspy2dmd.zip
+            # Plusieurs essais : une coupure passagere ne doit pas casser l'installation
+            wget -q --show-progress --tries=5 --waitretry=10 --retry-connrefused "$DOWNLOAD_URL" -O raspy2dmd.zip
 
             log_substep "Extraction de l'archive..."
             mkdir -p "$TMP_DIR/extracted"
