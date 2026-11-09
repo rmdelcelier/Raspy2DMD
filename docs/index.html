@@ -818,7 +818,8 @@
             <div class="nav-items">
                 <div class="nav-item" onclick="showSection('rtc')" data-i18n="nav.item.rtc">Module RTC</div>
                 <div class="nav-item" onclick="showSection('hdmi')" data-i18n="nav.item.hdmi">Sortie HDMI</div>
-                <div class="nav-item" onclick="showSection('picoseul')" data-i18n="nav.item.picoseul">Raspberry Pico seul</div>
+                <div class="nav-item" onclick="showSection('picoseul')" data-i18n="nav.item.picoseul">Carte d'affichage USB seule</div>
+                <div class="nav-item" onclick="showSection('picoh')" data-i18n="nav.item.picoh">Raspberry Pico H</div>
                 <div class="nav-item" onclick="showSection('interstate75w')" data-i18n="nav.item.interstate75w">Interstate 75 W</div>
                 <div class="nav-item" onclick="showSection('rp1pio')" data-i18n="nav.item.rp1pio">Raspberry Pi 5 (RP1 PIO)</div>
             </div>
@@ -3410,14 +3411,14 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "conf|HDMI|display_output:both"<br>
 
         <!-- RASPBERRY PICO SEUL -->
         <div class="content-section" id="picoseul">
-            <h2 class="section-title" data-i18n="sec.picoseul.title">🔌 Matériel - Raspberry Pico seul</h2>
+            <h2 class="section-title" data-i18n="sec.picoseul.title">🔌 Matériel - Carte d'affichage USB seule</h2>
 
             <div class="command-card">
                 <div class="command-title" data-i18n="cmd.picoseul.title">Raspy2DMD à côté d'un autre programme</div>
 
                 <div class="command-section">
                     <h4 data-i18n="lbl.description">Description</h4>
-                    <p data-i18n-html="sec.picoseul.p_desc">La sortie <strong>Raspberry Pico seul</strong> laisse libres tous les GPIO du Raspberry : les panneaux sont pilotés par le Pico, branché en USB. Raspy2DMD peut ainsi tourner sur la même machine qu'un programme qui utilise les GPIO, comme RaspyDarts. Sans Pico branché, rien n'est affiché (il est recherché en permanence). La page Matériel grise les réglages propres au pilotage par les GPIO.</p>
+                    <p data-i18n-html="sec.picoseul.p_desc">La sortie <strong>Carte d'affichage USB seule</strong> laisse libres tous les GPIO du Raspberry : les panneaux sont pilotés par le Pico, branché en USB. Raspy2DMD peut ainsi tourner sur la même machine qu'un programme qui utilise les GPIO, comme RaspyDarts. Sans Pico branché, rien n'est affiché (il est recherché en permanence). La page Matériel grise les réglages propres au pilotage par les GPIO.</p>
                 </div>
 
                 <div class="command-section">
@@ -3436,7 +3437,68 @@ curl -sSL https://raw.githubusercontent.com/rmdelcelier/Raspy2DMD/main/scripts/i
                         <li data-i18n-html="sec.picoseul.li_samba">Le partage réseau (Samba) appartient à l'autre programme : l'interrupteur de la page Paramètres généraux est grisé ; les dossiers de Raspy2DMD restent accessibles avec l'identifiant raspy2dmd</li>
                         <li data-i18n="sec.picoseul.li_update">Une mise à jour automatique ne redémarre que Raspy2DMD, jamais la machine</li>
                         <li data-i18n="sec.picoseul.li_buttons">Ni bouton GPIO ni Bluetooth : l'arrêt de la machine est commandé par l'autre programme</li>
-                        <li data-i18n-html="sec.picoseul.li_conf">Sans l'option d'installation, la sortie « Raspberry Pico seul » se choisit aussi dans la page Sortie HDMI ou par <code>conf|HDMI|display_output:pico</code> (redémarre Raspy2DMD)</li>
+                        <li data-i18n-html="sec.picoseul.li_conf">Sans l'option d'installation, la sortie « Carte d'affichage USB seule » se choisit aussi dans la page Sortie HDMI ou par <code>conf|HDMI|display_output:pico</code> (redémarre Raspy2DMD)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- RASPBERRY PICO H + ADAPTATEUR SEENGREAT -->
+        <div class="content-section" id="picoh">
+            <h2 class="section-title" data-i18n="sec.picoh.title">🔌 Matériel - Raspberry Pico H</h2>
+
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.picoh.title">Raspberry Pico H avec adaptateur Seengreat</div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.description">Description</h4>
+                    <p data-i18n-html="sec.picoh.p_desc">Le <strong>Raspberry Pico H</strong>, monté sur l'adaptateur <strong>Seengreat RGB Matrix Adapter</strong>, pilote les panneaux à la place des GPIO du Raspberry. Il est branché en USB au Raspberry et détecté automatiquement (page Carte d'affichage USB). Le Pico gère seul le rafraîchissement des panneaux : l'affichage ne dépend plus de la charge du Raspberry, et ses GPIO restent libres (sortie « Carte d'affichage USB seule » possible).</p>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.picoh.h4_versions">Versions de l'adaptateur</h4>
+                    <p data-i18n-html="sec.picoh.p_versions">Le brochage du Pico sur l'adaptateur a changé avec la version V3.9 : chaque version a son firmware. La version est imprimée sur la carte.</p>
+                    <ul>
+                        <li data-i18n-html="sec.picoh.li_v39"><strong>V3.9 et suivantes</strong> : firmware <code>raspy2dmd_pico.uf2</code></li>
+                        <li data-i18n-html="sec.picoh.li_v38"><strong>V3.8 et précédentes</strong> : firmware <code>raspy2dmd_pico_v38.uf2</code></li>
+                        <li data-i18n-html="sec.picoh.li_wrong">Un firmware de la mauvaise version n'abîme rien, mais les panneaux restent noirs ou affichent une image incorrecte : il suffit de flasher l'autre</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.picoh.h4_flash">Installer le firmware</h4>
+                    <ul>
+                        <li data-i18n-html="sec.picoh.li_flash1">Premier flash : maintenez le bouton <strong>BOOTSEL</strong> du Pico pendant que vous le branchez au Raspberry ; il apparaît comme un lecteur <code>RPI-RP2</code></li>
+                        <li data-i18n-html="sec.picoh.li_flash2">Sur la page <strong>Carte d'affichage USB</strong>, choisissez le firmware de votre adaptateur et lancez le flash ; une fois notre firmware installé, celui de la carte branchée est présélectionné</li>
+                        <li data-i18n-html="sec.picoh.li_flash3">Les mises à jour suivantes se font sans toucher au bouton. Le firmware de l'Interstate 75 W (<code>raspy2dmd_interstate75w.uf2</code>) est refusé avec un message</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.picoh.h4_power">Alimentation</h4>
+                    <ul>
+                        <li data-i18n-html="sec.picoh.li_power1">Alimentez l'adaptateur par son entrée USB-C (5 V / 4 A) ou son connecteur DC (5 V / 8 A) ; il redistribue le courant aux panneaux par ses deux connecteurs d'alimentation</li>
+                        <li data-i18n-html="sec.picoh.li_power2">Le câble USB entre le Pico et le Raspberry ne sert qu'aux données et au Pico : il ne peut pas fournir le courant des panneaux</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.picoh.h4_led">LED témoin</h4>
+                    <p data-i18n-html="sec.picoh.p_led">La LED verte du Pico indique son état (mêmes éclairs que l'Interstate 75 W, sans les couleurs) :</p>
+                    <ul>
+                        <li data-i18n-html="sec.picoh.li_led_boot"><strong>3 éclairs</strong> : démarrage du Pico</li>
+                        <li data-i18n-html="sec.picoh.li_led_on"><strong>Allumée fixe</strong> : Pico prêt ; le logo est affiché tant que Raspy2DMD n'est pas connecté</li>
+                        <li data-i18n-html="sec.picoh.li_led_connect"><strong>2 éclairs</strong> : Raspy2DMD vient de se connecter</li>
+                        <li data-i18n-html="sec.picoh.li_led_error"><strong>Éclairs rapides</strong> : les panneaux n'ont pas pu démarrer ; débranchez puis rebranchez le Pico, et reflashez le firmware si cela persiste</li>
+                        <li data-i18n-html="sec.picoh.li_led_off"><strong>Éteinte</strong> : mise à jour du firmware en cours (lecteur <code>RPI-RP2</code>) ou Pico non alimenté</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.picoh.h4_notes">Notes</h4>
+                    <ul>
+                        <li data-i18n-html="sec.picoh.li_panels">Panneaux de 32 lignes, jusqu'à 128×32 en chaîne ; les panneaux de 64 lignes ne sont pas pris en charge</li>
+                        <li data-i18n-html="sec.picoh.li_bus">Ne branchez pas les mêmes panneaux à la fois sur le Pico et sur les GPIO du Raspberry : les deux pilotes se brouilleraient</li>
                     </ul>
                 </div>
             </div>
@@ -3451,7 +3513,7 @@ curl -sSL https://raw.githubusercontent.com/rmdelcelier/Raspy2DMD/main/scripts/i
 
                 <div class="command-section">
                     <h4 data-i18n="lbl.description">Description</h4>
-                    <p data-i18n-html="sec.interstate75w.p_desc">La carte <strong>Pimoroni Interstate 75 W</strong> (version RP2350) se fixe directement au dos d'un panneau. C'est une troisième façon de piloter les panneaux, en plus des GPIO du Raspberry et du Raspberry Pico avec adaptateur. Raspy2DMD l'utilise comme un Raspberry Pico : branchée en USB au Raspberry, elle est détectée automatiquement (page Raspberry Pico, sortie « Raspberry Pico seul » possible). Aucun réglage de brochage n'est nécessaire.</p>
+                    <p data-i18n-html="sec.interstate75w.p_desc">La carte <strong>Pimoroni Interstate 75 W</strong> (version RP2350) se fixe directement au dos d'un panneau. C'est une troisième façon de piloter les panneaux, en plus des GPIO du Raspberry et du Raspberry Pico avec adaptateur. Raspy2DMD l'utilise comme un Raspberry Pico : branchée en USB au Raspberry, elle est détectée automatiquement (page Carte d'affichage USB, sortie « Carte d'affichage USB seule » possible). Aucun réglage de brochage n'est nécessaire.</p>
                 </div>
 
                 <div class="command-section">
@@ -4554,7 +4616,8 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.li_visuals": "Les visuels de Raspy2DMD (démarrage, avertissements, mise à jour, paramétrage) s'affichent sur l'écran dans leur version haute résolution (dossiers …/HDMI des médias), pendant que le DMD joue la sienne",
             "sec.hdmi.li_materiel": "En sortie « Écran HDMI » seule, la page Matériel grise les réglages propres aux panneaux LED ; la taille du DMD reste réglable : c'est la taille de l'image affichée à l'écran",
             "nav.item.hdmi": "Sortie HDMI",
-            "nav.item.picoseul": "Raspberry Pico seul",
+            "nav.item.picoseul": "Carte d'affichage USB seule",
+            "nav.item.picoh": "Raspberry Pico H",
             "nav.item.interstate75w": "Interstate 75 W",
             "nav.item.rp1pio": "Raspberry Pi 5 (RP1 PIO)",
             "sec.hdmi.title": "📺 Matériel - Sortie HDMI",
@@ -4571,9 +4634,9 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.td_both": "Les deux en même temps, image identique",
             "sec.hdmi.td_all": "Tous",
             "sec.hdmi.td_multi": "Pi à plusieurs cœurs : Zero 2 W, 3, 4, 5 (pas Zero / Zero W)",
-            "sec.picoseul.title": "🔌 Matériel - Raspberry Pico seul",
+            "sec.picoseul.title": "🔌 Matériel - Carte d'affichage USB seule",
             "cmd.picoseul.title": "Raspy2DMD à côté d'un autre programme",
-            "sec.picoseul.p_desc": "La sortie <strong>Raspberry Pico seul</strong> laisse libres tous les GPIO du Raspberry : les panneaux sont pilotés par le Pico, branché en USB. Raspy2DMD peut ainsi tourner sur la même machine qu'un programme qui utilise les GPIO, comme RaspyDarts. Sans Pico branché, rien n'est affiché (il est recherché en permanence). La page Matériel grise les réglages propres au pilotage par les GPIO.",
+            "sec.picoseul.p_desc": "La sortie <strong>Carte d'affichage USB seule</strong> laisse libres tous les GPIO du Raspberry : les panneaux sont pilotés par le Pico, branché en USB. Raspy2DMD peut ainsi tourner sur la même machine qu'un programme qui utilise les GPIO, comme RaspyDarts. Sans Pico branché, rien n'est affiché (il est recherché en permanence). La page Matériel grise les réglages propres au pilotage par les GPIO.",
             "sec.picoseul.h4_install": "Installation",
             "sec.picoseul.p_install": "Pour installer Raspy2DMD sur une machine où tourne déjà un autre programme, ajoutez l'option <code>--pico-seul</code>. Le système est laissé tel quel : pas de mise à niveau complète ; nom de la machine, réseau, <code>cmdline.txt</code>, écran HDMI, console et Samba inchangés. La configuration est prête pour RaspyDarts sur la même machine, sans bouton GPIO et son coupé (réglable dans l'interface web). La désinstallation ne retire que ce que l'installation a ajouté.",
             "sec.picoseul.h4_locked": "Ce qui change dans une installation « Pico seul »",
@@ -4581,10 +4644,35 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.picoseul.li_samba": "Le partage réseau (Samba) appartient à l'autre programme : l'interrupteur de la page Paramètres généraux est grisé ; les dossiers de Raspy2DMD restent accessibles avec l'identifiant raspy2dmd",
             "sec.picoseul.li_update": "Une mise à jour automatique ne redémarre que Raspy2DMD, jamais la machine",
             "sec.picoseul.li_buttons": "Ni bouton GPIO ni Bluetooth : l'arrêt de la machine est commandé par l'autre programme",
-            "sec.picoseul.li_conf": "Sans l'option d'installation, la sortie « Raspberry Pico seul » se choisit aussi dans la page Sortie HDMI ou par <code>conf|HDMI|display_output:pico</code> (redémarre Raspy2DMD)",
+            "sec.picoseul.li_conf": "Sans l'option d'installation, la sortie « Carte d'affichage USB seule » se choisit aussi dans la page Sortie HDMI ou par <code>conf|HDMI|display_output:pico</code> (redémarre Raspy2DMD)",
+            "sec.picoh.title": "🔌 Matériel - Raspberry Pico H",
+            "cmd.picoh.title": "Raspberry Pico H avec adaptateur Seengreat",
+            "sec.picoh.p_desc": "Le <strong>Raspberry Pico H</strong>, monté sur l'adaptateur <strong>Seengreat RGB Matrix Adapter</strong>, pilote les panneaux à la place des GPIO du Raspberry. Il est branché en USB au Raspberry et détecté automatiquement (page Carte d'affichage USB). Le Pico gère seul le rafraîchissement des panneaux : l'affichage ne dépend plus de la charge du Raspberry, et ses GPIO restent libres (sortie « Carte d'affichage USB seule » possible).",
+            "sec.picoh.h4_versions": "Versions de l'adaptateur",
+            "sec.picoh.p_versions": "Le brochage du Pico sur l'adaptateur a changé avec la version V3.9 : chaque version a son firmware. La version est imprimée sur la carte.",
+            "sec.picoh.li_v39": "<strong>V3.9 et suivantes</strong> : firmware <code>raspy2dmd_pico.uf2</code>",
+            "sec.picoh.li_v38": "<strong>V3.8 et précédentes</strong> : firmware <code>raspy2dmd_pico_v38.uf2</code>",
+            "sec.picoh.li_wrong": "Un firmware de la mauvaise version n'abîme rien, mais les panneaux restent noirs ou affichent une image incorrecte : il suffit de flasher l'autre",
+            "sec.picoh.h4_flash": "Installer le firmware",
+            "sec.picoh.li_flash1": "Premier flash : maintenez le bouton <strong>BOOTSEL</strong> du Pico pendant que vous le branchez au Raspberry ; il apparaît comme un lecteur <code>RPI-RP2</code>",
+            "sec.picoh.li_flash2": "Sur la page <strong>Carte d'affichage USB</strong>, choisissez le firmware de votre adaptateur et lancez le flash ; une fois notre firmware installé, celui de la carte branchée est présélectionné",
+            "sec.picoh.li_flash3": "Les mises à jour suivantes se font sans toucher au bouton. Le firmware de l'Interstate 75 W (<code>raspy2dmd_interstate75w.uf2</code>) est refusé avec un message",
+            "sec.picoh.h4_power": "Alimentation",
+            "sec.picoh.li_power1": "Alimentez l'adaptateur par son entrée USB-C (5 V / 4 A) ou son connecteur DC (5 V / 8 A) ; il redistribue le courant aux panneaux par ses deux connecteurs d'alimentation",
+            "sec.picoh.li_power2": "Le câble USB entre le Pico et le Raspberry ne sert qu'aux données et au Pico : il ne peut pas fournir le courant des panneaux",
+            "sec.picoh.h4_led": "LED témoin",
+            "sec.picoh.p_led": "La LED verte du Pico indique son état (mêmes éclairs que l'Interstate 75 W, sans les couleurs) :",
+            "sec.picoh.li_led_boot": "<strong>3 éclairs</strong> : démarrage du Pico",
+            "sec.picoh.li_led_on": "<strong>Allumée fixe</strong> : Pico prêt ; le logo est affiché tant que Raspy2DMD n'est pas connecté",
+            "sec.picoh.li_led_connect": "<strong>2 éclairs</strong> : Raspy2DMD vient de se connecter",
+            "sec.picoh.li_led_error": "<strong>Éclairs rapides</strong> : les panneaux n'ont pas pu démarrer ; débranchez puis rebranchez le Pico, et reflashez le firmware si cela persiste",
+            "sec.picoh.li_led_off": "<strong>Éteinte</strong> : mise à jour du firmware en cours (lecteur <code>RPI-RP2</code>) ou Pico non alimenté",
+            "sec.picoh.h4_notes": "Notes",
+            "sec.picoh.li_panels": "Panneaux de 32 lignes, jusqu'à 128×32 en chaîne ; les panneaux de 64 lignes ne sont pas pris en charge",
+            "sec.picoh.li_bus": "Ne branchez pas les mêmes panneaux à la fois sur le Pico et sur les GPIO du Raspberry : les deux pilotes se brouilleraient",
             "sec.interstate75w.title": "🔌 Matériel - Interstate 75 W",
             "cmd.interstate75w.title": "Carte Pimoroni Interstate 75 W",
-            "sec.interstate75w.p_desc": "La carte <strong>Pimoroni Interstate 75 W</strong> (version RP2350) se fixe directement au dos d'un panneau. C'est une troisième façon de piloter les panneaux, en plus des GPIO du Raspberry et du Raspberry Pico avec adaptateur. Raspy2DMD l'utilise comme un Raspberry Pico : branchée en USB au Raspberry, elle est détectée automatiquement (page Raspberry Pico, sortie « Raspberry Pico seul » possible). Aucun réglage de brochage n'est nécessaire.",
+            "sec.interstate75w.p_desc": "La carte <strong>Pimoroni Interstate 75 W</strong> (version RP2350) se fixe directement au dos d'un panneau. C'est une troisième façon de piloter les panneaux, en plus des GPIO du Raspberry et du Raspberry Pico avec adaptateur. Raspy2DMD l'utilise comme un Raspberry Pico : branchée en USB au Raspberry, elle est détectée automatiquement (page Carte d'affichage USB, sortie « Carte d'affichage USB seule » possible). Aucun réglage de brochage n'est nécessaire.",
             "sec.interstate75w.h4_flash": "Installer le firmware",
             "sec.interstate75w.li_flash1": "Premier flash : maintenez le bouton <strong>BOOT</strong> de la carte pendant que vous la branchez au Raspberry ; elle apparaît comme un lecteur <code>RP2350</code>",
             "sec.interstate75w.li_flash2": "Sur la page <strong>Raspberry Pico</strong>, choisissez <code>raspy2dmd_interstate75w.uf2</code> et lancez le flash (le fichier de la carte branchée est présélectionné)",
@@ -5278,7 +5366,8 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.li_visuals": "Raspy2DMD visuals (startup, warnings, update, settings) are shown on the screen in their high-resolution version (…/HDMI media folders), while the DMD plays its own",
             "sec.hdmi.li_materiel": "With the \"HDMI screen\" output alone, the Hardware page greys out settings specific to LED panels; the DMD size can still be changed: it is the size of the picture shown on the screen",
             "nav.item.hdmi": "HDMI output",
-            "nav.item.picoseul": "Raspberry Pico only",
+            "nav.item.picoseul": "USB display board only",
+            "nav.item.picoh": "Raspberry Pico H",
             "nav.item.interstate75w": "Interstate 75 W",
             "nav.item.rp1pio": "Raspberry Pi 5 (RP1 PIO)",
             "sec.hdmi.title": "📺 Hardware - HDMI output",
@@ -5295,9 +5384,9 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.td_both": "Both at the same time, same picture",
             "sec.hdmi.td_all": "All",
             "sec.hdmi.td_multi": "Multi-core Pi: Zero 2 W, 3, 4, 5 (not Zero / Zero W)",
-            "sec.picoseul.title": "🔌 Hardware - Raspberry Pico only",
+            "sec.picoseul.title": "🔌 Hardware - USB display board only",
             "cmd.picoseul.title": "Raspy2DMD alongside another program",
-            "sec.picoseul.p_desc": "The <strong>Raspberry Pico only</strong> output leaves all the Raspberry's GPIO free: the panels are driven by the Pico, connected over USB. Raspy2DMD can thus run on the same machine as a program that uses the GPIO, such as RaspyDarts. With no Pico connected, nothing is displayed (it is searched for continuously). The Hardware page greys out the settings specific to driving by the GPIO.",
+            "sec.picoseul.p_desc": "The <strong>USB display board only</strong> output leaves all the Raspberry's GPIO free: the panels are driven by the Pico, connected over USB. Raspy2DMD can thus run on the same machine as a program that uses the GPIO, such as RaspyDarts. With no Pico connected, nothing is displayed (it is searched for continuously). The Hardware page greys out the settings specific to driving by the GPIO.",
             "sec.picoseul.h4_install": "Installation",
             "sec.picoseul.p_install": "To install Raspy2DMD on a machine that already runs another program, add the <code>--pico-seul</code> option. The system is left as it is: no full upgrade; machine name, network, <code>cmdline.txt</code>, HDMI screen, console and Samba unchanged. The configuration is ready for RaspyDarts on the same machine, with no GPIO button and sound muted (adjustable in the web interface). Uninstalling only removes what the installation added.",
             "sec.picoseul.h4_locked": "What changes in a \"Pico only\" installation",
@@ -5305,10 +5394,35 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.picoseul.li_samba": "Network sharing (Samba) belongs to the other program: the switch on the General settings page is greyed out; Raspy2DMD's folders remain accessible with the raspy2dmd login",
             "sec.picoseul.li_update": "An automatic update only restarts Raspy2DMD, never the machine",
             "sec.picoseul.li_buttons": "No GPIO button and no Bluetooth: shutting down the machine is controlled by the other program",
-            "sec.picoseul.li_conf": "Without the installation option, the \"Raspberry Pico only\" output can also be chosen on the HDMI output page or with <code>conf|HDMI|display_output:pico</code> (restarts Raspy2DMD)",
+            "sec.picoseul.li_conf": "Without the installation option, the \"USB display board only\" output can also be chosen on the HDMI output page or with <code>conf|HDMI|display_output:pico</code> (restarts Raspy2DMD)",
+            "sec.picoh.title": "🔌 Hardware - Raspberry Pico H",
+            "cmd.picoh.title": "Raspberry Pico H with Seengreat adapter",
+            "sec.picoh.p_desc": "The <strong>Raspberry Pico H</strong>, mounted on the <strong>Seengreat RGB Matrix Adapter</strong>, drives the panels instead of the Raspberry's GPIO. It is connected to the Raspberry by USB and detected automatically (USB display board page). The Pico handles the panel refresh on its own: the display no longer depends on the Raspberry's load, and its GPIO stay free (\"USB display board only\" output possible).",
+            "sec.picoh.h4_versions": "Adapter versions",
+            "sec.picoh.p_versions": "The Pico's pin mapping on the adapter changed with version V3.9: each version has its own firmware. The version is printed on the board.",
+            "sec.picoh.li_v39": "<strong>V3.9 and later</strong>: firmware <code>raspy2dmd_pico.uf2</code>",
+            "sec.picoh.li_v38": "<strong>V3.8 and earlier</strong>: firmware <code>raspy2dmd_pico_v38.uf2</code>",
+            "sec.picoh.li_wrong": "A firmware for the wrong version damages nothing, but the panels stay black or show a wrong image: just flash the other one",
+            "sec.picoh.h4_flash": "Installing the firmware",
+            "sec.picoh.li_flash1": "First flash: hold the Pico's <strong>BOOTSEL</strong> button while connecting it to the Raspberry; it appears as an <code>RPI-RP2</code> drive",
+            "sec.picoh.li_flash2": "On the <strong>USB display board</strong> page, choose your adapter's firmware and start the flash; once our firmware is installed, the connected board's file is preselected",
+            "sec.picoh.li_flash3": "Later updates need no button. The Interstate 75 W firmware (<code>raspy2dmd_interstate75w.uf2</code>) is refused with a message",
+            "sec.picoh.h4_power": "Power supply",
+            "sec.picoh.li_power1": "Power the adapter through its USB-C input (5 V / 4 A) or its DC connector (5 V / 8 A); it passes the current to the panels through its two power connectors",
+            "sec.picoh.li_power2": "The USB cable between the Pico and the Raspberry only carries data and powers the Pico: it cannot supply the panels' current",
+            "sec.picoh.h4_led": "Status LED",
+            "sec.picoh.p_led": "The Pico's green LED shows its state (same flashes as the Interstate 75 W, without the colours):",
+            "sec.picoh.li_led_boot": "<strong>3 flashes</strong>: the Pico is starting",
+            "sec.picoh.li_led_on": "<strong>Steady on</strong>: Pico ready; the logo is shown until Raspy2DMD connects",
+            "sec.picoh.li_led_connect": "<strong>2 flashes</strong>: Raspy2DMD has just connected",
+            "sec.picoh.li_led_error": "<strong>Fast flashes</strong>: the panels could not start; unplug and replug the Pico, and reflash the firmware if it persists",
+            "sec.picoh.li_led_off": "<strong>Off</strong>: firmware update in progress (<code>RPI-RP2</code> drive) or Pico not powered",
+            "sec.picoh.h4_notes": "Notes",
+            "sec.picoh.li_panels": "32-row panels, up to 128×32 when chained; 64-row panels are not supported",
+            "sec.picoh.li_bus": "Do not connect the same panels to both the Pico and the Raspberry's GPIO: the two drivers would interfere",
             "sec.interstate75w.title": "🔌 Hardware - Interstate 75 W",
             "cmd.interstate75w.title": "Pimoroni Interstate 75 W board",
-            "sec.interstate75w.p_desc": "The <strong>Pimoroni Interstate 75 W</strong> board (RP2350 version) mounts directly on the back of a panel. It is a third way to drive the panels, alongside the Raspberry's GPIO and the Raspberry Pico with adapter. Raspy2DMD uses it like a Raspberry Pico: connected to the Raspberry by USB, it is detected automatically (Raspberry Pico page, \"Raspberry Pico only\" output possible). No pin mapping setting is needed.",
+            "sec.interstate75w.p_desc": "The <strong>Pimoroni Interstate 75 W</strong> board (RP2350 version) mounts directly on the back of a panel. It is a third way to drive the panels, alongside the Raspberry's GPIO and the Raspberry Pico with adapter. Raspy2DMD uses it like a Raspberry Pico: connected to the Raspberry by USB, it is detected automatically (USB display board page, \"USB display board only\" output possible). No pin mapping setting is needed.",
             "sec.interstate75w.h4_flash": "Installing the firmware",
             "sec.interstate75w.li_flash1": "First flash: hold the board's <strong>BOOT</strong> button while connecting it to the Raspberry; it appears as an <code>RP2350</code> drive",
             "sec.interstate75w.li_flash2": "On the <strong>Raspberry Pico</strong> page, choose <code>raspy2dmd_interstate75w.uf2</code> and start the flash (the connected board's file is preselected)",
@@ -5998,7 +6112,8 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.li_visuals": "Die Raspy2DMD-Grafiken (Start, Warnungen, Update, Einstellungen) erscheinen auf dem Bildschirm in ihrer hochauflösenden Version (Medienordner …/HDMI), während der DMD seine eigene zeigt",
             "sec.hdmi.li_materiel": "Beim Ausgang „HDMI-Bildschirm“ allein graut die Seite Hardware die Einstellungen der LED-Panels aus; die DMD-Größe bleibt einstellbar: Sie bestimmt die Größe des Bildes auf dem Bildschirm",
             "nav.item.hdmi": "HDMI-Ausgang",
-            "nav.item.picoseul": "Nur Raspberry Pico",
+            "nav.item.picoseul": "Nur USB-Anzeigeplatine",
+            "nav.item.picoh": "Raspberry Pico H",
             "nav.item.interstate75w": "Interstate 75 W",
             "nav.item.rp1pio": "Raspberry Pi 5 (RP1 PIO)",
             "sec.hdmi.title": "📺 Hardware - HDMI-Ausgang",
@@ -6015,9 +6130,9 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.td_both": "Beide gleichzeitig, identisches Bild",
             "sec.hdmi.td_all": "Alle",
             "sec.hdmi.td_multi": "Pi mit mehreren Kernen: Zero 2 W, 3, 4, 5 (nicht Zero / Zero W)",
-            "sec.picoseul.title": "🔌 Hardware - Nur Raspberry Pico",
+            "sec.picoseul.title": "🔌 Hardware - Nur USB-Anzeigeplatine",
             "cmd.picoseul.title": "Raspy2DMD neben einem anderen Programm",
-            "sec.picoseul.p_desc": "Der Ausgang <strong>Nur Raspberry Pico</strong> lässt alle GPIO des Raspberry frei: die Panels werden vom Pico angesteuert, der über USB angeschlossen ist. So kann Raspy2DMD auf derselben Maschine laufen wie ein Programm, das die GPIO nutzt, etwa RaspyDarts. Ohne angeschlossenen Pico wird nichts angezeigt (er wird ständig gesucht). Die Seite Hardware graut die Einstellungen der Ansteuerung über GPIO aus.",
+            "sec.picoseul.p_desc": "Der Ausgang <strong>Nur USB-Anzeigeplatine</strong> lässt alle GPIO des Raspberry frei: die Panels werden vom Pico angesteuert, der über USB angeschlossen ist. So kann Raspy2DMD auf derselben Maschine laufen wie ein Programm, das die GPIO nutzt, etwa RaspyDarts. Ohne angeschlossenen Pico wird nichts angezeigt (er wird ständig gesucht). Die Seite Hardware graut die Einstellungen der Ansteuerung über GPIO aus.",
             "sec.picoseul.h4_install": "Installation",
             "sec.picoseul.p_install": "Um Raspy2DMD auf einer Maschine zu installieren, auf der bereits ein anderes Programm läuft, die Option <code>--pico-seul</code> hinzufügen. Das System bleibt unverändert: kein vollständiges Upgrade; Rechnername, Netzwerk, <code>cmdline.txt</code>, HDMI-Bildschirm, Konsole und Samba bleiben gleich. Die Konfiguration ist für RaspyDarts auf derselben Maschine vorbereitet, ohne GPIO-Taster und mit stummem Ton (in der Weboberfläche einstellbar). Die Deinstallation entfernt nur, was die Installation hinzugefügt hat.",
             "sec.picoseul.h4_locked": "Was sich bei einer Installation „Nur Pico“ ändert",
@@ -6025,10 +6140,35 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.picoseul.li_samba": "Die Netzwerkfreigabe (Samba) gehört dem anderen Programm: der Schalter auf der Seite Allgemeine Einstellungen ist ausgegraut; die Ordner von Raspy2DMD bleiben mit dem Benutzer raspy2dmd erreichbar",
             "sec.picoseul.li_update": "Ein automatisches Update startet nur Raspy2DMD neu, nie den Rechner",
             "sec.picoseul.li_buttons": "Weder GPIO-Taster noch Bluetooth: das Herunterfahren des Rechners steuert das andere Programm",
-            "sec.picoseul.li_conf": "Ohne die Installationsoption lässt sich die Ausgabe „Nur Raspberry Pico“ auch auf der Seite HDMI-Ausgabe oder mit <code>conf|HDMI|display_output:pico</code> wählen (startet Raspy2DMD neu)",
+            "sec.picoseul.li_conf": "Ohne die Installationsoption lässt sich die Ausgabe „Nur USB-Anzeigeplatine“ auch auf der Seite HDMI-Ausgabe oder mit <code>conf|HDMI|display_output:pico</code> wählen (startet Raspy2DMD neu)",
+            "sec.picoh.title": "🔌 Hardware - Raspberry Pico H",
+            "cmd.picoh.title": "Raspberry Pico H mit Seengreat-Adapter",
+            "sec.picoh.p_desc": "Der <strong>Raspberry Pico H</strong>, auf den <strong>Seengreat RGB Matrix Adapter</strong> gesteckt, steuert die Panels anstelle der GPIO des Raspberry. Er ist per USB mit dem Raspberry verbunden und wird automatisch erkannt (Seite USB-Anzeigeplatine). Der Pico übernimmt die Bildwiederholung allein: die Anzeige hängt nicht mehr von der Last des Raspberry ab, und dessen GPIO bleiben frei (Ausgabe „Nur USB-Anzeigeplatine“ möglich).",
+            "sec.picoh.h4_versions": "Adapterversionen",
+            "sec.picoh.p_versions": "Die Pinbelegung des Pico auf dem Adapter hat sich mit Version V3.9 geändert: jede Version hat ihre eigene Firmware. Die Version ist auf der Platine aufgedruckt.",
+            "sec.picoh.li_v39": "<strong>V3.9 und neuer</strong>: Firmware <code>raspy2dmd_pico.uf2</code>",
+            "sec.picoh.li_v38": "<strong>V3.8 und älter</strong>: Firmware <code>raspy2dmd_pico_v38.uf2</code>",
+            "sec.picoh.li_wrong": "Eine Firmware der falschen Version beschädigt nichts, aber die Panels bleiben schwarz oder zeigen ein falsches Bild: einfach die andere flashen",
+            "sec.picoh.h4_flash": "Firmware installieren",
+            "sec.picoh.li_flash1": "Erstes Flashen: die Taste <strong>BOOTSEL</strong> des Pico gedrückt halten und ihn dabei an den Raspberry anschließen; er erscheint als Laufwerk <code>RPI-RP2</code>",
+            "sec.picoh.li_flash2": "Auf der Seite <strong>USB-Anzeigeplatine</strong> die Firmware Ihres Adapters wählen und das Flashen starten; sobald unsere Firmware installiert ist, ist die Datei der angeschlossenen Platine vorausgewählt",
+            "sec.picoh.li_flash3": "Spätere Updates ohne Taste. Die Firmware der Interstate 75 W (<code>raspy2dmd_interstate75w.uf2</code>) wird mit einer Meldung abgelehnt",
+            "sec.picoh.h4_power": "Stromversorgung",
+            "sec.picoh.li_power1": "Den Adapter über seinen USB-C-Eingang (5 V / 4 A) oder seinen DC-Anschluss (5 V / 8 A) versorgen; er gibt den Strom über seine zwei Stromanschlüsse an die Panels weiter",
+            "sec.picoh.li_power2": "Das USB-Kabel zwischen Pico und Raspberry dient nur den Daten und dem Pico: es kann den Strom der Panels nicht liefern",
+            "sec.picoh.h4_led": "Status-LED",
+            "sec.picoh.p_led": "Die grüne LED des Pico zeigt seinen Zustand (dieselben Blinkzeichen wie die Interstate 75 W, ohne Farben):",
+            "sec.picoh.li_led_boot": "<strong>3 Blitze</strong>: der Pico startet",
+            "sec.picoh.li_led_on": "<strong>Dauerhaft an</strong>: Pico bereit; das Logo wird angezeigt, bis Raspy2DMD sich verbindet",
+            "sec.picoh.li_led_connect": "<strong>2 Blitze</strong>: Raspy2DMD hat sich gerade verbunden",
+            "sec.picoh.li_led_error": "<strong>Schnelle Blitze</strong>: die Panels konnten nicht starten; Pico ab- und wieder anstecken, bei Bedarf die Firmware neu flashen",
+            "sec.picoh.li_led_off": "<strong>Aus</strong>: Firmware-Update läuft (Laufwerk <code>RPI-RP2</code>) oder Pico ohne Strom",
+            "sec.picoh.h4_notes": "Hinweise",
+            "sec.picoh.li_panels": "Panels mit 32 Zeilen, verkettet bis 128×32; Panels mit 64 Zeilen werden nicht unterstützt",
+            "sec.picoh.li_bus": "Dieselben Panels nicht gleichzeitig an den Pico und an die GPIO des Raspberry anschließen: die beiden Treiber würden sich stören",
             "sec.interstate75w.title": "🔌 Hardware - Interstate 75 W",
             "cmd.interstate75w.title": "Pimoroni-Platine Interstate 75 W",
-            "sec.interstate75w.p_desc": "Die Platine <strong>Pimoroni Interstate 75 W</strong> (RP2350-Version) wird direkt auf die Rückseite eines Panels gesteckt. Sie ist eine dritte Möglichkeit, die Panels anzusteuern, neben den GPIO des Raspberry und dem Raspberry Pico mit Adapter. Raspy2DMD nutzt sie wie einen Raspberry Pico: per USB mit dem Raspberry verbunden, wird sie automatisch erkannt (Seite Raspberry Pico, Ausgabe „Nur Raspberry Pico“ möglich). Keine Pinbelegung einzustellen.",
+            "sec.interstate75w.p_desc": "Die Platine <strong>Pimoroni Interstate 75 W</strong> (RP2350-Version) wird direkt auf die Rückseite eines Panels gesteckt. Sie ist eine dritte Möglichkeit, die Panels anzusteuern, neben den GPIO des Raspberry und dem Raspberry Pico mit Adapter. Raspy2DMD nutzt sie wie einen Raspberry Pico: per USB mit dem Raspberry verbunden, wird sie automatisch erkannt (Seite USB-Anzeigeplatine, Ausgabe „Nur USB-Anzeigeplatine“ möglich). Keine Pinbelegung einzustellen.",
             "sec.interstate75w.h4_flash": "Firmware installieren",
             "sec.interstate75w.li_flash1": "Erstes Flashen: die Taste <strong>BOOT</strong> der Platine gedrückt halten und sie dabei an den Raspberry anschließen; sie erscheint als Laufwerk <code>RP2350</code>",
             "sec.interstate75w.li_flash2": "Auf der Seite <strong>Raspberry Pico</strong> <code>raspy2dmd_interstate75w.uf2</code> wählen und das Flashen starten (die Datei der angeschlossenen Platine ist vorausgewählt)",
@@ -6718,7 +6858,8 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.li_visuals": "Las imágenes de Raspy2DMD (arranque, avisos, actualización, ajustes) se muestran en la pantalla en su versión de alta resolución (carpetas …/HDMI de los medios), mientras el DMD reproduce la suya",
             "sec.hdmi.li_materiel": "Con la salida «Pantalla HDMI» sola, la página Hardware atenúa los ajustes propios de los paneles LED; el tamaño del DMD sigue siendo ajustable: es el tamaño de la imagen mostrada",
             "nav.item.hdmi": "Salida HDMI",
-            "nav.item.picoseul": "Solo Raspberry Pico",
+            "nav.item.picoseul": "Solo placa de visualización USB",
+            "nav.item.picoh": "Raspberry Pico H",
             "nav.item.interstate75w": "Interstate 75 W",
             "nav.item.rp1pio": "Raspberry Pi 5 (RP1 PIO)",
             "sec.hdmi.title": "📺 Hardware - Salida HDMI",
@@ -6735,9 +6876,9 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.td_both": "Ambos a la vez, imagen idéntica",
             "sec.hdmi.td_all": "Todos",
             "sec.hdmi.td_multi": "Pi de varios núcleos: Zero 2 W, 3, 4, 5 (no Zero / Zero W)",
-            "sec.picoseul.title": "🔌 Hardware - Solo Raspberry Pico",
+            "sec.picoseul.title": "🔌 Hardware - Solo placa de visualización USB",
             "cmd.picoseul.title": "Raspy2DMD junto a otro programa",
-            "sec.picoseul.p_desc": "La salida <strong>Solo Raspberry Pico</strong> deja libres todos los GPIO de la Raspberry: los paneles los controla el Pico, conectado por USB. Raspy2DMD puede así funcionar en la misma máquina que un programa que usa los GPIO, como RaspyDarts. Sin Pico conectado, no se muestra nada (se busca continuamente). La página Hardware atenúa los ajustes propios del control por GPIO.",
+            "sec.picoseul.p_desc": "La salida <strong>Solo placa de visualización USB</strong> deja libres todos los GPIO de la Raspberry: los paneles los controla el Pico, conectado por USB. Raspy2DMD puede así funcionar en la misma máquina que un programa que usa los GPIO, como RaspyDarts. Sin Pico conectado, no se muestra nada (se busca continuamente). La página Hardware atenúa los ajustes propios del control por GPIO.",
             "sec.picoseul.h4_install": "Instalación",
             "sec.picoseul.p_install": "Para instalar Raspy2DMD en una máquina donde ya funciona otro programa, añada la opción <code>--pico-seul</code>. El sistema se deja tal cual: sin actualización completa; nombre de la máquina, red, <code>cmdline.txt</code>, pantalla HDMI, consola y Samba sin cambios. La configuración queda lista para RaspyDarts en la misma máquina, sin botón GPIO y con el sonido silenciado (ajustable en la interfaz web). La desinstalación solo quita lo que la instalación añadió.",
             "sec.picoseul.h4_locked": "Lo que cambia en una instalación «Solo Pico»",
@@ -6745,10 +6886,35 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.picoseul.li_samba": "El uso compartido de red (Samba) pertenece al otro programa: el interruptor de la página Parámetros generales está atenuado; las carpetas de Raspy2DMD siguen accesibles con el usuario raspy2dmd",
             "sec.picoseul.li_update": "Una actualización automática solo reinicia Raspy2DMD, nunca la máquina",
             "sec.picoseul.li_buttons": "Ni botón GPIO ni Bluetooth: el apagado de la máquina lo controla el otro programa",
-            "sec.picoseul.li_conf": "Sin la opción de instalación, la salida «Solo Raspberry Pico» también se elige en la página Salida HDMI o con <code>conf|HDMI|display_output:pico</code> (reinicia Raspy2DMD)",
+            "sec.picoseul.li_conf": "Sin la opción de instalación, la salida «Solo placa de visualización USB» también se elige en la página Salida HDMI o con <code>conf|HDMI|display_output:pico</code> (reinicia Raspy2DMD)",
+            "sec.picoh.title": "🔌 Hardware - Raspberry Pico H",
+            "cmd.picoh.title": "Raspberry Pico H con adaptador Seengreat",
+            "sec.picoh.p_desc": "El <strong>Raspberry Pico H</strong>, montado en el adaptador <strong>Seengreat RGB Matrix Adapter</strong>, controla los paneles en lugar de los GPIO de la Raspberry. Se conecta por USB a la Raspberry y se detecta automáticamente (página Placa de visualización USB). El Pico gestiona solo el refresco de los paneles: la visualización ya no depende de la carga de la Raspberry, y sus GPIO quedan libres (salida «Solo placa de visualización USB» posible).",
+            "sec.picoh.h4_versions": "Versiones del adaptador",
+            "sec.picoh.p_versions": "La asignación de pines del Pico en el adaptador cambió con la versión V3.9: cada versión tiene su firmware. La versión está impresa en la placa.",
+            "sec.picoh.li_v39": "<strong>V3.9 y posteriores</strong>: firmware <code>raspy2dmd_pico.uf2</code>",
+            "sec.picoh.li_v38": "<strong>V3.8 y anteriores</strong>: firmware <code>raspy2dmd_pico_v38.uf2</code>",
+            "sec.picoh.li_wrong": "Un firmware de la versión equivocada no daña nada, pero los paneles quedan en negro o muestran una imagen incorrecta: basta con flashear el otro",
+            "sec.picoh.h4_flash": "Instalar el firmware",
+            "sec.picoh.li_flash1": "Primer flasheo: mantenga pulsado el botón <strong>BOOTSEL</strong> del Pico mientras lo conecta a la Raspberry; aparece como una unidad <code>RPI-RP2</code>",
+            "sec.picoh.li_flash2": "En la página <strong>Placa de visualización USB</strong>, elija el firmware de su adaptador e inicie el flasheo; una vez instalado nuestro firmware, el archivo de la placa conectada está preseleccionado",
+            "sec.picoh.li_flash3": "Las actualizaciones siguientes no requieren el botón. El firmware de la Interstate 75 W (<code>raspy2dmd_interstate75w.uf2</code>) se rechaza con un mensaje",
+            "sec.picoh.h4_power": "Alimentación",
+            "sec.picoh.li_power1": "Alimente el adaptador por su entrada USB-C (5 V / 4 A) o su conector DC (5 V / 8 A); reparte la corriente a los paneles por sus dos conectores de alimentación",
+            "sec.picoh.li_power2": "El cable USB entre el Pico y la Raspberry solo sirve para los datos y el Pico: no puede suministrar la corriente de los paneles",
+            "sec.picoh.h4_led": "LED de estado",
+            "sec.picoh.p_led": "El LED verde del Pico indica su estado (mismos destellos que la Interstate 75 W, sin los colores):",
+            "sec.picoh.li_led_boot": "<strong>3 destellos</strong>: arranque del Pico",
+            "sec.picoh.li_led_on": "<strong>Encendido fijo</strong>: Pico listo; el logotipo se muestra hasta que Raspy2DMD se conecta",
+            "sec.picoh.li_led_connect": "<strong>2 destellos</strong>: Raspy2DMD acaba de conectarse",
+            "sec.picoh.li_led_error": "<strong>Destellos rápidos</strong>: los paneles no han podido arrancar; desconecte y vuelva a conectar el Pico, y vuelva a flashear el firmware si persiste",
+            "sec.picoh.li_led_off": "<strong>Apagado</strong>: actualización del firmware en curso (unidad <code>RPI-RP2</code>) o Pico sin alimentación",
+            "sec.picoh.h4_notes": "Notas",
+            "sec.picoh.li_panels": "Paneles de 32 filas, hasta 128×32 encadenados; los paneles de 64 filas no son compatibles",
+            "sec.picoh.li_bus": "No conecte los mismos paneles a la vez al Pico y a los GPIO de la Raspberry: los dos controladores se interferirían",
             "sec.interstate75w.title": "🔌 Hardware - Interstate 75 W",
             "cmd.interstate75w.title": "Placa Pimoroni Interstate 75 W",
-            "sec.interstate75w.p_desc": "La placa <strong>Pimoroni Interstate 75 W</strong> (versión RP2350) se monta directamente en la parte trasera de un panel. Es una tercera forma de controlar los paneles, además de los GPIO de la Raspberry y del Raspberry Pico con adaptador. Raspy2DMD la usa como un Raspberry Pico: conectada por USB a la Raspberry, se detecta automáticamente (página Raspberry Pico, salida «Solo Raspberry Pico» posible). No hay que ajustar la asignación de pines.",
+            "sec.interstate75w.p_desc": "La placa <strong>Pimoroni Interstate 75 W</strong> (versión RP2350) se monta directamente en la parte trasera de un panel. Es una tercera forma de controlar los paneles, además de los GPIO de la Raspberry y del Raspberry Pico con adaptador. Raspy2DMD la usa como un Raspberry Pico: conectada por USB a la Raspberry, se detecta automáticamente (página Placa de visualización USB, salida «Solo placa de visualización USB» posible). No hay que ajustar la asignación de pines.",
             "sec.interstate75w.h4_flash": "Instalar el firmware",
             "sec.interstate75w.li_flash1": "Primer flasheo: mantenga pulsado el botón <strong>BOOT</strong> de la placa mientras la conecta a la Raspberry; aparece como una unidad <code>RP2350</code>",
             "sec.interstate75w.li_flash2": "En la página <strong>Raspberry Pico</strong>, elija <code>raspy2dmd_interstate75w.uf2</code> e inicie el flasheo (el archivo de la placa conectada está preseleccionado)",
@@ -7438,7 +7604,8 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.li_visuals": "Le grafiche di Raspy2DMD (avvio, avvisi, aggiornamento, impostazioni) appaiono sullo schermo nella versione ad alta risoluzione (cartelle …/HDMI dei media), mentre il DMD mostra la propria",
             "sec.hdmi.li_materiel": "Con la sola uscita «Schermo HDMI», la pagina Hardware disattiva le impostazioni dei pannelli LED; la dimensione del DMD resta regolabile: è la dimensione dell'immagine mostrata sullo schermo",
             "nav.item.hdmi": "Uscita HDMI",
-            "nav.item.picoseul": "Solo Raspberry Pico",
+            "nav.item.picoseul": "Solo scheda di visualizzazione USB",
+            "nav.item.picoh": "Raspberry Pico H",
             "nav.item.interstate75w": "Interstate 75 W",
             "nav.item.rp1pio": "Raspberry Pi 5 (RP1 PIO)",
             "sec.hdmi.title": "📺 Hardware - Uscita HDMI",
@@ -7455,9 +7622,9 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.hdmi.td_both": "Entrambi contemporaneamente, immagine identica",
             "sec.hdmi.td_all": "Tutti",
             "sec.hdmi.td_multi": "Pi multi-core: Zero 2 W, 3, 4, 5 (non Zero / Zero W)",
-            "sec.picoseul.title": "🔌 Hardware - Solo Raspberry Pico",
+            "sec.picoseul.title": "🔌 Hardware - Solo scheda di visualizzazione USB",
             "cmd.picoseul.title": "Raspy2DMD accanto a un altro programma",
-            "sec.picoseul.p_desc": "L'uscita <strong>Solo Raspberry Pico</strong> lascia liberi tutti i GPIO del Raspberry: i pannelli sono pilotati dal Pico, collegato via USB. Raspy2DMD può così funzionare sulla stessa macchina di un programma che usa i GPIO, come RaspyDarts. Senza Pico collegato non viene mostrato nulla (viene cercato continuamente). La pagina Hardware disattiva le impostazioni proprie del pilotaggio tramite GPIO.",
+            "sec.picoseul.p_desc": "L'uscita <strong>Solo scheda di visualizzazione USB</strong> lascia liberi tutti i GPIO del Raspberry: i pannelli sono pilotati dal Pico, collegato via USB. Raspy2DMD può così funzionare sulla stessa macchina di un programma che usa i GPIO, come RaspyDarts. Senza Pico collegato non viene mostrato nulla (viene cercato continuamente). La pagina Hardware disattiva le impostazioni proprie del pilotaggio tramite GPIO.",
             "sec.picoseul.h4_install": "Installazione",
             "sec.picoseul.p_install": "Per installare Raspy2DMD su una macchina dove gira già un altro programma, aggiungere l'opzione <code>--pico-seul</code>. Il sistema resta com'è: nessun aggiornamento completo; nome della macchina, rete, <code>cmdline.txt</code>, schermo HDMI, console e Samba invariati. La configurazione è pronta per RaspyDarts sulla stessa macchina, senza pulsante GPIO e con l'audio disattivato (regolabile nell'interfaccia web). La disinstallazione rimuove solo ciò che l'installazione ha aggiunto.",
             "sec.picoseul.h4_locked": "Cosa cambia in un'installazione «Solo Pico»",
@@ -7465,10 +7632,35 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.picoseul.li_samba": "La condivisione di rete (Samba) appartiene all'altro programma: l'interruttore della pagina Parametri generali è disattivato; le cartelle di Raspy2DMD restano accessibili con l'utente raspy2dmd",
             "sec.picoseul.li_update": "Un aggiornamento automatico riavvia solo Raspy2DMD, mai la macchina",
             "sec.picoseul.li_buttons": "Né pulsante GPIO né Bluetooth: lo spegnimento della macchina è comandato dall'altro programma",
-            "sec.picoseul.li_conf": "Senza l'opzione di installazione, l'uscita «Solo Raspberry Pico» si sceglie anche nella pagina Uscita HDMI o con <code>conf|HDMI|display_output:pico</code> (riavvia Raspy2DMD)",
+            "sec.picoseul.li_conf": "Senza l'opzione di installazione, l'uscita «Solo scheda di visualizzazione USB» si sceglie anche nella pagina Uscita HDMI o con <code>conf|HDMI|display_output:pico</code> (riavvia Raspy2DMD)",
+            "sec.picoh.title": "🔌 Hardware - Raspberry Pico H",
+            "cmd.picoh.title": "Raspberry Pico H con adattatore Seengreat",
+            "sec.picoh.p_desc": "Il <strong>Raspberry Pico H</strong>, montato sull'adattatore <strong>Seengreat RGB Matrix Adapter</strong>, pilota i pannelli al posto dei GPIO del Raspberry. È collegato in USB al Raspberry e viene rilevato automaticamente (pagina Scheda di visualizzazione USB). Il Pico gestisce da solo l'aggiornamento dei pannelli: la visualizzazione non dipende più dal carico del Raspberry, e i suoi GPIO restano liberi (uscita «Solo scheda di visualizzazione USB» possibile).",
+            "sec.picoh.h4_versions": "Versioni dell'adattatore",
+            "sec.picoh.p_versions": "La piedinatura del Pico sull'adattatore è cambiata con la versione V3.9: ogni versione ha il suo firmware. La versione è stampata sulla scheda.",
+            "sec.picoh.li_v39": "<strong>V3.9 e successive</strong>: firmware <code>raspy2dmd_pico.uf2</code>",
+            "sec.picoh.li_v38": "<strong>V3.8 e precedenti</strong>: firmware <code>raspy2dmd_pico_v38.uf2</code>",
+            "sec.picoh.li_wrong": "Un firmware della versione sbagliata non danneggia nulla, ma i pannelli restano neri o mostrano un'immagine errata: basta flashare l'altro",
+            "sec.picoh.h4_flash": "Installare il firmware",
+            "sec.picoh.li_flash1": "Primo flash: tenere premuto il pulsante <strong>BOOTSEL</strong> del Pico mentre lo si collega al Raspberry; appare come un'unità <code>RPI-RP2</code>",
+            "sec.picoh.li_flash2": "Nella pagina <strong>Scheda di visualizzazione USB</strong>, scegliere il firmware del proprio adattatore e avviare il flash; una volta installato il nostro firmware, il file della scheda collegata è preselezionato",
+            "sec.picoh.li_flash3": "Gli aggiornamenti successivi non richiedono il pulsante. Il firmware dell'Interstate 75 W (<code>raspy2dmd_interstate75w.uf2</code>) viene rifiutato con un messaggio",
+            "sec.picoh.h4_power": "Alimentazione",
+            "sec.picoh.li_power1": "Alimentare l'adattatore tramite il suo ingresso USB-C (5 V / 4 A) o il suo connettore DC (5 V / 8 A); distribuisce la corrente ai pannelli tramite i suoi due connettori di alimentazione",
+            "sec.picoh.li_power2": "Il cavo USB tra il Pico e il Raspberry serve solo ai dati e al Pico: non può fornire la corrente dei pannelli",
+            "sec.picoh.h4_led": "LED di stato",
+            "sec.picoh.p_led": "Il LED verde del Pico indica il suo stato (stessi lampeggi dell'Interstate 75 W, senza i colori):",
+            "sec.picoh.li_led_boot": "<strong>3 lampeggi</strong>: avvio del Pico",
+            "sec.picoh.li_led_on": "<strong>Acceso fisso</strong>: Pico pronto; il logo è visualizzato finché Raspy2DMD non si collega",
+            "sec.picoh.li_led_connect": "<strong>2 lampeggi</strong>: Raspy2DMD si è appena collegato",
+            "sec.picoh.li_led_error": "<strong>Lampeggi rapidi</strong>: i pannelli non sono riusciti ad avviarsi; scollegare e ricollegare il Pico, e riflashare il firmware se il problema persiste",
+            "sec.picoh.li_led_off": "<strong>Spento</strong>: aggiornamento del firmware in corso (unità <code>RPI-RP2</code>) o Pico non alimentato",
+            "sec.picoh.h4_notes": "Note",
+            "sec.picoh.li_panels": "Pannelli a 32 righe, fino a 128×32 in catena; i pannelli a 64 righe non sono supportati",
+            "sec.picoh.li_bus": "Non collegare gli stessi pannelli contemporaneamente al Pico e ai GPIO del Raspberry: i due driver si disturberebbero",
             "sec.interstate75w.title": "🔌 Hardware - Interstate 75 W",
             "cmd.interstate75w.title": "Scheda Pimoroni Interstate 75 W",
-            "sec.interstate75w.p_desc": "La scheda <strong>Pimoroni Interstate 75 W</strong> (versione RP2350) si monta direttamente sul retro di un pannello. È un terzo modo per pilotare i pannelli, oltre ai GPIO del Raspberry e al Raspberry Pico con adattatore. Raspy2DMD la usa come un Raspberry Pico: collegata in USB al Raspberry, viene rilevata automaticamente (pagina Raspberry Pico, uscita «Solo Raspberry Pico» possibile). Nessuna impostazione dei pin necessaria.",
+            "sec.interstate75w.p_desc": "La scheda <strong>Pimoroni Interstate 75 W</strong> (versione RP2350) si monta direttamente sul retro di un pannello. È un terzo modo per pilotare i pannelli, oltre ai GPIO del Raspberry e al Raspberry Pico con adattatore. Raspy2DMD la usa come un Raspberry Pico: collegata in USB al Raspberry, viene rilevata automaticamente (pagina Scheda di visualizzazione USB, uscita «Solo scheda di visualizzazione USB» possibile). Nessuna impostazione dei pin necessaria.",
             "sec.interstate75w.h4_flash": "Installare il firmware",
             "sec.interstate75w.li_flash1": "Primo flash: tenere premuto il pulsante <strong>BOOT</strong> della scheda mentre la si collega al Raspberry; appare come un'unità <code>RP2350</code>",
             "sec.interstate75w.li_flash2": "Nella pagina <strong>Raspberry Pico</strong>, scegliere <code>raspy2dmd_interstate75w.uf2</code> e avviare il flash (il file della scheda collegata è preselezionato)",
