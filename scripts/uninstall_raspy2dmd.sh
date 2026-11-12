@@ -7,12 +7,16 @@
 # Ce script desinstalle Raspy2DMD et nettoie le systeme
 #
 # Usage :
-#   sudo bash uninstall_raspy2dmd.sh [--keep-medias] [--keep-database]
+#   sudo bash uninstall_raspy2dmd.sh [--keep-medias] [--keep-database] [--full] [--sans-question]
 #
 # Options :
 #   --keep-medias   : Conserve le dossier /Medias
 #   --keep-database : Conserve les bases de donnees MariaDB
-#   --full          : Supprime TOUT (application + medias + bdd)
+#   --full          : Supprime TOUT (application + medias + bdd) ; installation « Pico seul » :
+#                     aussi l'utilisateur raspy2dmd, MariaDB et Node.js s'ils ont ete ajoutes par
+#                     l'installation
+#   --sans-question : Aucune confirmation (lancement sans terminal, par RaspyDarts) ; aussi
+#                     avec RASPY2DMD_SANS_QUESTION=1
 #
 # IMPORTANT: Les fins de ligne doivent etre LF (Unix), pas CRLF (Windows)
 ##############################################################################
@@ -40,6 +44,9 @@ BOLD='\033[1m'
 # =============================================================================
 KEEP_MEDIAS=true
 KEEP_DATABASE=true
+FULL=false
+SANS_QUESTION=false
+[ "${RASPY2DMD_SANS_QUESTION:-0}" = "1" ] && SANS_QUESTION=true
 
 for arg in "$@"; do
     case $arg in
@@ -52,6 +59,10 @@ for arg in "$@"; do
         --full)
             KEEP_MEDIAS=false
             KEEP_DATABASE=false
+            FULL=true
+            ;;
+        --sans-question|--yes|-y)
+            SANS_QUESTION=true
             ;;
         --remove-medias)
             KEEP_MEDIAS=false
@@ -128,12 +139,18 @@ echo "  --keep-database   : Conserver les bases de donnees (par defaut)"
 echo "  --remove-medias   : Supprimer le dossier /Medias"
 echo "  --remove-database : Supprimer les bases de donnees"
 echo "  --full            : Tout supprimer"
+echo "  --sans-question   : Ne rien demander (lancement automatique)"
 echo ""
 
-read -p "Etes-vous sur de vouloir continuer ? (oui/NON) " -r
-if [[ ! $REPLY =~ ^[Oo][Uu][Ii]$ ]]; then
-    log_warn "Desinstallation annulee"
-    exit 0
+if [ "$SANS_QUESTION" = true ]; then
+    log_info "Mode sans question : desinstallation lancee sans confirmation"
+else
+    # Sans terminal ni reponse (entree vide), read echoue : annulation propre, pas d'erreur
+    read -p "Etes-vous sur de vouloir continuer ? (oui/NON) " -r || REPLY=""
+    if [[ ! $REPLY =~ ^[Oo][Uu][Ii]$ ]]; then
+        log_warn "Desinstallation annulee"
+        exit 0
+    fi
 fi
 
 # =============================================================================
@@ -178,10 +195,15 @@ pkill -f "hdmi_output.py" 2>/dev/null || true
 # Installation « Pico seul » (--pico-seul) : console, cmdline.txt et ecran jamais modifies,
 # rc.local et son service retires seulement s'ils ont ete crees par l'installation
 PICO_SEUL_INSTALL=0; RC_LOCAL_CREE=0; RC_SERVICE_CREE=0
+UTILISATEUR_CREE=0; MARIADB_INSTALLE=0; NODE_INSTALLE=0
 if [ -f "${INSTALL_DIR}/.pico_seul" ]; then
     PICO_SEUL_INSTALL=1
     grep -q '^rc_local_cree=1' "${INSTALL_DIR}/.pico_seul" && RC_LOCAL_CREE=1
     grep -q '^rc_service_cree=1' "${INSTALL_DIR}/.pico_seul" && RC_SERVICE_CREE=1
+    # Ecrits depuis la 1.6.2.3 : absents d'un marqueur plus ancien, rien n'est alors retire
+    grep -q '^utilisateur_cree=1' "${INSTALL_DIR}/.pico_seul" && UTILISATEUR_CREE=1
+    grep -q '^mariadb_installe=1' "${INSTALL_DIR}/.pico_seul" && MARIADB_INSTALLE=1
+    grep -q '^node_installe=1' "${INSTALL_DIR}/.pico_seul" && NODE_INSTALLE=1
 fi
 if [ "$PICO_SEUL_INSTALL" = "1" ]; then
     log_info "Installation Pico seul : console Linux et cmdline.txt laisses tels quels"
@@ -245,13 +267,13 @@ fi
 if [ "$KEEP_DATABASE" = false ]; then
     log_info "Suppression des bases de donnees..."
 
-    # Tentative avec mot de passe par defaut
-    mysql -u root -praspberrypi -e "DROP DATABASE IF EXISTS excluded;" 2>/dev/null || true
-    mysql -u root -praspberrypi -e "DROP DATABASE IF EXISTS effects;" 2>/dev/null || true
-
-    # Tentative sans mot de passe
-    mysql -u root -e "DROP DATABASE IF EXISTS excluded;" 2>/dev/null || true
-    mysql -u root -e "DROP DATABASE IF EXISTS effects;" 2>/dev/null || true
+    # Bases et utilisateur crees par l'installation (typos et l'utilisateur raspy2dmd
+    # restaient en place). Root par socket (script lance en root), sinon anciens mots de passe.
+    DB_SQL="DROP DATABASE IF EXISTS excluded; DROP DATABASE IF EXISTS effects; DROP DATABASE IF EXISTS typos;
+DROP USER IF EXISTS 'raspy2dmd'@'localhost'; DROP USER IF EXISTS 'raspy2dmd'@'127.0.0.1';"
+    mysql -u root -e "$DB_SQL" 2>/dev/null \
+        || mysql -u root -praspberrypi -e "$DB_SQL" 2>/dev/null \
+        || mysql -u raspy2dmd -praspy2dmd -e "$DB_SQL" 2>/dev/null || true
 
     log_info "Bases de donnees supprimees"
 else
@@ -297,6 +319,43 @@ systemctl disable raspy2dmd.service 2>/dev/null || true
 rm -f /etc/systemd/system/raspy2dmd.service 2>/dev/null || true
 systemctl daemon-reload 2>/dev/null || true
 
+# Ecoute reseau de Mosquitto ajoutee par l'installation (port 1883, sans mot de passe).
+# Sur une borne RaspyDarts, celui-ci repose son propre raspydarts.conf s'il en a besoin.
+if [ -f /etc/mosquitto/conf.d/raspy2dmd.conf ]; then
+    rm -f /etc/mosquitto/conf.d/raspy2dmd.conf
+    systemctl restart mosquitto 2>/dev/null || true
+    log_info "Configuration Mosquitto de Raspy2DMD retiree (raspy2dmd.conf)"
+fi
+
+# Installation « Pico seul » avec --full : ce que l'installation a ajoute a la machine
+if [ "$FULL" = true ] && [ "$PICO_SEUL_INSTALL" = "1" ]; then
+    if [ "$UTILISATEUR_CREE" = "1" ] && id raspy2dmd >/dev/null 2>&1; then
+        pkill -u raspy2dmd 2>/dev/null || true
+        sleep 1
+        userdel -r raspy2dmd 2>/dev/null || userdel raspy2dmd 2>/dev/null || true
+        log_info "Utilisateur raspy2dmd (cree par l'installation) supprime"
+    fi
+    if [ "$MARIADB_INSTALLE" = "1" ] && dpkg -s mariadb-server >/dev/null 2>&1; then
+        systemctl stop mariadb 2>/dev/null || true
+        DEBIAN_FRONTEND=noninteractive apt-get purge -y -qq mariadb-server mariadb-client >/dev/null 2>&1 || true
+        log_info "MariaDB (installe par l'installation) supprime"
+    fi
+    if [ "$NODE_INSTALLE" = "1" ]; then
+        if dpkg -s nodejs >/dev/null 2>&1; then
+            DEBIAN_FRONTEND=noninteractive apt-get purge -y -qq nodejs >/dev/null 2>&1 || true
+            rm -f /etc/apt/sources.list.d/nodesource.list 2>/dev/null || true
+        fi
+        # Archive officielle decompressee dans /usr/local, liens dans /usr/bin
+        for b in node npm npx corepack; do
+            [ "$(readlink -f /usr/bin/$b 2>/dev/null)" = "$(readlink -f /usr/local/bin/$b 2>/dev/null)" ] && rm -f /usr/bin/$b
+            rm -f /usr/local/bin/$b
+        done
+        rm -rf /usr/local/lib/node_modules /usr/local/include/node /usr/local/share/doc/node 2>/dev/null || true
+        rm -f /usr/local/share/man/man1/node.1 /usr/local/share/systemtap/tapset/node.stp 2>/dev/null || true
+        log_info "Node.js (installe par l'installation) supprime"
+    fi
+fi
+
 # Suppression des fichiers temporaires
 rm -rf /tmp/raspy2dmd_* 2>/dev/null || true
 
@@ -324,6 +383,10 @@ if [ "$KEEP_DATABASE" = true ]; then
 fi
 
 echo ""
-echo -e "${YELLOW}Les dependances systeme (python3, nodejs, mariadb, etc.) n'ont pas ete supprimees.${NC}"
-echo "Pour les supprimer, utilisez apt-get remove."
+if [ "$FULL" = true ] && [ "$PICO_SEUL_INSTALL" = "1" ]; then
+    echo -e "${YELLOW}Les autres dependances systeme (python3, mosquitto...) ont ete conservees : l'autre programme de cette machine peut s'en servir.${NC}"
+else
+    echo -e "${YELLOW}Les dependances systeme (python3, nodejs, mariadb, etc.) n'ont pas ete supprimees.${NC}"
+    echo "Pour les supprimer, utilisez apt-get remove."
+fi
 echo ""

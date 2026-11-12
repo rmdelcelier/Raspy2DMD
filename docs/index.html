@@ -691,6 +691,7 @@
             <div class="nav-items">
                 <div class="nav-item" onclick="showSection('intro')" data-i18n="nav.item.about">À propos</div>
                 <div class="nav-item" onclick="showSection('quickstart')" data-i18n="nav.item.quickstart">Démarrage rapide</div>
+                <div class="nav-item" onclick="showSection('uninstall')" data-i18n="nav.item.uninstall">Désinstallation</div>
                 <div class="nav-item" onclick="showSection('notes')" data-i18n="nav.item.notes">Notes importantes</div>
             </div>
         </div>
@@ -927,6 +928,53 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "sound|beep.ogg"<br>
         </div>
 
         <!-- SYSTÈME -->
+        <!-- DESINSTALLATION -->
+        <div class="content-section" id="uninstall">
+            <h2 class="section-title" data-i18n="sec.uninstall.title">🧹 Désinstallation</h2>
+
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.uninstall.title">Retirer Raspy2DMD</div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.description">Description</h4>
+                    <p data-i18n-html="sec.uninstall.p_desc">Le script de désinstallation arrête Raspy2DMD et retire ce que l'installation a ajouté. Par défaut, vos médias (<code>/Medias</code>) et les bases de données sont <strong>conservés</strong>.</p>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.uninstall.h4_cmd">Commande</h4>
+                    <div class="example-code">
+curl -sSL https://raw.githubusercontent.com/rmdelcelier/Raspy2DMD/main/scripts/uninstall_raspy2dmd.sh -o uninstall_raspy2dmd.sh<br>
+sudo bash uninstall_raspy2dmd.sh [--remove-medias] [--remove-database] [--full] [--sans-question]<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.uninstall.h4_options">Options</h4>
+                    <ul>
+                        <li data-i18n-html="sec.uninstall.li_medias"><code>--remove-medias</code> : supprime aussi le dossier <code>/Medias</code> (GIF, images, sons, polices…)</li>
+                        <li data-i18n-html="sec.uninstall.li_db"><code>--remove-database</code> : supprime aussi les bases de données et l'utilisateur MariaDB de Raspy2DMD</li>
+                        <li data-i18n-html="sec.uninstall.li_full"><code>--full</code> : supprime tout (médias et bases compris)</li>
+                        <li data-i18n-html="sec.uninstall.li_quiet"><code>--sans-question</code> : ne demande pas de confirmation (lancement automatique, par exemple depuis RaspyDarts)</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.uninstall.h4_removed">Ce qui est retiré</h4>
+                    <ul>
+                        <li data-i18n-html="sec.uninstall.li_app">Les services de Raspy2DMD et le dossier <code>/Raspy2DMD</code></li>
+                        <li data-i18n-html="sec.uninstall.li_system">Les partages réseau des dossiers de <code>/Medias</code>, la configuration MQTT (Mosquitto) de Raspy2DMD, la surveillance automatique et le démarrage automatique</li>
+                        <li data-i18n-html="sec.uninstall.li_console">Sur un écran HDMI, la console Linux masquée par Raspy2DMD est rétablie (effet complet au redémarrage)</li>
+                        <li data-i18n-html="sec.uninstall.li_deps">Les logiciels installés pour Raspy2DMD (Python, Node.js, MariaDB…) restent en place</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="sec.uninstall.h4_picoseul">Installation « Pico seul »</h4>
+                    <p data-i18n-html="sec.uninstall.p_picoseul">Sur une machine partagée avec un autre programme (installation <code>--pico-seul</code>), la console, le réseau et l'écran ne sont pas touchés. Avec <code>--full</code>, l'utilisateur <code>raspy2dmd</code>, MariaDB et Node.js sont aussi retirés, <strong>seulement s'ils ont été ajoutés par l'installation</strong> de Raspy2DMD.</p>
+                </div>
+            </div>
+        </div>
+
         <div class="content-section" id="rebt">
             <h2 class="section-title" data-i18n="sec.rebt.title">1️⃣ Système - rebt</h2>
             <div class="command-card">
@@ -4030,6 +4078,7 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             // --- NAVIGATION ITEMS ---
             "nav.item.about": "À propos",
             "nav.item.quickstart": "Démarrage rapide",
+            "nav.item.uninstall": "Désinstallation",
             "nav.item.notes": "Notes importantes",
             "nav.item.rebt": "rebt - Redémarrer",
             "nav.item.shutdwn": "shutdwn - Éteindre",
@@ -4645,6 +4694,22 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.picoseul.li_update": "Une mise à jour automatique ne redémarre que Raspy2DMD, jamais la machine",
             "sec.picoseul.li_buttons": "Ni bouton GPIO ni Bluetooth : l'arrêt de la machine est commandé par l'autre programme",
             "sec.picoseul.li_conf": "Sans l'option d'installation, la sortie « Carte d'affichage USB seule » se choisit aussi dans la page Sortie HDMI ou par <code>conf|HDMI|display_output:pico</code> (redémarre Raspy2DMD)",
+            "sec.uninstall.title": "🧹 Désinstallation",
+            "cmd.uninstall.title": "Retirer Raspy2DMD",
+            "sec.uninstall.p_desc": "Le script de désinstallation arrête Raspy2DMD et retire ce que l'installation a ajouté. Par défaut, vos médias (<code>/Medias</code>) et les bases de données sont <strong>conservés</strong>.",
+            "sec.uninstall.h4_cmd": "Commande",
+            "sec.uninstall.h4_options": "Options",
+            "sec.uninstall.li_medias": "<code>--remove-medias</code> : supprime aussi le dossier <code>/Medias</code> (GIF, images, sons, polices…)",
+            "sec.uninstall.li_db": "<code>--remove-database</code> : supprime aussi les bases de données et l'utilisateur MariaDB de Raspy2DMD",
+            "sec.uninstall.li_full": "<code>--full</code> : supprime tout (médias et bases compris)",
+            "sec.uninstall.li_quiet": "<code>--sans-question</code> : ne demande pas de confirmation (lancement automatique, par exemple depuis RaspyDarts)",
+            "sec.uninstall.h4_removed": "Ce qui est retiré",
+            "sec.uninstall.li_app": "Les services de Raspy2DMD et le dossier <code>/Raspy2DMD</code>",
+            "sec.uninstall.li_system": "Les partages réseau des dossiers de <code>/Medias</code>, la configuration MQTT (Mosquitto) de Raspy2DMD, la surveillance automatique et le démarrage automatique",
+            "sec.uninstall.li_console": "Sur un écran HDMI, la console Linux masquée par Raspy2DMD est rétablie (effet complet au redémarrage)",
+            "sec.uninstall.li_deps": "Les logiciels installés pour Raspy2DMD (Python, Node.js, MariaDB…) restent en place",
+            "sec.uninstall.h4_picoseul": "Installation « Pico seul »",
+            "sec.uninstall.p_picoseul": "Sur une machine partagée avec un autre programme (installation <code>--pico-seul</code>), la console, le réseau et l'écran ne sont pas touchés. Avec <code>--full</code>, l'utilisateur <code>raspy2dmd</code>, MariaDB et Node.js sont aussi retirés, <strong>seulement s'ils ont été ajoutés par l'installation</strong> de Raspy2DMD.",
             "sec.picoh.title": "🔌 Matériel - Raspberry Pico H",
             "cmd.picoh.title": "Raspberry Pico H avec adaptateur Seengreat",
             "sec.picoh.p_desc": "Le <strong>Raspberry Pico H</strong>, monté sur l'adaptateur <strong>Seengreat RGB Matrix Adapter</strong>, pilote les panneaux à la place des GPIO du Raspberry. Il est branché en USB au Raspberry et détecté automatiquement (page Carte d'affichage USB). Le Pico gère seul le rafraîchissement des panneaux : l'affichage ne dépend plus de la charge du Raspberry, et ses GPIO restent libres (sortie « Carte d'affichage USB seule » possible).",
@@ -4803,6 +4868,7 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "nav.cat.audiovis": "1️⃣3️⃣ Audio Visualizer",
             "nav.item.about": "About",
             "nav.item.quickstart": "Quick Start",
+            "nav.item.uninstall": "Uninstalling",
             "nav.item.notes": "Important Notes",
             "nav.item.rebt": "rebt - Restart",
             "nav.item.shutdwn": "shutdwn - Shutdown",
@@ -5395,6 +5461,22 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.picoseul.li_update": "An automatic update only restarts Raspy2DMD, never the machine",
             "sec.picoseul.li_buttons": "No GPIO button and no Bluetooth: shutting down the machine is controlled by the other program",
             "sec.picoseul.li_conf": "Without the installation option, the \"USB display board only\" output can also be chosen on the HDMI output page or with <code>conf|HDMI|display_output:pico</code> (restarts Raspy2DMD)",
+            "sec.uninstall.title": "🧹 Uninstalling",
+            "cmd.uninstall.title": "Removing Raspy2DMD",
+            "sec.uninstall.p_desc": "The uninstall script stops Raspy2DMD and removes what the installation added. By default, your media (<code>/Medias</code>) and the databases are <strong>kept</strong>.",
+            "sec.uninstall.h4_cmd": "Command",
+            "sec.uninstall.h4_options": "Options",
+            "sec.uninstall.li_medias": "<code>--remove-medias</code>: also deletes the <code>/Medias</code> folder (GIFs, images, sounds, fonts…)",
+            "sec.uninstall.li_db": "<code>--remove-database</code>: also deletes the Raspy2DMD databases and MariaDB user",
+            "sec.uninstall.li_full": "<code>--full</code>: deletes everything (media and databases included)",
+            "sec.uninstall.li_quiet": "<code>--sans-question</code>: asks no confirmation (automatic run, for example from RaspyDarts)",
+            "sec.uninstall.h4_removed": "What is removed",
+            "sec.uninstall.li_app": "The Raspy2DMD services and the <code>/Raspy2DMD</code> folder",
+            "sec.uninstall.li_system": "The network shares of the <code>/Medias</code> folders, the Raspy2DMD MQTT (Mosquitto) configuration, the automatic monitoring and the automatic start",
+            "sec.uninstall.li_console": "On an HDMI screen, the Linux console hidden by Raspy2DMD is restored (fully effective after a reboot)",
+            "sec.uninstall.li_deps": "The software installed for Raspy2DMD (Python, Node.js, MariaDB…) stays in place",
+            "sec.uninstall.h4_picoseul": "\"Pico only\" installation",
+            "sec.uninstall.p_picoseul": "On a machine shared with another program (<code>--pico-seul</code> installation), the console, the network and the screen are left untouched. With <code>--full</code>, the <code>raspy2dmd</code> user, MariaDB and Node.js are also removed, <strong>only if they were added by the Raspy2DMD installation</strong>.",
             "sec.picoh.title": "🔌 Hardware - Raspberry Pico H",
             "cmd.picoh.title": "Raspberry Pico H with Seengreat adapter",
             "sec.picoh.p_desc": "The <strong>Raspberry Pico H</strong>, mounted on the <strong>Seengreat RGB Matrix Adapter</strong>, drives the panels instead of the Raspberry's GPIO. It is connected to the Raspberry by USB and detected automatically (USB display board page). The Pico handles the panel refresh on its own: the display no longer depends on the Raspberry's load, and its GPIO stay free (\"USB display board only\" output possible).",
@@ -5549,6 +5631,7 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "nav.cat.audiovis": "1️⃣3️⃣ Audio-Visualisierer",
             "nav.item.about": "Über",
             "nav.item.quickstart": "Schnellstart",
+            "nav.item.uninstall": "Deinstallation",
             "nav.item.notes": "Wichtige Hinweise",
             "nav.item.rebt": "rebt - Neustart",
             "nav.item.shutdwn": "shutdwn - Herunterfahren",
@@ -6141,6 +6224,22 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.picoseul.li_update": "Ein automatisches Update startet nur Raspy2DMD neu, nie den Rechner",
             "sec.picoseul.li_buttons": "Weder GPIO-Taster noch Bluetooth: das Herunterfahren des Rechners steuert das andere Programm",
             "sec.picoseul.li_conf": "Ohne die Installationsoption lässt sich die Ausgabe „Nur USB-Anzeigeplatine“ auch auf der Seite HDMI-Ausgabe oder mit <code>conf|HDMI|display_output:pico</code> wählen (startet Raspy2DMD neu)",
+            "sec.uninstall.title": "🧹 Deinstallation",
+            "cmd.uninstall.title": "Raspy2DMD entfernen",
+            "sec.uninstall.p_desc": "Das Deinstallationsskript stoppt Raspy2DMD und entfernt, was die Installation hinzugefügt hat. Standardmäßig werden Ihre Medien (<code>/Medias</code>) und die Datenbanken <strong>behalten</strong>.",
+            "sec.uninstall.h4_cmd": "Befehl",
+            "sec.uninstall.h4_options": "Optionen",
+            "sec.uninstall.li_medias": "<code>--remove-medias</code>: löscht auch den Ordner <code>/Medias</code> (GIFs, Bilder, Töne, Schriften…)",
+            "sec.uninstall.li_db": "<code>--remove-database</code>: löscht auch die Datenbanken und den MariaDB-Benutzer von Raspy2DMD",
+            "sec.uninstall.li_full": "<code>--full</code>: löscht alles (Medien und Datenbanken eingeschlossen)",
+            "sec.uninstall.li_quiet": "<code>--sans-question</code>: fragt nicht nach einer Bestätigung (automatischer Start, z. B. aus RaspyDarts)",
+            "sec.uninstall.h4_removed": "Was entfernt wird",
+            "sec.uninstall.li_app": "Die Dienste von Raspy2DMD und der Ordner <code>/Raspy2DMD</code>",
+            "sec.uninstall.li_system": "Die Netzwerkfreigaben der Ordner in <code>/Medias</code>, die MQTT-Konfiguration (Mosquitto) von Raspy2DMD, die automatische Überwachung und der automatische Start",
+            "sec.uninstall.li_console": "Auf einem HDMI-Bildschirm wird die von Raspy2DMD ausgeblendete Linux-Konsole wiederhergestellt (vollständig nach einem Neustart)",
+            "sec.uninstall.li_deps": "Die für Raspy2DMD installierte Software (Python, Node.js, MariaDB…) bleibt erhalten",
+            "sec.uninstall.h4_picoseul": "Installation „Nur Pico“",
+            "sec.uninstall.p_picoseul": "Auf einem mit einem anderen Programm geteilten Rechner (Installation <code>--pico-seul</code>) bleiben Konsole, Netzwerk und Bildschirm unverändert. Mit <code>--full</code> werden auch der Benutzer <code>raspy2dmd</code>, MariaDB und Node.js entfernt, <strong>nur wenn sie von der Raspy2DMD-Installation hinzugefügt wurden</strong>.",
             "sec.picoh.title": "🔌 Hardware - Raspberry Pico H",
             "cmd.picoh.title": "Raspberry Pico H mit Seengreat-Adapter",
             "sec.picoh.p_desc": "Der <strong>Raspberry Pico H</strong>, auf den <strong>Seengreat RGB Matrix Adapter</strong> gesteckt, steuert die Panels anstelle der GPIO des Raspberry. Er ist per USB mit dem Raspberry verbunden und wird automatisch erkannt (Seite USB-Anzeigeplatine). Der Pico übernimmt die Bildwiederholung allein: die Anzeige hängt nicht mehr von der Last des Raspberry ab, und dessen GPIO bleiben frei (Ausgabe „Nur USB-Anzeigeplatine“ möglich).",
@@ -6295,6 +6394,7 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "nav.cat.audiovis": "1️⃣3️⃣ Visualizador de Audio",
             "nav.item.about": "Acerca de",
             "nav.item.quickstart": "Inicio rápido",
+            "nav.item.uninstall": "Desinstalación",
             "nav.item.notes": "Notas importantes",
             "nav.item.rebt": "rebt - Reiniciar",
             "nav.item.shutdwn": "shutdwn - Apagar",
@@ -6887,6 +6987,22 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.picoseul.li_update": "Una actualización automática solo reinicia Raspy2DMD, nunca la máquina",
             "sec.picoseul.li_buttons": "Ni botón GPIO ni Bluetooth: el apagado de la máquina lo controla el otro programa",
             "sec.picoseul.li_conf": "Sin la opción de instalación, la salida «Solo placa de visualización USB» también se elige en la página Salida HDMI o con <code>conf|HDMI|display_output:pico</code> (reinicia Raspy2DMD)",
+            "sec.uninstall.title": "🧹 Desinstalación",
+            "cmd.uninstall.title": "Quitar Raspy2DMD",
+            "sec.uninstall.p_desc": "El script de desinstalación detiene Raspy2DMD y quita lo que añadió la instalación. Por defecto, sus medios (<code>/Medias</code>) y las bases de datos se <strong>conservan</strong>.",
+            "sec.uninstall.h4_cmd": "Comando",
+            "sec.uninstall.h4_options": "Opciones",
+            "sec.uninstall.li_medias": "<code>--remove-medias</code>: borra también la carpeta <code>/Medias</code> (GIF, imágenes, sonidos, fuentes…)",
+            "sec.uninstall.li_db": "<code>--remove-database</code>: borra también las bases de datos y el usuario MariaDB de Raspy2DMD",
+            "sec.uninstall.li_full": "<code>--full</code>: borra todo (medios y bases incluidos)",
+            "sec.uninstall.li_quiet": "<code>--sans-question</code>: no pide confirmación (ejecución automática, por ejemplo desde RaspyDarts)",
+            "sec.uninstall.h4_removed": "Lo que se quita",
+            "sec.uninstall.li_app": "Los servicios de Raspy2DMD y la carpeta <code>/Raspy2DMD</code>",
+            "sec.uninstall.li_system": "Las carpetas compartidas en red de <code>/Medias</code>, la configuración MQTT (Mosquitto) de Raspy2DMD, la supervisión automática y el arranque automático",
+            "sec.uninstall.li_console": "En una pantalla HDMI, se restablece la consola Linux ocultada por Raspy2DMD (efecto completo tras reiniciar)",
+            "sec.uninstall.li_deps": "El software instalado para Raspy2DMD (Python, Node.js, MariaDB…) se mantiene",
+            "sec.uninstall.h4_picoseul": "Instalación «Solo Pico»",
+            "sec.uninstall.p_picoseul": "En una máquina compartida con otro programa (instalación <code>--pico-seul</code>), la consola, la red y la pantalla no se tocan. Con <code>--full</code>, también se quitan el usuario <code>raspy2dmd</code>, MariaDB y Node.js, <strong>solo si los añadió la instalación</strong> de Raspy2DMD.",
             "sec.picoh.title": "🔌 Hardware - Raspberry Pico H",
             "cmd.picoh.title": "Raspberry Pico H con adaptador Seengreat",
             "sec.picoh.p_desc": "El <strong>Raspberry Pico H</strong>, montado en el adaptador <strong>Seengreat RGB Matrix Adapter</strong>, controla los paneles en lugar de los GPIO de la Raspberry. Se conecta por USB a la Raspberry y se detecta automáticamente (página Placa de visualización USB). El Pico gestiona solo el refresco de los paneles: la visualización ya no depende de la carga de la Raspberry, y sus GPIO quedan libres (salida «Solo placa de visualización USB» posible).",
@@ -7041,6 +7157,7 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "nav.cat.audiovis": "1️⃣3️⃣ Visualizzatore Audio",
             "nav.item.about": "Informazioni",
             "nav.item.quickstart": "Avvio rapido",
+            "nav.item.uninstall": "Disinstallazione",
             "nav.item.notes": "Note importanti",
             "nav.item.rebt": "rebt - Riavvio",
             "nav.item.shutdwn": "shutdwn - Spegnimento",
@@ -7633,6 +7750,22 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.picoseul.li_update": "Un aggiornamento automatico riavvia solo Raspy2DMD, mai la macchina",
             "sec.picoseul.li_buttons": "Né pulsante GPIO né Bluetooth: lo spegnimento della macchina è comandato dall'altro programma",
             "sec.picoseul.li_conf": "Senza l'opzione di installazione, l'uscita «Solo scheda di visualizzazione USB» si sceglie anche nella pagina Uscita HDMI o con <code>conf|HDMI|display_output:pico</code> (riavvia Raspy2DMD)",
+            "sec.uninstall.title": "🧹 Disinstallazione",
+            "cmd.uninstall.title": "Rimuovere Raspy2DMD",
+            "sec.uninstall.p_desc": "Lo script di disinstallazione arresta Raspy2DMD e rimuove ciò che l'installazione ha aggiunto. Per impostazione predefinita, i media (<code>/Medias</code>) e i database vengono <strong>conservati</strong>.",
+            "sec.uninstall.h4_cmd": "Comando",
+            "sec.uninstall.h4_options": "Opzioni",
+            "sec.uninstall.li_medias": "<code>--remove-medias</code>: elimina anche la cartella <code>/Medias</code> (GIF, immagini, suoni, font…)",
+            "sec.uninstall.li_db": "<code>--remove-database</code>: elimina anche i database e l'utente MariaDB di Raspy2DMD",
+            "sec.uninstall.li_full": "<code>--full</code>: elimina tutto (media e database compresi)",
+            "sec.uninstall.li_quiet": "<code>--sans-question</code>: non chiede conferma (avvio automatico, ad esempio da RaspyDarts)",
+            "sec.uninstall.h4_removed": "Cosa viene rimosso",
+            "sec.uninstall.li_app": "I servizi di Raspy2DMD e la cartella <code>/Raspy2DMD</code>",
+            "sec.uninstall.li_system": "Le condivisioni di rete delle cartelle di <code>/Medias</code>, la configurazione MQTT (Mosquitto) di Raspy2DMD, la sorveglianza automatica e l'avvio automatico",
+            "sec.uninstall.li_console": "Su uno schermo HDMI, la console Linux nascosta da Raspy2DMD viene ripristinata (effetto completo al riavvio)",
+            "sec.uninstall.li_deps": "Il software installato per Raspy2DMD (Python, Node.js, MariaDB…) resta al suo posto",
+            "sec.uninstall.h4_picoseul": "Installazione «Solo Pico»",
+            "sec.uninstall.p_picoseul": "Su una macchina condivisa con un altro programma (installazione <code>--pico-seul</code>), console, rete e schermo non vengono toccati. Con <code>--full</code> vengono rimossi anche l'utente <code>raspy2dmd</code>, MariaDB e Node.js, <strong>solo se aggiunti dall'installazione</strong> di Raspy2DMD.",
             "sec.picoh.title": "🔌 Hardware - Raspberry Pico H",
             "cmd.picoh.title": "Raspberry Pico H con adattatore Seengreat",
             "sec.picoh.p_desc": "Il <strong>Raspberry Pico H</strong>, montato sull'adattatore <strong>Seengreat RGB Matrix Adapter</strong>, pilota i pannelli al posto dei GPIO del Raspberry. È collegato in USB al Raspberry e viene rilevato automaticamente (pagina Scheda di visualizzazione USB). Il Pico gestisce da solo l'aggiornamento dei pannelli: la visualizzazione non dipende più dal carico del Raspberry, e i suoi GPIO restano liberi (uscita «Solo scheda di visualizzazione USB» possibile).",

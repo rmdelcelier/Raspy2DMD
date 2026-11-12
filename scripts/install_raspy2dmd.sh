@@ -1600,6 +1600,13 @@ step_final_config() {
     # Configuration de Mosquitto pour l'acces reseau
     log_substep "Configuration de Mosquitto (MQTT) pour l'acces reseau..."
     mkdir -p /etc/mosquitto/conf.d
+    # Une borne RaspyDarts (4.6.2+) peut avoir pose son propre raspydarts.conf : deux
+    # « listener 1883 » empechent mosquitto de demarrer (plus de MQTT, ni LED ni affichage).
+    # Raspy2DMD ouvre la meme ecoute (reseau, sans mot de passe) : le sien est retire.
+    if [ -f /etc/mosquitto/conf.d/raspydarts.conf ]; then
+        rm -f /etc/mosquitto/conf.d/raspydarts.conf
+        log_info "raspydarts.conf retire (meme ecoute reseau que raspy2dmd.conf, conflit sur le port 1883)"
+    fi
     cat > /etc/mosquitto/conf.d/raspy2dmd.conf << 'MQTTEOF'
 # Configuration Raspy2DMD - Acces reseau
 # Ecoute sur toutes les interfaces reseau (0.0.0.0)
@@ -1613,6 +1620,10 @@ MQTTEOF
     # Demarrage et activation de Mosquitto
     systemctl restart mosquitto 2>/dev/null || true
     systemctl enable mosquitto 2>/dev/null || true
+    if ! systemctl is-active --quiet mosquitto 2>/dev/null; then
+        log_warn "Mosquitto ne demarre pas : un autre fichier de /etc/mosquitto/conf.d declare-t-il aussi « listener 1883 » ?"
+        grep -l "^[[:space:]]*listener[[:space:]]\+1883" /etc/mosquitto/conf.d/*.conf 2>/dev/null | sed 's/^/         /' || true
+    fi
     log_info "Mosquitto configure pour l'acces reseau (port 1883)"
 
     # Desactiver Bluetooth par defaut (activable via l'interface web Raspy2DMD)
@@ -2087,6 +2098,10 @@ SAMBAEOF
         {
             echo "rc_local_cree=$((1 - RC_LOCAL_EXISTAIT))"
             echo "rc_service_cree=$((1 - RC_SERVICE_EXISTAIT))"
+            # Retires par « uninstall_raspy2dmd.sh --full » seulement s'ils ont ete ajoutes
+            echo "utilisateur_cree=$((1 - UTILISATEUR_EXISTAIT))"
+            echo "mariadb_installe=$((1 - MARIADB_EXISTAIT))"
+            echo "node_installe=$((1 - NODE_EXISTAIT))"
         } > "${INSTALL_DIR}/.pico_seul"
     fi
 
@@ -2236,6 +2251,19 @@ confirm_installation() {
 # FONCTION PRINCIPALE
 # =============================================================================
 main() {
+    # Avant toute etape : ce qui existait deja sur la machine (installation « Pico seul » :
+    # la desinstallation ne retire que ce que l'installation a ajoute). Une reinstallation
+    # garde ce que la precedente avait ajoute, d'apres son marqueur.
+    UTILISATEUR_EXISTAIT=0; MARIADB_EXISTAIT=0; NODE_EXISTAIT=0
+    id raspy2dmd >/dev/null 2>&1 && UTILISATEUR_EXISTAIT=1
+    dpkg -s mariadb-server >/dev/null 2>&1 && MARIADB_EXISTAIT=1
+    command -v node >/dev/null 2>&1 && NODE_EXISTAIT=1
+    if [ -f "${INSTALL_DIR}/.pico_seul" ]; then
+        grep -q '^utilisateur_cree=1' "${INSTALL_DIR}/.pico_seul" && UTILISATEUR_EXISTAIT=0
+        grep -q '^mariadb_installe=1' "${INSTALL_DIR}/.pico_seul" && MARIADB_EXISTAIT=0
+        grep -q '^node_installe=1' "${INSTALL_DIR}/.pico_seul" && NODE_EXISTAIT=0
+    fi
+
     for arg in "$@"; do
         case "$arg" in
             --pico-seul|--pico-only) PICO_SEUL=1 ;;
