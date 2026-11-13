@@ -1660,7 +1660,7 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "msgfull|Hello World"<br>
                 
                 <div class="command-section">
                     <h4 data-i18n="lbl.format">Format</h4>
-                    <div class="command-format">score|&lt;X - X - X&gt;|[durée]|[R;G;B]</div>
+                    <div class="command-format">score|&lt;X - X - X&gt;|[durée]|[R;G;B]|[O/N]</div>
                 </div>
 
                 <div class="command-section">
@@ -1669,6 +1669,7 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "msgfull|Hello World"<br>
                         <li data-i18n-html="sec.score.li_valeur"><strong>valeur</strong> : Score à afficher (ex: "T20 - D2 - X")</li>
                         <li data-i18n-html="sec.score.li_duree"><strong>durée</strong> : Durée d'affichage en secondes (optionnel)</li>
                         <li data-i18n-html="sec.score.li_couleur"><strong>couleur</strong> : Couleur du texte au format R;G;B, fond noir (optionnel ; durée vide pour la donner seule)</li>
+                        <li data-i18n-html="sec.score.li_anim"><strong>animations</strong> : O (défaut) joue les GIF de score et des coups spéciaux, N les saute (optionnel)</li>
                     </ul>
                 </div>
 
@@ -1686,6 +1687,9 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score|D2 - T20 - S1"<br>
 
 <span class="comment"># Score à la couleur du joueur (vert), sans durée :</span>
 mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score|T20 - X - X||0;255;0"<br>
+
+<span class="comment"># Même score, sans les GIF de score ni des coups spéciaux :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score|T20 - X - X||0;255;0|N"<br>
                     </div>
                 </div>
 
@@ -1693,6 +1697,90 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score|T20 - X - X||0;255;0"<br>
                     <h4 data-i18n="lbl.notes">Notes</h4>
                     <ul>
                         <li data-i18n="sec.score.li_note">Format spécial pour affichage de scores de RaspyDarts</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.score1.title">score1 - Score animé « chien de chasse »</div>
+                <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
+                <p data-i18n-html="sec.score1.p_intro">Un chien sort des herbes devant un paysage d'arbres ; les trois fléchettes sont inscrites dans un panneau en bois en bas de l'écran. La dernière fléchette reçue est animée : si un segment est touché, un éclair puis le chien saute en brandissant une pancarte avec le segment ; si le tir est manqué (<strong>MISS</strong>), le chien se moque, la main sur la bouche, entouré de « AH! ». Le score s'inscrit dans le panneau une fois l'action terminée.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">score1|&lt;X - X - X&gt;|[durée]|[R;G;B]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.score1.li_valeur"><strong>valeur</strong> : 1 à 3 fléchettes séparées par « - » : un segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tir manqué) ou <strong>X</strong> (pas encore lancée, dessinée comme une fléchette grise)</li>
+                        <li data-i18n-html="sec.score.li_duree"><strong>durée</strong> : Durée d'affichage en secondes (optionnel)</li>
+                        <li data-i18n-html="sec.score1.li_couleur"><strong>couleur</strong> : Couleur du joueur au format R;G;B, appliquée à la pancarte et au score (optionnel, blanc par défaut)</li>
+                        <li data-i18n-html="sec.score.li_anim"><strong>animations</strong> : O (défaut) joue les GIF de score et des coups spéciaux, N les saute (optionnel)</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># 1ère fléchette, segment touché, couleur du joueur :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score1|T20 - X - X||0;255;0"<br>
+
+<span class="comment"># 2ème fléchette manquée :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score1|T20 - MISS - X||0;255;0"<br>
+
+<span class="comment"># 3ème fléchette, sans les GIF de score ni des coups spéciaux :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score1|T20 - MISS - D5||0;255;0|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.score1.li_note_last">Seule la dernière fléchette lancée est animée ; les précédentes restent affichées dans le panneau</li>
+                        <li data-i18n="sec.score1.li_note_gif">Les GIF de score et des coups spéciaux sont joués avant l'animation (pas pour un tir manqué), sauf avec N ou si les coups spéciaux sont désactivés</li>
+                        <li data-i18n="sec.score1.li_note_raspydarts">C'est RaspyDarts qui choisit la trame envoyée (score| ou score1|) ; « score| » reste l'affichage habituel</li>
+                        <li data-i18n="sec.score1.li_note_page">Les styles s'essaient depuis l'interface web : Accueil &gt; Médias et personnalisation &gt; Affichage des scores (/scores)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.fond1.title">fond1 - Paysage permanent du chien</div>
+                <p data-i18n-html="sec.fond1.p_intro">Affiche en permanence le paysage du chien de score1| (ciel de nuit, nuages, arbres, herbes, un oiseau de temps en temps) sous les messages et les scores, jusqu'à fond1|stop. Les textes s'y posent tels qu'ils sont demandés (couleur, motif dans les lettres, défilement) ; un texte avec une couleur de fond, les GIF, images, vidéos et l'horloge gardent tout l'écran.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">fond1|[start/stop]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.fond1.li_action"><strong>action</strong> : start (défaut) pour afficher le fond, stop pour le retirer (l'afficheur est effacé)</li>
+                        <li data-i18n-html="sec.fond1.li_attract"><strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond1|stop, et le chien s'endort à sa place (bonnet de nuit, lit, « Z »)</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Début de partie : paysage, attract mode comme d'habitude</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond1|"<br>
+
+<span class="comment"># Début de partie : paysage, attract mode remplacé par le chien endormi</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond1|start|N"<br>
+
+<span class="comment"># Fin de partie</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond1|stop"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.fond1.li_note_nostop">N'interrompt pas l'affichage en cours</li>
+                        <li data-i18n="sec.fond1.li_note_sleep">Le chien s'endort après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage le réveille</li>
+                        <li data-i18n="sec.fond1.li_note_style">Avec le fond, score1| fait sortir le chien des herbes du paysage ; pas de fond en mode portrait ni pendant les jeux</li>
                     </ul>
                 </div>
             </div>
@@ -3819,7 +3907,7 @@ curl -sSL https://raw.githubusercontent.com/rmdelcelier/Raspy2DMD/main/scripts/i
                         <tbody>
                             <tr>
                                 <td data-i18n="sec.recap.td_cat_text"><strong>Texte</strong></td>
-                                <td>msg, msgXX, msgmove, msgmovebcl, msgcarrou, msgcolor, msgimg, msgcst, msgfull, score</td>
+                                <td>msg, msgXX, msgmove, msgmovebcl, msgcarrou, msgcolor, msgimg, msgcst, msgfull, score, score1, fond1</td>
                             </tr>
                             <tr>
                                 <td data-i18n="sec.recap.td_cat_media"><strong>Images & GIFs</strong></td>
@@ -4321,6 +4409,22 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.score.li_duree": "<strong>durée</strong> : Durée d'affichage en secondes (optionnel)",
             "sec.score.li_couleur": "<strong>couleur</strong> : Couleur du texte au format R;G;B, fond noir (optionnel ; durée vide pour la donner seule)",
             "sec.score.li_note": "Format spécial pour affichage de scores de RaspyDarts",
+            "sec.score.li_anim": "<strong>animations</strong> : O (défaut) joue les GIF de score et des coups spéciaux, N les saute (optionnel)",
+            "cmd.score1.title": "score1 - Score animé « chien de chasse »",
+            "sec.score1.p_intro": "Un chien sort des herbes devant un paysage d'arbres ; les trois fléchettes sont inscrites dans un panneau en bois en bas de l'écran. La dernière fléchette reçue est animée : si un segment est touché, un éclair puis le chien saute en brandissant une pancarte avec le segment ; si le tir est manqué (<strong>MISS</strong>), le chien se moque, la main sur la bouche, entouré de « AH! ». Le score s'inscrit dans le panneau une fois l'action terminée.",
+            "sec.score1.li_valeur": "<strong>valeur</strong> : 1 à 3 fléchettes séparées par « - » : un segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tir manqué) ou <strong>X</strong> (pas encore lancée, dessinée comme une fléchette grise)",
+            "sec.score1.li_couleur": "<strong>couleur</strong> : Couleur du joueur au format R;G;B, appliquée à la pancarte et au score (optionnel, blanc par défaut)",
+            "sec.score1.li_note_last": "Seule la dernière fléchette lancée est animée ; les précédentes restent affichées dans le panneau",
+            "sec.score1.li_note_gif": "Les GIF de score et des coups spéciaux sont joués avant l'animation (pas pour un tir manqué), sauf avec N ou si les coups spéciaux sont désactivés",
+            "sec.score1.li_note_raspydarts": "C'est RaspyDarts qui choisit la trame envoyée (score| ou score1|) ; « score| » reste l'affichage habituel",
+            "sec.score1.li_note_page": "Les styles s'essaient depuis l'interface web : Accueil > Médias et personnalisation > Affichage des scores (/scores)",
+            "cmd.fond1.title": "fond1 - Paysage permanent du chien",
+            "sec.fond1.p_intro": "Affiche en permanence le paysage du chien de score1| (ciel de nuit, nuages, arbres, herbes, un oiseau de temps en temps) sous les messages et les scores, jusqu'à fond1|stop. Les textes s'y posent tels qu'ils sont demandés (couleur, motif dans les lettres, défilement) ; un texte avec une couleur de fond, les GIF, images, vidéos et l'horloge gardent tout l'écran.",
+            "sec.fond1.li_action": "<strong>action</strong> : start (défaut) pour afficher le fond, stop pour le retirer (l'afficheur est effacé)",
+            "sec.fond1.li_attract": "<strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond1|stop, et le chien s'endort à sa place (bonnet de nuit, lit, « Z »)",
+            "sec.fond1.li_note_nostop": "N'interrompt pas l'affichage en cours",
+            "sec.fond1.li_note_sleep": "Le chien s'endort après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage le réveille",
+            "sec.fond1.li_note_style": "Avec le fond, score1| fait sortir le chien des herbes du paysage ; pas de fond en mode portrait ni pendant les jeux",
             // --- IMAGES & GIFS ---
             "sec.img.title": "4️⃣ Images & GIFs - img",
             "cmd.img.title": "img - Afficher une image",
@@ -5101,6 +5205,22 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.score.li_duree": "<strong>duration</strong>: Display duration in seconds (optional)",
             "sec.score.li_couleur": "<strong>color</strong>: Text color as R;G;B, black background (optional; leave the duration empty to give it alone)",
             "sec.score.li_note": "Special format for RaspyDarts score display",
+            "sec.score.li_anim": "<strong>animations</strong>: O (default) plays the score and special move GIFs, N skips them (optional)",
+            "cmd.score1.title": "score1 - Animated \"hunting dog\" score",
+            "sec.score1.p_intro": "A dog pops out of the grass in front of a landscape of trees; the three darts are written on a wooden board at the bottom of the screen. The last dart received is animated: when a segment is hit, a flash, then the dog jumps up holding a sign with the segment; when the throw misses (<strong>MISS</strong>), the dog laughs with its paw over its mouth, surrounded by \"AH!\". The score is written on the board once the action is over.",
+            "sec.score1.li_valeur": "<strong>value</strong>: 1 to 3 darts separated by \"-\": a segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (missed throw) or <strong>X</strong> (not thrown yet, drawn as a grey dart)",
+            "sec.score1.li_couleur": "<strong>color</strong>: Player color as R;G;B, used for the sign and the score (optional, white by default)",
+            "sec.score1.li_note_last": "Only the last dart thrown is animated; the previous ones stay on the board",
+            "sec.score1.li_note_gif": "The score and special move GIFs are played before the animation (not for a missed throw), except with N or when special moves are disabled",
+            "sec.score1.li_note_raspydarts": "RaspyDarts chooses which frame is sent (score| or score1|); \"score|\" remains the usual display",
+            "sec.score1.li_note_page": "The styles can be tried from the web interface: Home > Media and customization > Score display (/scores)",
+            "cmd.fond1.title": "fond1 - Permanent dog landscape",
+            "sec.fond1.p_intro": "Permanently shows the landscape of the score1| dog (night sky, clouds, trees, grass, a bird now and then) behind messages and scores, until fond1|stop. Texts are drawn on it as requested (color, pattern inside the letters, scrolling); a text with a background color, GIFs, images, videos and the clock keep the full screen.",
+            "sec.fond1.li_action": "<strong>action</strong>: start (default) to show the background, stop to remove it (the display is cleared)",
+            "sec.fond1.li_attract": "<strong>attract mode</strong>: O (default) the attract mode works as usual; N it is suspended until fond1|stop, and the dog falls asleep instead (nightcap, bed, \"Z\")",
+            "sec.fond1.li_note_nostop": "Does not interrupt the current display",
+            "sec.fond1.li_note_sleep": "The dog falls asleep after the attract mode delay + 1 s without display (16 s if the attract mode is disabled); any display wakes it up",
+            "sec.fond1.li_note_style": "With the background, score1| makes the dog pop out of the landscape's grass; no background in portrait mode or during games",
             "sec.img.title": "4️⃣ Images & GIFs - img",
             "cmd.img.title": "img - Display an image",
             "sec.img.li_fichier": "<strong>file</strong>: Image file name",
@@ -5864,6 +5984,22 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.score.li_duree": "<strong>Dauer</strong>: Anzeigedauer in Sekunden (optional)",
             "sec.score.li_couleur": "<strong>Farbe</strong>: Textfarbe im Format R;G;B, schwarzer Hintergrund (optional; Dauer leer lassen, um nur die Farbe anzugeben)",
             "sec.score.li_note": "Spezielles Format für RaspyDarts-Punktestandanzeige",
+            "sec.score.li_anim": "<strong>Animationen</strong>: O (Standard) spielt die Punkte- und Spezialwurf-GIFs ab, N überspringt sie (optional)",
+            "cmd.score1.title": "score1 - Animierte Punkteanzeige „Jagdhund“",
+            "sec.score1.p_intro": "Ein Hund taucht vor einer Baumlandschaft aus dem Gras auf; die drei Pfeile stehen auf einer Holztafel am unteren Bildrand. Der zuletzt empfangene Pfeil wird animiert: Bei einem Treffer ein Blitz, dann springt der Hund mit einem Schild hoch, auf dem das Segment steht; bei einem Fehlwurf (<strong>MISS</strong>) lacht der Hund, die Pfote vor dem Mund, umgeben von „AH!“. Die Punkte erscheinen auf der Tafel, sobald die Aktion vorbei ist.",
+            "sec.score1.li_valeur": "<strong>Wert</strong>: 1 bis 3 Pfeile, getrennt durch „-“: ein Segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (Fehlwurf) oder <strong>X</strong> (noch nicht geworfen, als grauer Pfeil gezeichnet)",
+            "sec.score1.li_couleur": "<strong>Farbe</strong>: Spielerfarbe im Format R;G;B, für das Schild und die Punkte (optional, standardmäßig weiß)",
+            "sec.score1.li_note_last": "Nur der zuletzt geworfene Pfeil wird animiert; die vorherigen bleiben auf der Tafel",
+            "sec.score1.li_note_gif": "Die Punkte- und Spezialwurf-GIFs werden vor der Animation abgespielt (nicht bei einem Fehlwurf), außer mit N oder wenn Spezialwürfe deaktiviert sind",
+            "sec.score1.li_note_raspydarts": "RaspyDarts wählt, welche Nachricht gesendet wird (score| oder score1|); „score|“ bleibt die gewohnte Anzeige",
+            "sec.score1.li_note_page": "Die Stile lassen sich über die Weboberfläche ausprobieren: Startseite > Medien und Anpassung > Punkteanzeige (/scores)",
+            "cmd.fond1.title": "fond1 - Dauerhafte Landschaft des Hundes",
+            "sec.fond1.p_intro": "Zeigt dauerhaft die Landschaft des score1|-Hundes (Nachthimmel, Wolken, Bäume, Gras, ab und zu ein Vogel) hinter Nachrichten und Punkten, bis fond1|stop. Texte erscheinen darauf wie angefordert (Farbe, Muster in den Buchstaben, Laufschrift); ein Text mit Hintergrundfarbe, GIFs, Bilder, Videos und die Uhr behalten den ganzen Bildschirm.",
+            "sec.fond1.li_action": "<strong>Aktion</strong>: start (Standard) zeigt den Hintergrund, stop entfernt ihn (die Anzeige wird gelöscht)",
+            "sec.fond1.li_attract": "<strong>Attract-Modus</strong>: O (Standard) der Attract-Modus läuft wie gewohnt; N er ist bis fond1|stop ausgesetzt, und stattdessen schläft der Hund ein (Schlafmütze, Bett, „Z“)",
+            "sec.fond1.li_note_nostop": "Unterbricht die laufende Anzeige nicht",
+            "sec.fond1.li_note_sleep": "Der Hund schläft nach der Verzögerung des Attract-Modus + 1 s ohne Anzeige ein (16 s, wenn der Attract-Modus deaktiviert ist); jede Anzeige weckt ihn",
+            "sec.fond1.li_note_style": "Mit dem Hintergrund taucht der Hund von score1| aus dem Gras der Landschaft auf; kein Hintergrund im Hochformat oder während der Spiele",
             "sec.img.title": "4️⃣ Bilder & GIFs - img",
             "cmd.img.title": "img - Bild anzeigen",
             "sec.img.li_fichier": "<strong>Datei</strong>: Bilddateiname",
@@ -6627,6 +6763,22 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.score.li_duree": "<strong>duración</strong>: Duración de visualización en segundos (opcional)",
             "sec.score.li_couleur": "<strong>color</strong>: Color del texto en formato R;G;B, fondo negro (opcional; deje la duración vacía para indicar solo el color)",
             "sec.score.li_note": "Formato especial para visualización de puntuaciones de RaspyDarts",
+            "sec.score.li_anim": "<strong>animaciones</strong>: O (por defecto) reproduce los GIF de puntuación y de jugadas especiales, N los omite (opcional)",
+            "cmd.score1.title": "score1 - Puntuación animada «perro de caza»",
+            "sec.score1.p_intro": "Un perro sale de la hierba delante de un paisaje de árboles; los tres dardos se escriben en un panel de madera en la parte inferior de la pantalla. El último dardo recibido se anima: si se acierta un segmento, un destello y luego el perro salta con un cartel que muestra el segmento; si el tiro falla (<strong>MISS</strong>), el perro se ríe con la pata en la boca, rodeado de «AH!». La puntuación aparece en el panel una vez terminada la acción.",
+            "sec.score1.li_valeur": "<strong>valor</strong>: 1 a 3 dardos separados por «-»: un segmento (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tiro fallado) o <strong>X</strong> (aún no lanzado, dibujado como un dardo gris)",
+            "sec.score1.li_couleur": "<strong>color</strong>: Color del jugador en formato R;G;B, aplicado al cartel y a la puntuación (opcional, blanco por defecto)",
+            "sec.score1.li_note_last": "Solo se anima el último dardo lanzado; los anteriores permanecen en el panel",
+            "sec.score1.li_note_gif": "Los GIF de puntuación y de jugadas especiales se reproducen antes de la animación (no en un tiro fallado), salvo con N o si las jugadas especiales están desactivadas",
+            "sec.score1.li_note_raspydarts": "RaspyDarts elige la trama que se envía (score| o score1|); «score|» sigue siendo la visualización habitual",
+            "sec.score1.li_note_page": "Los estilos se prueban desde la interfaz web: Inicio > Medios y personalización > Visualización de puntuaciones (/scores)",
+            "cmd.fond1.title": "fond1 - Paisaje permanente del perro",
+            "sec.fond1.p_intro": "Muestra de forma permanente el paisaje del perro de score1| (cielo nocturno, nubes, árboles, hierba, un pájaro de vez en cuando) detrás de los mensajes y las puntuaciones, hasta fond1|stop. Los textos se muestran encima tal como se piden (color, motivo dentro de las letras, desplazamiento); un texto con color de fondo, los GIF, imágenes, vídeos y el reloj ocupan toda la pantalla.",
+            "sec.fond1.li_action": "<strong>acción</strong>: start (por defecto) para mostrar el fondo, stop para quitarlo (la pantalla se borra)",
+            "sec.fond1.li_attract": "<strong>attract mode</strong>: O (por defecto) el attract mode funciona como siempre; N queda suspendido hasta fond1|stop y, en su lugar, el perro se duerme (gorro de dormir, cama, «Z»)",
+            "sec.fond1.li_note_nostop": "No interrumpe la visualización en curso",
+            "sec.fond1.li_note_sleep": "El perro se duerme tras el retardo del attract mode + 1 s sin visualización (16 s si el attract mode está desactivado); cualquier visualización lo despierta",
+            "sec.fond1.li_note_style": "Con el fondo, score1| hace salir al perro de la hierba del paisaje; sin fondo en modo vertical ni durante los juegos",
             "sec.img.title": "4️⃣ Imágenes & GIFs - img",
             "cmd.img.title": "img - Mostrar una imagen",
             "sec.img.li_fichier": "<strong>archivo</strong>: Nombre del archivo de imagen",
@@ -7390,6 +7542,22 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.score.li_duree": "<strong>durata</strong>: Durata di visualizzazione in secondi (opzionale)",
             "sec.score.li_couleur": "<strong>colore</strong>: Colore del testo nel formato R;G;B, sfondo nero (opzionale; lasciare vuota la durata per indicare solo il colore)",
             "sec.score.li_note": "Formato speciale per la visualizzazione dei punteggi di RaspyDarts",
+            "sec.score.li_anim": "<strong>animazioni</strong>: O (predefinito) riproduce le GIF del punteggio e dei colpi speciali, N le salta (opzionale)",
+            "cmd.score1.title": "score1 - Punteggio animato «cane da caccia»",
+            "sec.score1.p_intro": "Un cane spunta dall'erba davanti a un paesaggio di alberi; le tre freccette sono scritte su un pannello di legno in basso sullo schermo. L'ultima freccetta ricevuta viene animata: se un segmento è colpito, un lampo e poi il cane salta reggendo un cartello con il segmento; se il tiro è mancato (<strong>MISS</strong>), il cane ride con la zampa sulla bocca, circondato da «AH!». Il punteggio compare sul pannello a fine azione.",
+            "sec.score1.li_valeur": "<strong>valore</strong>: da 1 a 3 freccette separate da «-»: un segmento (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tiro mancato) o <strong>X</strong> (non ancora lanciata, disegnata come una freccetta grigia)",
+            "sec.score1.li_couleur": "<strong>colore</strong>: Colore del giocatore nel formato R;G;B, applicato al cartello e al punteggio (opzionale, bianco per default)",
+            "sec.score1.li_note_last": "Solo l'ultima freccetta lanciata viene animata; le precedenti restano sul pannello",
+            "sec.score1.li_note_gif": "Le GIF del punteggio e dei colpi speciali vengono riprodotte prima dell'animazione (non per un tiro mancato), tranne con N o se i colpi speciali sono disattivati",
+            "sec.score1.li_note_raspydarts": "È RaspyDarts a scegliere la trama inviata (score| o score1|); «score|» resta la visualizzazione abituale",
+            "sec.score1.li_note_page": "Gli stili si provano dall'interfaccia web: Home > Media e personalizzazione > Visualizzazione punteggi (/scores)",
+            "cmd.fond1.title": "fond1 - Paesaggio permanente del cane",
+            "sec.fond1.p_intro": "Mostra in modo permanente il paesaggio del cane di score1| (cielo notturno, nuvole, alberi, erba, ogni tanto un uccello) dietro i messaggi e i punteggi, fino a fond1|stop. I testi vi compaiono come richiesto (colore, motivo nelle lettere, scorrimento); un testo con colore di sfondo, le GIF, le immagini, i video e l'orologio occupano tutto lo schermo.",
+            "sec.fond1.li_action": "<strong>azione</strong>: start (predefinito) per mostrare lo sfondo, stop per toglierlo (il display viene cancellato)",
+            "sec.fond1.li_attract": "<strong>attract mode</strong>: O (predefinito) l'attract mode funziona come al solito; N è sospeso fino a fond1|stop e al suo posto il cane si addormenta (berretto da notte, letto, «Z»)",
+            "sec.fond1.li_note_nostop": "Non interrompe la visualizzazione in corso",
+            "sec.fond1.li_note_sleep": "Il cane si addormenta dopo il ritardo dell'attract mode + 1 s senza visualizzazione (16 s se l'attract mode è disattivato); qualsiasi visualizzazione lo sveglia",
+            "sec.fond1.li_note_style": "Con lo sfondo, score1| fa uscire il cane dall'erba del paesaggio; nessuno sfondo in modalità verticale né durante i giochi",
             "sec.img.title": "4️⃣ Immagini & GIF - img",
             "cmd.img.title": "img - Mostra un'immagine",
             "sec.img.li_fichier": "<strong>file</strong>: Nome del file immagine",
