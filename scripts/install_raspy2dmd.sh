@@ -1323,7 +1323,7 @@ output = local
 [Pico]
 pico_auto_detect = 0
 pico_display_enabled = 0
-pico_reconnect_timeout = 5
+pico_reconnect_timeout = 60
 CONFIGEOF
     fi
 
