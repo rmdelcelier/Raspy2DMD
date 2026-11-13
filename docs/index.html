@@ -1783,6 +1783,84 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond1|stop"<br>
                         <li data-i18n="sec.fond1.li_note_style">Avec le fond, score1| fait sortir le chien des herbes du paysage ; pas de fond en mode portrait ni pendant les jeux</li>
                     </ul>
                 </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.score2.title">score2 - Score animé « la cible »</div>
+                <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
+                <p data-i18n-html="sec.score2.p_intro">Une cible anglaise vue par une caméra. Pour chaque fléchette reçue, la caméra zoome sur le segment touché (flash, puis le segment clignote), se décale vers la droite pendant que la valeur arrive en glissant à gauche, puis recule pour montrer la cible entière. Un tir manqué (<strong>MISS</strong>) : zoom sur le centre, la cible tremble puis explose sur tout l'écran, « MISS » repoussant les morceaux. Vue d'ensemble : à gauche une fenêtre caméra (elle cherche un segment, puis montre en gros plan les segments touchés), au centre la cible (segments touchés en vert, qui clignotent), à droite le tableau des scores.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">score2|&lt;X - X - X&gt;|[durée]|[R;G;B]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.score2.li_valeur"><strong>valeur</strong> : 1 à 3 fléchettes séparées par « - » : un segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tir manqué) ou <strong>X</strong> (pas encore lancée, « _ » dans le tableau)</li>
+                        <li data-i18n-html="sec.score.li_duree"><strong>durée</strong> : Durée d'affichage en secondes (optionnel)</li>
+                        <li data-i18n-html="sec.score2.li_couleur"><strong>couleur</strong> : Couleur du joueur au format R;G;B, appliquée à la valeur qui glisse et au tableau (optionnel, blanc par défaut) ; MISS reste en rouge</li>
+                        <li data-i18n-html="sec.score.li_anim"><strong>animations</strong> : O (défaut) joue les GIF de score et des coups spéciaux, N les saute (optionnel)</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># 1ère fléchette, segment touché, couleur du joueur :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score2|T20 - X - X||0;255;0"<br>
+
+<span class="comment"># 2ème fléchette manquée, sans les GIF de score ni des coups spéciaux :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score2|T20 - MISS - X||0;255;0|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.score1.li_note_last">Seule la dernière fléchette lancée est animée ; les précédentes restent affichées dans le panneau</li>
+                        <li data-i18n="sec.score2.li_note_wait">Après l'animation, la fenêtre caméra et les segments touchés restent animés 30 s, puis l'image se fige jusqu'au message suivant</li>
+                        <li data-i18n="sec.score1.li_note_gif">Les GIF de score et des coups spéciaux sont joués avant l'animation (pas pour un tir manqué), sauf avec N ou si les coups spéciaux sont désactivés</li>
+                        <li data-i18n="sec.score2.li_note_font">Les textes de score1| et score2| utilisent Quicksand Light sans lissage (dossier des polices), fine et nette sur les LED, ou une police pixel intégrée si elle manque ; les messages gardent la police choisie</li>
+                        <li data-i18n="sec.score1.li_note_page">Les styles s'essaient depuis l'interface web : Accueil &gt; Médias et personnalisation &gt; Affichage des scores (/scores)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.fond2.title">fond2 - Mur de briques et cible</div>
+                <p data-i18n-html="sec.fond2.p_intro">Affiche en permanence un mur de briques sombre avec la cible sur son panneau en bois, sous les messages, jusqu'à fond2|stop. Les textes s'y posent comme avec fond1| ; score2| y pose sa vue d'ensemble, mais son zoom et son MISS gardent tout l'écran pour rester lisibles ; comme ailleurs, un texte avec une couleur de fond, les GIF, images, vidéos et l'horloge gardent tout l'écran.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">fond2|[start/stop]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.fond1.li_action"><strong>action</strong> : start (défaut) pour afficher le fond, stop pour le retirer (l'afficheur est effacé)</li>
+                        <li data-i18n-html="sec.fond2.li_attract"><strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond2|stop, et la caméra balaie lentement la cible à sa place, comme si elle cherchait un segment</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Début de partie : mur de briques, attract mode remplacé par la recherche de segment</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond2|start|N"<br>
+
+<span class="comment"># Fin de partie</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond2|stop"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.fond1.li_note_nostop">N'interrompt pas l'affichage en cours</li>
+                        <li data-i18n="sec.fond2.li_note_search">La recherche de segment démarre après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage l'arrête. Pas de fond en mode portrait ni pendant les jeux</li>
+                    </ul>
+                </div>
+            </div>
             </div>
         </div>
 
@@ -3907,7 +3985,7 @@ curl -sSL https://raw.githubusercontent.com/rmdelcelier/Raspy2DMD/main/scripts/i
                         <tbody>
                             <tr>
                                 <td data-i18n="sec.recap.td_cat_text"><strong>Texte</strong></td>
-                                <td>msg, msgXX, msgmove, msgmovebcl, msgcarrou, msgcolor, msgimg, msgcst, msgfull, score, score1, fond1</td>
+                                <td>msg, msgXX, msgmove, msgmovebcl, msgcarrou, msgcolor, msgimg, msgcst, msgfull, score, score1, score2, fond1, fond2</td>
                             </tr>
                             <tr>
                                 <td data-i18n="sec.recap.td_cat_media"><strong>Images & GIFs</strong></td>
@@ -4425,6 +4503,16 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.fond1.li_note_nostop": "N'interrompt pas l'affichage en cours",
             "sec.fond1.li_note_sleep": "Le chien s'endort après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage le réveille",
             "sec.fond1.li_note_style": "Avec le fond, score1| fait sortir le chien des herbes du paysage ; pas de fond en mode portrait ni pendant les jeux",
+            "cmd.score2.title": "score2 - Score animé « la cible »",
+            "sec.score2.p_intro": "Une cible anglaise vue par une caméra. Pour chaque fléchette reçue, la caméra zoome sur le segment touché (flash, puis le segment clignote), se décale vers la droite pendant que la valeur arrive en glissant à gauche, puis recule pour montrer la cible entière. Un tir manqué (<strong>MISS</strong>) : zoom sur le centre, la cible tremble puis explose sur tout l'écran, « MISS » repoussant les morceaux. Vue d'ensemble : à gauche une fenêtre caméra (elle cherche un segment, puis montre en gros plan les segments touchés), au centre la cible (segments touchés en vert, qui clignotent), à droite le tableau des scores.",
+            "sec.score2.li_valeur": "<strong>valeur</strong> : 1 à 3 fléchettes séparées par « - » : un segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tir manqué) ou <strong>X</strong> (pas encore lancée, « _ » dans le tableau)",
+            "sec.score2.li_couleur": "<strong>couleur</strong> : Couleur du joueur au format R;G;B, appliquée à la valeur qui glisse et au tableau (optionnel, blanc par défaut) ; MISS reste en rouge",
+            "sec.score2.li_note_wait": "Après l'animation, la fenêtre caméra et les segments touchés restent animés 30 s, puis l'image se fige jusqu'au message suivant",
+            "sec.score2.li_note_font": "Les textes de score1| et score2| utilisent Quicksand Light sans lissage (dossier des polices), fine et nette sur les LED, ou une police pixel intégrée si elle manque ; les messages gardent la police choisie",
+            "cmd.fond2.title": "fond2 - Mur de briques et cible",
+            "sec.fond2.p_intro": "Affiche en permanence un mur de briques sombre avec la cible sur son panneau en bois, sous les messages, jusqu'à fond2|stop. Les textes s'y posent comme avec fond1| ; score2| y pose sa vue d'ensemble, mais son zoom et son MISS gardent tout l'écran pour rester lisibles ; comme ailleurs, un texte avec une couleur de fond, les GIF, images, vidéos et l'horloge gardent tout l'écran.",
+            "sec.fond2.li_attract": "<strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond2|stop, et la caméra balaie lentement la cible à sa place, comme si elle cherchait un segment",
+            "sec.fond2.li_note_search": "La recherche de segment démarre après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage l'arrête. Pas de fond en mode portrait ni pendant les jeux",
             // --- IMAGES & GIFS ---
             "sec.img.title": "4️⃣ Images & GIFs - img",
             "cmd.img.title": "img - Afficher une image",
@@ -5221,6 +5309,16 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.fond1.li_note_nostop": "Does not interrupt the current display",
             "sec.fond1.li_note_sleep": "The dog falls asleep after the attract mode delay + 1 s without display (16 s if the attract mode is disabled); any display wakes it up",
             "sec.fond1.li_note_style": "With the background, score1| makes the dog pop out of the landscape's grass; no background in portrait mode or during games",
+            "cmd.score2.title": "score2 - Animated \"dartboard\" score",
+            "sec.score2.p_intro": "A standard dartboard seen through a camera. For each dart received, the camera zooms in on the segment hit (flash, then the segment blinks), pans to the right while the value slides in on the left, then pulls back to show the whole board. A missed throw (<strong>MISS</strong>): zoom on the centre, the board shakes then explodes over the whole screen, \"MISS\" pushing the pieces away. Overview: on the left a camera window (it searches for a segment, then shows a close-up of the segments hit), in the centre the board (segments hit in blinking green), on the right the scoreboard.",
+            "sec.score2.li_valeur": "<strong>value</strong>: 1 to 3 darts separated by \"-\": a segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (missed throw) or <strong>X</strong> (not thrown yet, \"_\" on the scoreboard)",
+            "sec.score2.li_couleur": "<strong>color</strong>: Player color as R;G;B, used for the sliding value and the scoreboard (optional, white by default); MISS stays red",
+            "sec.score2.li_note_wait": "After the animation, the camera window and the segments hit stay animated for 30 s, then the picture freezes until the next message",
+            "sec.score2.li_note_font": "The texts of score1| and score2| use Quicksand Light without smoothing (fonts folder), thin and sharp on LEDs, or a built-in pixel font if it is missing; messages keep the chosen font",
+            "cmd.fond2.title": "fond2 - Brick wall and dartboard",
+            "sec.fond2.p_intro": "Permanently shows a dark brick wall with the dartboard on its wooden cabinet behind messages, until fond2|stop. Texts are drawn on it as with fond1|; score2| draws its overview on it, but its zoom and MISS keep the full screen to stay readable; as elsewhere, a text with a background color, GIFs, images, videos and the clock keep the full screen.",
+            "sec.fond2.li_attract": "<strong>attract mode</strong>: O (default) the attract mode works as usual; N it is suspended until fond2|stop, and the camera slowly sweeps the board instead, as if searching for a segment",
+            "sec.fond2.li_note_search": "The segment search starts after the attract mode delay + 1 s without display (16 s if the attract mode is disabled); any display stops it. No background in portrait mode or during games",
             "sec.img.title": "4️⃣ Images & GIFs - img",
             "cmd.img.title": "img - Display an image",
             "sec.img.li_fichier": "<strong>file</strong>: Image file name",
@@ -6000,6 +6098,16 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.fond1.li_note_nostop": "Unterbricht die laufende Anzeige nicht",
             "sec.fond1.li_note_sleep": "Der Hund schläft nach der Verzögerung des Attract-Modus + 1 s ohne Anzeige ein (16 s, wenn der Attract-Modus deaktiviert ist); jede Anzeige weckt ihn",
             "sec.fond1.li_note_style": "Mit dem Hintergrund taucht der Hund von score1| aus dem Gras der Landschaft auf; kein Hintergrund im Hochformat oder während der Spiele",
+            "cmd.score2.title": "score2 - Animierte Punkteanzeige „Dartscheibe“",
+            "sec.score2.p_intro": "Eine Standard-Dartscheibe, gesehen durch eine Kamera. Bei jedem empfangenen Pfeil zoomt die Kamera auf das getroffene Segment (Blitz, dann blinkt das Segment), schwenkt nach rechts, während der Wert links hereingleitet, und zieht dann zurück, um die ganze Scheibe zu zeigen. Ein Fehlwurf (<strong>MISS</strong>): Zoom auf die Mitte, die Scheibe wackelt und explodiert über den ganzen Bildschirm, „MISS“ schiebt die Teile weg. Übersicht: links ein Kamerafenster (es sucht ein Segment und zeigt dann die getroffenen Segmente in Nahaufnahme), in der Mitte die Scheibe (getroffene Segmente grün blinkend), rechts die Punktetafel.",
+            "sec.score2.li_valeur": "<strong>Wert</strong>: 1 bis 3 Pfeile, getrennt durch „-“: ein Segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (Fehlwurf) oder <strong>X</strong> (noch nicht geworfen, „_“ auf der Tafel)",
+            "sec.score2.li_couleur": "<strong>Farbe</strong>: Spielerfarbe im Format R;G;B, für den hereingleitenden Wert und die Tafel (optional, standardmäßig weiß); MISS bleibt rot",
+            "sec.score2.li_note_wait": "Nach der Animation bleiben das Kamerafenster und die getroffenen Segmente 30 s animiert, dann bleibt das Bild bis zur nächsten Nachricht stehen",
+            "sec.score2.li_note_font": "Die Texte von score1| und score2| verwenden Quicksand Light ohne Glättung (Schriftenordner), fein und scharf auf LEDs, oder eine eingebaute Pixelschrift, falls sie fehlt; Nachrichten behalten die gewählte Schrift",
+            "cmd.fond2.title": "fond2 - Ziegelwand und Dartscheibe",
+            "sec.fond2.p_intro": "Zeigt dauerhaft eine dunkle Ziegelwand mit der Dartscheibe auf ihrem Holzschrank hinter Nachrichten, bis fond2|stop. Texte erscheinen darauf wie bei fond1|; score2| zeigt seine Übersicht darauf, aber Zoom und MISS behalten den ganzen Bildschirm, damit sie lesbar bleiben; wie sonst auch behalten ein Text mit Hintergrundfarbe, GIFs, Bilder, Videos und die Uhr den ganzen Bildschirm.",
+            "sec.fond2.li_attract": "<strong>Attract-Modus</strong>: O (Standard) der Attract-Modus läuft wie gewohnt; N er ist bis fond2|stop ausgesetzt, und stattdessen schwenkt die Kamera langsam über die Scheibe, als suche sie ein Segment",
+            "sec.fond2.li_note_search": "Die Segmentsuche beginnt nach der Verzögerung des Attract-Modus + 1 s ohne Anzeige (16 s, wenn der Attract-Modus deaktiviert ist); jede Anzeige beendet sie. Kein Hintergrund im Hochformat oder während der Spiele",
             "sec.img.title": "4️⃣ Bilder & GIFs - img",
             "cmd.img.title": "img - Bild anzeigen",
             "sec.img.li_fichier": "<strong>Datei</strong>: Bilddateiname",
@@ -6779,6 +6887,16 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.fond1.li_note_nostop": "No interrumpe la visualización en curso",
             "sec.fond1.li_note_sleep": "El perro se duerme tras el retardo del attract mode + 1 s sin visualización (16 s si el attract mode está desactivado); cualquier visualización lo despierta",
             "sec.fond1.li_note_style": "Con el fondo, score1| hace salir al perro de la hierba del paisaje; sin fondo en modo vertical ni durante los juegos",
+            "cmd.score2.title": "score2 - Puntuación animada «la diana»",
+            "sec.score2.p_intro": "Una diana reglamentaria vista por una cámara. Por cada dardo recibido, la cámara hace zoom en el segmento acertado (destello y luego el segmento parpadea), se desplaza a la derecha mientras el valor entra deslizándose por la izquierda y luego retrocede para mostrar la diana entera. Un tiro fallado (<strong>MISS</strong>): zoom en el centro, la diana tiembla y explota en toda la pantalla, «MISS» empujando los trozos. Vista general: a la izquierda una ventana de cámara (busca un segmento y luego muestra de cerca los segmentos acertados), en el centro la diana (segmentos acertados en verde parpadeante), a la derecha el marcador.",
+            "sec.score2.li_valeur": "<strong>valor</strong>: 1 a 3 dardos separados por «-»: un segmento (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tiro fallado) o <strong>X</strong> (aún no lanzado, «_» en el marcador)",
+            "sec.score2.li_couleur": "<strong>color</strong>: Color del jugador en formato R;G;B, aplicado al valor que se desliza y al marcador (opcional, blanco por defecto); MISS sigue en rojo",
+            "sec.score2.li_note_wait": "Tras la animación, la ventana de cámara y los segmentos acertados siguen animados 30 s y luego la imagen se congela hasta el mensaje siguiente",
+            "sec.score2.li_note_font": "Los textos de score1| y score2| usan Quicksand Light sin suavizado (carpeta de fuentes), fina y nítida en los LED, o una fuente de píxeles integrada si falta; los mensajes conservan la fuente elegida",
+            "cmd.fond2.title": "fond2 - Pared de ladrillos y diana",
+            "sec.fond2.p_intro": "Muestra de forma permanente una pared de ladrillos oscura con la diana en su mueble de madera detrás de los mensajes, hasta fond2|stop. Los textos se muestran encima como con fond1|; score2| muestra encima su vista general, pero su zoom y su MISS ocupan toda la pantalla para seguir siendo legibles; como en otros casos, un texto con color de fondo, los GIF, imágenes, vídeos y el reloj ocupan toda la pantalla.",
+            "sec.fond2.li_attract": "<strong>attract mode</strong>: O (por defecto) el attract mode funciona como siempre; N se suspende hasta fond2|stop y, en su lugar, la cámara recorre lentamente la diana, como si buscara un segmento",
+            "sec.fond2.li_note_search": "La búsqueda de segmento empieza tras el retardo del attract mode + 1 s sin visualización (16 s si el attract mode está desactivado); cualquier visualización la detiene. Sin fondo en modo vertical ni durante los juegos",
             "sec.img.title": "4️⃣ Imágenes & GIFs - img",
             "cmd.img.title": "img - Mostrar una imagen",
             "sec.img.li_fichier": "<strong>archivo</strong>: Nombre del archivo de imagen",
@@ -7558,6 +7676,16 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.fond1.li_note_nostop": "Non interrompe la visualizzazione in corso",
             "sec.fond1.li_note_sleep": "Il cane si addormenta dopo il ritardo dell'attract mode + 1 s senza visualizzazione (16 s se l'attract mode è disattivato); qualsiasi visualizzazione lo sveglia",
             "sec.fond1.li_note_style": "Con lo sfondo, score1| fa uscire il cane dall'erba del paesaggio; nessuno sfondo in modalità verticale né durante i giochi",
+            "cmd.score2.title": "score2 - Punteggio animato «il bersaglio»",
+            "sec.score2.p_intro": "Un bersaglio regolamentare visto da una telecamera. Per ogni freccetta ricevuta, la telecamera zooma sul segmento colpito (lampo, poi il segmento lampeggia), si sposta a destra mentre il valore entra scorrendo da sinistra, poi arretra per mostrare il bersaglio intero. Un tiro mancato (<strong>MISS</strong>): zoom sul centro, il bersaglio trema poi esplode su tutto lo schermo, «MISS» che spinge via i pezzi. Vista d'insieme: a sinistra una finestra della telecamera (cerca un segmento, poi mostra da vicino i segmenti colpiti), al centro il bersaglio (segmenti colpiti in verde lampeggiante), a destra il tabellone.",
+            "sec.score2.li_valeur": "<strong>valore</strong>: da 1 a 3 freccette separate da «-»: un segmento (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tiro mancato) o <strong>X</strong> (non ancora lanciata, «_» sul tabellone)",
+            "sec.score2.li_couleur": "<strong>colore</strong>: Colore del giocatore nel formato R;G;B, applicato al valore che scorre e al tabellone (opzionale, bianco per impostazione predefinita); MISS resta rosso",
+            "sec.score2.li_note_wait": "Dopo l'animazione, la finestra della telecamera e i segmenti colpiti restano animati 30 s, poi l'immagine si ferma fino al messaggio successivo",
+            "sec.score2.li_note_font": "I testi di score1| e score2| usano Quicksand Light senza smussatura (cartella dei caratteri), sottile e nitido sui LED, o un carattere a pixel integrato se manca; i messaggi mantengono il carattere scelto",
+            "cmd.fond2.title": "fond2 - Muro di mattoni e bersaglio",
+            "sec.fond2.p_intro": "Mostra in modo permanente un muro di mattoni scuro con il bersaglio sul suo mobile di legno dietro i messaggi, fino a fond2|stop. I testi vi appaiono come con fond1|; score2| vi mostra la sua vista d'insieme, ma lo zoom e il MISS occupano tutto lo schermo per restare leggibili; come altrove, un testo con colore di sfondo, le GIF, le immagini, i video e l'orologio occupano tutto lo schermo.",
+            "sec.fond2.li_attract": "<strong>attract mode</strong>: O (predefinito) l'attract mode funziona come al solito; N è sospeso fino a fond2|stop e, al suo posto, la telecamera percorre lentamente il bersaglio, come se cercasse un segmento",
+            "sec.fond2.li_note_search": "La ricerca del segmento parte dopo il ritardo dell'attract mode + 1 s senza visualizzazione (16 s se l'attract mode è disattivato); qualsiasi visualizzazione la ferma. Nessuno sfondo in modalità verticale né durante i giochi",
             "sec.img.title": "4️⃣ Immagini & GIF - img",
             "cmd.img.title": "img - Mostra un'immagine",
             "sec.img.li_fichier": "<strong>file</strong>: Nome del file immagine",
