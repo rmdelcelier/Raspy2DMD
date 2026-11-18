@@ -220,6 +220,24 @@ detect_pi_architecture() {
     return 0
 }
 
+# Nombre de compilations en parallele selon la memoire : sur un Pi 3 (1 Go) en 64 bits,
+# les bindings Python de RGB Matrix lancaient 3 cc1plus a la fois : echange plein,
+# borne figee puis reinitialisee par le chien de garde en pleine installation (18/11/2026).
+# 1 tache sous 1,5 Go, 2 sous 3 Go, sinon un par coeur.
+build_jobs() {
+    local mem_mb cpus jobs
+    mem_mb=$(awk '/^MemTotal:/ {print int($2 / 1024)}' /proc/meminfo 2>/dev/null)
+    cpus=$(nproc 2>/dev/null || echo 1)
+    jobs=1
+    if [ "${mem_mb:-0}" -ge 3000 ]; then
+        jobs=$cpus
+    elif [ "${mem_mb:-0}" -ge 1500 ]; then
+        jobs=2
+    fi
+    [ "$jobs" -gt "$cpus" ] && jobs=$cpus
+    echo "$jobs"
+}
+
 check_raspberry_pi() {
     if ! grep -q "Raspberry Pi\|BCM" /proc/cpuinfo 2>/dev/null; then
         log_error "Ce script doit etre execute sur un Raspberry Pi"
@@ -238,6 +256,8 @@ check_raspberry_pi() {
     if [ "$PI_ARCH" = "armv6" ]; then
         log_info "Architecture ARMv6 detectee (Pi Zero/Zero W/Zero WH)"
         log_warn "Node.js 18 LTS sera installe (Node.js 20+ ne supporte pas ARMv6)"
+    elif [ "$(uname -m)" = "aarch64" ] && [ "$(getconf LONG_BIT 2>/dev/null)" = "64" ]; then
+        log_info "Architecture 64 bits detectee (aarch64)"
     else
         log_info "Architecture ARMv7+ detectee"
     fi
@@ -751,6 +771,13 @@ step_install_rgbmatrix() {
 
     log_warn "Cette etape peut prendre 5-10 minutes sur un Raspberry Pi Zero"
 
+    # Compilations en parallele limitees par la memoire (make de la bibliotheque, ninja
+    # des bindings via scikit-build-core) : voir build_jobs
+    local JOBS
+    JOBS=$(build_jobs)
+    export MAKEFLAGS="-j${JOBS}" CMAKE_BUILD_PARALLEL_LEVEL="$JOBS"
+    log_info "Compilation sur ${JOBS} coeur(s) ($(awk '/^MemTotal:/ {print int($2 / 1024)}' /proc/meminfo) Mo de memoire)"
+
     # Nettoyage d'une eventuelle installation precedente
     if [ -d "/tmp/rpi-rgb-led-matrix" ]; then
         rm -rf /tmp/rpi-rgb-led-matrix
@@ -921,7 +948,18 @@ step_download_raspy2dmd() {
         # Telechargement de la release
         log_substep "Telechargement de l'archive (cela peut prendre quelques minutes)..."
 
-        if [ -n "$DOWNLOAD_URL" ]; then
+        if [ -n "${RASPY2DMD_ARCHIVE:-}" ] && [ -f "${RASPY2DMD_ARCHIVE:-}" ]; then
+            # Essai d'une archive avant sa publication (RASPY2DMD_ARCHIVE=/chemin/archive.zip) :
+            # le reste de l'installation est celui d'une release
+            log_warn "Archive locale (essai avant publication) : $RASPY2DMD_ARCHIVE"
+            cp "$RASPY2DMD_ARCHIVE" raspy2dmd.zip
+
+            log_substep "Extraction de l'archive..."
+            mkdir -p "$TMP_DIR/extracted"
+            unzip -o raspy2dmd.zip -d "$TMP_DIR/extracted" >> "$LOG_FILE" 2>&1
+            rm -f raspy2dmd.zip
+            mv "$TMP_DIR/extracted" "$TMP_DIR/extracted_app"
+        elif [ -n "$DOWNLOAD_URL" ]; then
             # Plusieurs essais : une coupure passagere ne doit pas casser l'installation
             wget -q --show-progress --tries=5 --waitretry=10 --retry-connrefused "$DOWNLOAD_URL" -O raspy2dmd.zip
 
