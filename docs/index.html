@@ -2507,6 +2507,78 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond11|start|N"<br>
                     </ul>
                 </div>
             </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.score12.title">score12 - Score animé « le ring boy »</div>
+                <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
+                <p data-i18n-html="sec.score12.p_intro">Le même ring et le même déroulé que score12|, avec un ring boy : la cloche sonne, il entre en gros plan avec un panneau tenu à côté de lui où est écrite la valeur du segment, le public le prend en photo, il ressort, puis la valeur s'affiche en grand. Un des quatre ring boys, tiré au hasard à chaque volée (indépendamment de score12|). SB : un projecteur le suit ; DB : deux projecteurs et une pluie de confettis. Un tir manqué (<strong>MISS</strong>) : l'éponge est jetée sur le ring, il entre gêné avec le panneau MISS, la foule hue (« OUUUH ! »).</strong>) : l'éponge est jetée sur le ring, elle entre gênée avec le panneau MISS, la foule hue (« OUUUH ! »).</strong>) : trois tirs déchirent le rideau, la lumière passe par les déchirures.</strong>) : trois tirs déchirent le rideau, la lumière passe par les déchirures.</strong>) : la baguette frappe le bord du tambour, une étincelle jaillit, puis « MISS » s'affiche.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">score12|&lt;X - X - X&gt;|[durée]|[R;G;B]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.scenes.li_valeur"><strong>valeur</strong> : 1 à 3 fléchettes séparées par « - » : un segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tir manqué) ou <strong>X</strong> (pas encore lancée, trait gris dans la colonne)</li>
+                        <li data-i18n-html="sec.score.li_duree"><strong>durée</strong> : Durée d'affichage en secondes (optionnel)</li>
+                        <li data-i18n-html="sec.scenes.li_couleur"><strong>couleur</strong> : Couleur du joueur au format R;G;B, appliquée au segment affiché en grand et à la colonne (optionnel, blanc par défaut) ; MISS reste en rouge</li>
+                        <li data-i18n-html="sec.score.li_anim"><strong>animations</strong> : O (défaut) joue les GIF de score et des coups spéciaux, N les saute (optionnel)</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Fléchette manquée, couleur du joueur, sans les GIF :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score12|T20 - MISS - X||0;255;0|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.scenes.li_note_col">La colonne de droite montre les trois fléchettes de la volée (code du segment, SB et DB compris), sans points ni total ; dans la scène, le segment s'affiche en grand (SB : BULL, DB : DOUBLE BULL), avec un contour qui s'adapte au décor</li>
+                        <li data-i18n="sec.scenes.li_note_wait">Seule la dernière fléchette lancée est animée. Ensuite, la scène reste animée 30 s, puis l'image se fige jusqu'au message suivant</li>
+                        <li data-i18n="sec.score1.li_note_gif">Les GIF de score et des coups spéciaux sont joués avant l'animation (pas pour un tir manqué), sauf avec N ou si les coups spéciaux sont désactivés</li>
+                        <li data-i18n="sec.score1.li_note_page">Les styles s'essaient depuis l'interface web : Accueil &gt; Médias et personnalisation &gt; Affichage des scores (/scores)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.fond12.title">fond12 - Ring de boxe (style 12)</div>
+                <p data-i18n-html="sec.fond12.p_intro">Le décor du style 12 (le même ring de boxe que fond12|) sous les messages, jusqu'à fond12|stop.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">fond12|[start/stop]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.fond1.li_action"><strong>action</strong> : start (défaut) pour afficher le fond, stop pour le retirer (l'afficheur est effacé)</li>
+                        <li data-i18n-html="sec.fond12.li_attract"><strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond12|stop, et à sa place les têtes des ring boys défilent lentement devant le ring balayé par un projecteur</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond12|stop, et à sa place les têtes des ring girls défilent lentement devant le ring balayé par un projecteur</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond12|stop, et à sa place la chaîne de canards défile doucement et les ampoules de l'auvent s'allument en chenillard</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond12|stop, et à sa place la chaîne défile doucement et les ampoules de l'auvent s'allument en chenillard</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond12|stop, et à sa place le tambour glisse au centre et bat doucement ; il revient à gauche dès qu'un affichage arrive</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Début de partie : décor du style, attract mode remplacé par sa scène d'attente</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond12|start|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.fond1.li_note_nostop">N'interrompt pas l'affichage en cours</li>
+                        <li data-i18n="sec.scenes.li_note_overlay">Les animations du score gardent tout l'écran ; les messages sans couleur de fond se posent sur le fond</li>
+                        <li data-i18n="sec.scenes.li_note_idle">La scène d'attente démarre après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage l'arrête. Pas de fond en mode portrait ni pendant les jeux</li>
+                    </ul>
+                </div>
+            </div>
             </div>
             </div>
         </div>
@@ -4632,7 +4704,7 @@ curl -sSL https://raw.githubusercontent.com/rmdelcelier/Raspy2DMD/main/scripts/i
                         <tbody>
                             <tr>
                                 <td data-i18n="sec.recap.td_cat_text"><strong>Texte</strong></td>
-                                <td>msg, msgXX, msgmove, msgmovebcl, msgcarrou, msgcolor, msgimg, msgcst, msgfull, score, score1, score2, score3, score4, score5, score6, score7, score8, score9, score10, score11, fond1, fond2, fond3, fond4, fond5, fond6, fond7, fond8, fond9, fond10, fond11</td>
+                                <td>msg, msgXX, msgmove, msgmovebcl, msgcarrou, msgcolor, msgimg, msgcst, msgfull, score, score1, score2, score3, score4, score5, score6, score7, score8, score9, score10, score11, score12, fond1, fond2, fond3, fond4, fond5, fond6, fond7, fond8, fond9, fond10, fond11, fond12</td>
                             </tr>
                             <tr>
                                 <td data-i18n="sec.recap.td_cat_media"><strong>Images & GIFs</strong></td>
@@ -5211,6 +5283,11 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.fond11.title": "fond11 - Ring de boxe (style 11)",
             "sec.fond11.p_intro": "Le décor du style 11 (ring de boxe la nuit) sous les messages, jusqu'à fond11|stop.",
             "sec.fond11.li_attract": "<strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond11|stop, et à sa place les têtes des ring girls défilent lentement devant le ring balayé par un projecteur",
+            "cmd.score12.title": "score12 - Score animé « le ring boy »",
+            "sec.score12.p_intro": "Le même ring et le même déroulé que score11|, avec un ring boy : la cloche sonne, il entre en gros plan avec un panneau tenu à côté de lui où est écrite la valeur du segment, le public le prend en photo, il ressort, puis la valeur s'affiche en grand. Un des quatre ring boys, tiré au hasard à chaque volée (indépendamment de score11|). SB : un projecteur le suit ; DB : deux projecteurs et une pluie de confettis. Un tir manqué (<strong>MISS</strong>) : l'éponge est jetée sur le ring, il entre gêné avec le panneau MISS, la foule hue (« OUUUH ! »).",
+            "cmd.fond12.title": "fond12 - Ring de boxe (style 12)",
+            "sec.fond12.p_intro": "Le décor du style 12 (le même ring de boxe que fond11|) sous les messages, jusqu'à fond12|stop.",
+            "sec.fond12.li_attract": "<strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond12|stop, et à sa place les têtes des ring boys défilent lentement devant le ring balayé par un projecteur",
             // --- IMAGES & GIFS ---
             "sec.img.title": "4️⃣ Images & GIFs - img",
             "cmd.img.title": "img - Afficher une image",
@@ -6068,6 +6145,11 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.fond11.title": "fond11 - Boxing ring (style 11)",
             "sec.fond11.p_intro": "The scenery of style 11 (boxing ring at night) behind messages, until fond11|stop.",
             "sec.fond11.li_attract": "<strong>attract mode</strong>: O (default) the attract mode works as usual; N it is suspended until fond11|stop, and instead the ring girls' heads parade slowly in front of the ring swept by a spotlight",
+            "cmd.score12.title": "score12 - Animated \"ring boy\" score",
+            "sec.score12.p_intro": "The same ring and the same sequence as score11|, with a ring boy: the bell rings, he comes in close-up holding a sign beside him with the segment value written on it, the crowd takes pictures, he leaves, then the value is shown large. One of four ring boys, drawn at random for each turn (independently of score11|). SB: a spotlight follows him; DB: two spotlights and falling confetti. A missed throw (<strong>MISS</strong>): the towel is thrown into the ring, he comes in embarrassed with the MISS sign, the crowd boos (\"OUUUH !\").",
+            "cmd.fond12.title": "fond12 - Boxing ring (style 12)",
+            "sec.fond12.p_intro": "The scenery of style 12 (the same boxing ring as fond11|) behind messages, until fond12|stop.",
+            "sec.fond12.li_attract": "<strong>attract mode</strong>: O (default) the attract mode works as usual; N it is suspended until fond12|stop, and instead the ring boys' heads parade slowly in front of the ring swept by a spotlight",
             "sec.img.title": "4️⃣ Images & GIFs - img",
             "cmd.img.title": "img - Display an image",
             "sec.img.li_fichier": "<strong>file</strong>: Image file name",
@@ -6908,6 +6990,11 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.fond11.title": "fond11 - Boxring (Stil 11)",
             "sec.fond11.p_intro": "Die Szenerie von Stil 11 (Boxring bei Nacht) hinter Nachrichten, bis fond11|stop.",
             "sec.fond11.li_attract": "<strong>Attract-Modus</strong>: O (Standard) der Attract-Modus läuft wie gewohnt; N er ist bis fond11|stop ausgesetzt, und stattdessen ziehen die Köpfe der Ringgirls langsam vor dem Ring vorbei, über den ein Scheinwerfer streicht",
+            "cmd.score12.title": "score12 - Animierte Punkteanzeige „Ringboy“",
+            "sec.score12.p_intro": "Derselbe Ring und derselbe Ablauf wie bei score11|, mit einem Ringboy: Die Glocke läutet, er kommt in Nahaufnahme mit einem Schild neben sich, auf dem der Segmentwert steht, das Publikum fotografiert, er geht, dann wird der Wert groß angezeigt. Einer von vier Ringboys, bei jeder Runde zufällig ausgewählt (unabhängig von score11|). SB: ein Scheinwerfer folgt ihm; DB: zwei Scheinwerfer und Konfettiregen. Ein Fehlwurf (<strong>MISS</strong>): Das Handtuch wird in den Ring geworfen, er kommt verlegen mit dem MISS-Schild, das Publikum buht („OUUUH !“).",
+            "cmd.fond12.title": "fond12 - Boxring (Stil 12)",
+            "sec.fond12.p_intro": "Die Szenerie von Stil 12 (derselbe Boxring wie bei fond11|) hinter Nachrichten, bis fond12|stop.",
+            "sec.fond12.li_attract": "<strong>Attract-Modus</strong>: O (Standard) der Attract-Modus läuft wie gewohnt; N er ist bis fond12|stop ausgesetzt, und stattdessen ziehen die Köpfe der Ringboys langsam vor dem Ring vorbei, über den ein Scheinwerfer streicht",
             "sec.img.title": "4️⃣ Bilder & GIFs - img",
             "cmd.img.title": "img - Bild anzeigen",
             "sec.img.li_fichier": "<strong>Datei</strong>: Bilddateiname",
@@ -7748,6 +7835,11 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.fond11.title": "fond11 - Ring de boxeo (estilo 11)",
             "sec.fond11.p_intro": "El decorado del estilo 11 (ring de boxeo de noche) detrás de los mensajes, hasta fond11|stop.",
             "sec.fond11.li_attract": "<strong>attract mode</strong>: O (por defecto) el attract mode funciona como siempre; N se suspende hasta fond11|stop y, en su lugar, las cabezas de las chicas de ring desfilan despacio delante del ring barrido por un foco",
+            "cmd.score12.title": "score12 - Puntuación animada «el chico de ring»",
+            "sec.score12.p_intro": "El mismo ring y el mismo desarrollo que score11|, con un chico de ring: suena la campana, entra en primer plano con un cartel a su lado donde está escrito el valor del segmento, el público le hace fotos, sale y después el valor se muestra en grande. Uno de los cuatro chicos de ring, elegido al azar en cada ronda (independientemente de score11|). SB: un foco lo sigue; DB: dos focos y una lluvia de confeti. Un tiro fallado (<strong>MISS</strong>): se tira la toalla al ring, él entra avergonzado con el cartel MISS y el público abuchea («OUUUH !»).",
+            "cmd.fond12.title": "fond12 - Ring de boxeo (estilo 12)",
+            "sec.fond12.p_intro": "El decorado del estilo 12 (el mismo ring de boxeo que fond11|) detrás de los mensajes, hasta fond12|stop.",
+            "sec.fond12.li_attract": "<strong>attract mode</strong>: O (por defecto) el attract mode funciona como siempre; N se suspende hasta fond12|stop y, en su lugar, las cabezas de los chicos de ring desfilan despacio delante del ring barrido por un foco",
             "sec.img.title": "4️⃣ Imágenes & GIFs - img",
             "cmd.img.title": "img - Mostrar una imagen",
             "sec.img.li_fichier": "<strong>archivo</strong>: Nombre del archivo de imagen",
@@ -8588,6 +8680,11 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.fond11.title": "fond11 - Ring di pugilato (stile 11)",
             "sec.fond11.p_intro": "Lo scenario dello stile 11 (ring di pugilato di notte) dietro i messaggi, fino a fond11|stop.",
             "sec.fond11.li_attract": "<strong>attract mode</strong>: O (predefinito) l'attract mode funziona come al solito; N è sospeso fino a fond11|stop e, al suo posto, le teste delle ring girl sfilano lentamente davanti al ring percorso da un riflettore",
+            "cmd.score12.title": "score12 - Punteggio animato «il ring boy»",
+            "sec.score12.p_intro": "Lo stesso ring e lo stesso svolgimento di score11|, con un ring boy: suona la campana, lui entra in primo piano con accanto un cartello su cui è scritto il valore del segmento, il pubblico lo fotografa, lui esce, poi il valore appare in grande. Uno dei quattro ring boy, estratto a caso a ogni turno (indipendentemente da score11|). SB: un riflettore lo segue; DB: due riflettori e una pioggia di coriandoli. Un tiro mancato (<strong>MISS</strong>): l'asciugamano viene gettato sul ring, lui entra imbarazzato con il cartello MISS e il pubblico fischia («OUUUH !»).",
+            "cmd.fond12.title": "fond12 - Ring di pugilato (stile 12)",
+            "sec.fond12.p_intro": "Lo scenario dello stile 12 (lo stesso ring di pugilato di fond11|) dietro i messaggi, fino a fond12|stop.",
+            "sec.fond12.li_attract": "<strong>attract mode</strong>: O (predefinito) l'attract mode funziona come al solito; N è sospeso fino a fond12|stop e, al suo posto, le teste dei ring boy sfilano lentamente davanti al ring percorso da un riflettore",
             "sec.img.title": "4️⃣ Immagini & GIF - img",
             "cmd.img.title": "img - Mostra un'immagine",
             "sec.img.li_fichier": "<strong>file</strong>: Nome del file immagine",
