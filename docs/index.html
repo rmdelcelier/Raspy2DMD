@@ -2291,6 +2291,78 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond8|start|N"<br>
                     </ul>
                 </div>
             </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.score9.title">score9 - Score animé « le tir aux pipes »</div>
+                <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
+                <p data-i18n-html="sec.score9.p_intro">Un stand de tir de fête foraine : auvent rayé, rideau sombre, pipes en terre sur une chaîne en boucle (elles passent sur la barre du haut et reviennent, tête en bas, sur celle du bas). Pour chaque fléchette, une, deux ou trois pipes éclatent (simple, double, triple), puis la valeur s'affiche par-dessus le stand ; la chaîne tourne alors vite et les pipes cassées reviennent neuves. Pour SB et DB, la caméra recule sur toute la chaîne et une rafale casse une pipe sur deux (SB) ou toutes (DB). Un tir manqué (<strong>MISS</strong>) : trois tirs déchirent le rideau, la lumière passe par les déchirures.</strong>) : la baguette frappe le bord du tambour, une étincelle jaillit, puis « MISS » s'affiche.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">score9|&lt;X - X - X&gt;|[durée]|[R;G;B]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.scenes.li_valeur"><strong>valeur</strong> : 1 à 3 fléchettes séparées par « - » : un segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tir manqué) ou <strong>X</strong> (pas encore lancée, trait gris dans la colonne)</li>
+                        <li data-i18n-html="sec.score.li_duree"><strong>durée</strong> : Durée d'affichage en secondes (optionnel)</li>
+                        <li data-i18n-html="sec.scenes.li_couleur"><strong>couleur</strong> : Couleur du joueur au format R;G;B, appliquée au segment affiché en grand et à la colonne (optionnel, blanc par défaut) ; MISS reste en rouge</li>
+                        <li data-i18n-html="sec.score.li_anim"><strong>animations</strong> : O (défaut) joue les GIF de score et des coups spéciaux, N les saute (optionnel)</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Fléchette manquée, couleur du joueur, sans les GIF :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score9|T20 - MISS - X||0;255;0|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.scenes.li_note_col">La colonne de droite montre les trois fléchettes de la volée (code du segment, SB et DB compris), sans points ni total ; dans la scène, le segment s'affiche en grand (SB : BULL, DB : DOUBLE BULL), avec un contour qui s'adapte au décor</li>
+                        <li data-i18n="sec.scenes.li_note_wait">Seule la dernière fléchette lancée est animée. Ensuite, la scène reste animée 30 s, puis l'image se fige jusqu'au message suivant</li>
+                        <li data-i18n="sec.score1.li_note_gif">Les GIF de score et des coups spéciaux sont joués avant l'animation (pas pour un tir manqué), sauf avec N ou si les coups spéciaux sont désactivés</li>
+                        <li data-i18n="sec.score1.li_note_page">Les styles s'essaient depuis l'interface web : Accueil &gt; Médias et personnalisation &gt; Affichage des scores (/scores)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.fond9.title">fond9 - Stand de tir aux pipes (style 9)</div>
+                <p data-i18n-html="sec.fond9.p_intro">Le décor du style 9 (auvent, rideau et chaîne de pipes) sous les messages, jusqu'à fond9|stop.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">fond9|[start/stop]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.fond1.li_action"><strong>action</strong> : start (défaut) pour afficher le fond, stop pour le retirer (l'afficheur est effacé)</li>
+                        <li data-i18n-html="sec.fond9.li_attract"><strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond9|stop, et à sa place la chaîne défile doucement et les ampoules de l'auvent s'allument en chenillard</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond9|stop, et à sa place le tambour glisse au centre et bat doucement ; il revient à gauche dès qu'un affichage arrive</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Début de partie : décor du style, attract mode remplacé par sa scène d'attente</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond9|start|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.fond1.li_note_nostop">N'interrompt pas l'affichage en cours</li>
+                        <li data-i18n="sec.scenes.li_note_overlay">Les animations du score gardent tout l'écran ; les messages sans couleur de fond se posent sur le fond</li>
+                        <li data-i18n="sec.scenes.li_note_idle">La scène d'attente démarre après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage l'arrête. Pas de fond en mode portrait ni pendant les jeux</li>
+                    </ul>
+                </div>
+            </div>
             </div>
             </div>
         </div>
@@ -4416,7 +4488,7 @@ curl -sSL https://raw.githubusercontent.com/rmdelcelier/Raspy2DMD/main/scripts/i
                         <tbody>
                             <tr>
                                 <td data-i18n="sec.recap.td_cat_text"><strong>Texte</strong></td>
-                                <td>msg, msgXX, msgmove, msgmovebcl, msgcarrou, msgcolor, msgimg, msgcst, msgfull, score, score1, score2, score3, score4, score5, score6, score7, score8, fond1, fond2, fond3, fond4, fond5, fond6, fond7, fond8</td>
+                                <td>msg, msgXX, msgmove, msgmovebcl, msgcarrou, msgcolor, msgimg, msgcst, msgfull, score, score1, score2, score3, score4, score5, score6, score7, score8, score9, fond1, fond2, fond3, fond4, fond5, fond6, fond7, fond8, fond9</td>
                             </tr>
                             <tr>
                                 <td data-i18n="sec.recap.td_cat_media"><strong>Images & GIFs</strong></td>
@@ -4980,6 +5052,11 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.fond8.title": "fond8 - Tambour (style 8)",
             "sec.fond8.p_intro": "Le décor du style 8 (tambour et baguettes au repos) sous les messages, jusqu'à fond8|stop.",
             "sec.fond8.li_attract": "<strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond8|stop, et à sa place le tambour glisse au centre et bat doucement ; il revient à gauche dès qu'un affichage arrive",
+            "cmd.score9.title": "score9 - Score animé « le tir aux pipes »",
+            "sec.score9.p_intro": "Un stand de tir de fête foraine : auvent rayé, rideau sombre, pipes en terre sur une chaîne en boucle (elles passent sur la barre du haut et reviennent, tête en bas, sur celle du bas). Pour chaque fléchette, une, deux ou trois pipes éclatent (simple, double, triple), puis la valeur s'affiche par-dessus le stand ; la chaîne tourne alors vite et les pipes cassées reviennent neuves. Pour SB et DB, la caméra recule sur toute la chaîne et une rafale casse une pipe sur deux (SB) ou toutes (DB). Un tir manqué (<strong>MISS</strong>) : trois tirs déchirent le rideau, la lumière passe par les déchirures.",
+            "cmd.fond9.title": "fond9 - Stand de tir aux pipes (style 9)",
+            "sec.fond9.p_intro": "Le décor du style 9 (auvent, rideau et chaîne de pipes) sous les messages, jusqu'à fond9|stop.",
+            "sec.fond9.li_attract": "<strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond9|stop, et à sa place la chaîne défile doucement et les ampoules de l'auvent s'allument en chenillard",
             // --- IMAGES & GIFS ---
             "sec.img.title": "4️⃣ Images & GIFs - img",
             "cmd.img.title": "img - Afficher une image",
@@ -5822,6 +5899,11 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.fond8.title": "fond8 - Drum (style 8)",
             "sec.fond8.p_intro": "The scenery of style 8 (drum and sticks at rest) behind messages, until fond8|stop.",
             "sec.fond8.li_attract": "<strong>attract mode</strong>: O (default) the attract mode works as usual; N it is suspended until fond8|stop, and instead the drum slides to the centre and beats softly; it goes back to the left as soon as something is displayed",
+            "cmd.score9.title": "score9 - Animated \"pipe shooting gallery\" score",
+            "sec.score9.p_intro": "A fairground shooting stall: striped awning, dark curtain, clay pipes on a looping chain (they move along the top bar and come back, upside down, on the bottom one). For each dart, one, two or three pipes shatter (single, double, triple), then the value appears over the stall; the chain then turns fast and the broken pipes come back new. For SB and DB, the camera pulls back over the whole chain and a burst breaks one pipe in two (SB) or all of them (DB). A missed throw (<strong>MISS</strong>): three shots tear the curtain, light shines through the tears.",
+            "cmd.fond9.title": "fond9 - Pipe shooting stall (style 9)",
+            "sec.fond9.p_intro": "The scenery of style 9 (awning, curtain and chain of pipes) behind messages, until fond9|stop.",
+            "sec.fond9.li_attract": "<strong>attract mode</strong>: O (default) the attract mode works as usual; N it is suspended until fond9|stop, and instead the chain moves slowly and the awning bulbs light up in a chase",
             "sec.img.title": "4️⃣ Images & GIFs - img",
             "cmd.img.title": "img - Display an image",
             "sec.img.li_fichier": "<strong>file</strong>: Image file name",
@@ -6647,6 +6729,11 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.fond8.title": "fond8 - Trommel (Stil 8)",
             "sec.fond8.p_intro": "Die Szenerie von Stil 8 (ruhende Trommel und Stöcke) hinter Nachrichten, bis fond8|stop.",
             "sec.fond8.li_attract": "<strong>Attract-Modus</strong>: O (Standard) der Attract-Modus läuft wie gewohnt; N er ist bis fond8|stop ausgesetzt, und stattdessen die Trommel gleitet in die Mitte und schlägt leise; sobald etwas angezeigt wird, kehrt sie nach links zurück",
+            "cmd.score9.title": "score9 - Animierte Punkteanzeige „Pfeifenschießbude“",
+            "sec.score9.p_intro": "Eine Schießbude auf dem Jahrmarkt: gestreiftes Vordach, dunkler Vorhang, Tonpfeifen auf einer umlaufenden Kette (sie laufen über die obere Stange und kommen kopfüber auf der unteren zurück). Bei jedem Pfeil zerspringen eine, zwei oder drei Pfeifen (Single, Double, Triple), dann erscheint der Wert über der Bude; danach läuft die Kette schnell und die zerbrochenen Pfeifen kommen neu zurück. Bei SB und DB zoomt die Kamera auf die ganze Kette heraus und eine Salve zerschlägt jede zweite Pfeife (SB) oder alle (DB). Ein Fehlwurf (<strong>MISS</strong>): Drei Schüsse zerreißen den Vorhang, Licht scheint durch die Risse.",
+            "cmd.fond9.title": "fond9 - Pfeifenschießbude (Stil 9)",
+            "sec.fond9.p_intro": "Die Szenerie von Stil 9 (Vordach, Vorhang und Pfeifenkette) hinter Nachrichten, bis fond9|stop.",
+            "sec.fond9.li_attract": "<strong>Attract-Modus</strong>: O (Standard) der Attract-Modus läuft wie gewohnt; N er ist bis fond9|stop ausgesetzt, und stattdessen läuft die Kette langsam und die Lampen des Vordachs leuchten als Lauflicht",
             "sec.img.title": "4️⃣ Bilder & GIFs - img",
             "cmd.img.title": "img - Bild anzeigen",
             "sec.img.li_fichier": "<strong>Datei</strong>: Bilddateiname",
@@ -7472,6 +7559,11 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.fond8.title": "fond8 - Tambor (estilo 8)",
             "sec.fond8.p_intro": "El decorado del estilo 8 (tambor y baquetas en reposo) detrás de los mensajes, hasta fond8|stop.",
             "sec.fond8.li_attract": "<strong>attract mode</strong>: O (por defecto) el attract mode funciona como siempre; N se suspende hasta fond8|stop y, en su lugar, el tambor se desliza al centro y toca suavemente; vuelve a la izquierda en cuanto se muestra algo",
+            "cmd.score9.title": "score9 - Puntuación animada «el tiro a las pipas»",
+            "sec.score9.p_intro": "Una caseta de tiro de feria: toldo a rayas, cortina oscura, pipas de barro en una cadena en bucle (pasan por la barra de arriba y vuelven, boca abajo, por la de abajo). Por cada dardo, una, dos o tres pipas estallan (simple, doble, triple) y después el valor aparece sobre la caseta; luego la cadena gira rápido y las pipas rotas vuelven nuevas. Para SB y DB, la cámara se aleja hasta ver toda la cadena y una ráfaga rompe una pipa de cada dos (SB) o todas (DB). Un tiro fallado (<strong>MISS</strong>): tres disparos rasgan la cortina y la luz pasa por los desgarros.",
+            "cmd.fond9.title": "fond9 - Caseta de tiro a las pipas (estilo 9)",
+            "sec.fond9.p_intro": "El decorado del estilo 9 (toldo, cortina y cadena de pipas) detrás de los mensajes, hasta fond9|stop.",
+            "sec.fond9.li_attract": "<strong>attract mode</strong>: O (por defecto) el attract mode funciona como siempre; N se suspende hasta fond9|stop y, en su lugar, la cadena avanza despacio y las bombillas del toldo se encienden en secuencia",
             "sec.img.title": "4️⃣ Imágenes & GIFs - img",
             "cmd.img.title": "img - Mostrar una imagen",
             "sec.img.li_fichier": "<strong>archivo</strong>: Nombre del archivo de imagen",
@@ -8297,6 +8389,11 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "cmd.fond8.title": "fond8 - Tamburo (stile 8)",
             "sec.fond8.p_intro": "Lo scenario dello stile 8 (tamburo e bacchette a riposo) dietro i messaggi, fino a fond8|stop.",
             "sec.fond8.li_attract": "<strong>attract mode</strong>: O (predefinito) l'attract mode funziona come al solito; N è sospeso fino a fond8|stop e, al suo posto, il tamburo scivola al centro e batte piano; torna a sinistra appena viene mostrato qualcosa",
+            "cmd.score9.title": "score9 - Punteggio animato «il tiro alle pipe»",
+            "sec.score9.p_intro": "Un baraccone del tiro al luna park: tendone a righe, tenda scura, pipe di terracotta su una catena ad anello (passano sulla barra in alto e tornano, capovolte, su quella in basso). Per ogni freccetta, una, due o tre pipe si frantumano (singolo, doppio, triplo), poi il valore appare sopra il baraccone; quindi la catena gira veloce e le pipe rotte tornano nuove. Per SB e DB la telecamera si allontana su tutta la catena e una raffica rompe una pipa su due (SB) o tutte (DB). Un tiro mancato (<strong>MISS</strong>): tre colpi strappano la tenda e la luce passa dagli strappi.",
+            "cmd.fond9.title": "fond9 - Baraccone del tiro alle pipe (stile 9)",
+            "sec.fond9.p_intro": "Lo scenario dello stile 9 (tendone, tenda e catena di pipe) dietro i messaggi, fino a fond9|stop.",
+            "sec.fond9.li_attract": "<strong>attract mode</strong>: O (predefinito) l'attract mode funziona come al solito; N è sospeso fino a fond9|stop e, al suo posto, la catena scorre lentamente e le lampadine del tendone si accendono in sequenza",
             "sec.img.title": "4️⃣ Immagini & GIF - img",
             "cmd.img.title": "img - Mostra un'immagine",
             "sec.img.li_fichier": "<strong>file</strong>: Nome del file immagine",
