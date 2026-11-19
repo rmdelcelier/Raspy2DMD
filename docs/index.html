@@ -1860,6 +1860,437 @@ mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond2|stop"<br>
                         <li data-i18n="sec.fond2.li_note_search">La recherche de segment démarre après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage l'arrête. Pas de fond en mode portrait ni pendant les jeux</li>
                     </ul>
                 </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.score3.title">score3 - Score animé « la cible, grande fenêtre »</div>
+                <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
+                <p data-i18n-html="sec.score3.p_intro">Les mêmes animations que score2| (zoom sur le segment touché, flash, valeur qui glisse, recul ; MISS : la cible explose), mais la vue d'ensemble n'a que deux zones : une grande fenêtre caméra à gauche et au centre, qui cherche un segment puis montre en gros plan les segments touchés, et le tableau des scores à droite. Le zoom part de ce que montre la fenêtre et y revient.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">score3|&lt;X - X - X&gt;|[durée]|[R;G;B]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.score2.li_valeur"><strong>valeur</strong> : 1 à 3 fléchettes séparées par « - » : un segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tir manqué) ou <strong>X</strong> (pas encore lancée, « _ » dans le tableau)</li>
+                        <li data-i18n-html="sec.score.li_duree"><strong>durée</strong> : Durée d'affichage en secondes (optionnel)</li>
+                        <li data-i18n-html="sec.score2.li_couleur"><strong>couleur</strong> : Couleur du joueur au format R;G;B, appliquée à la valeur qui glisse et au tableau (optionnel, blanc par défaut) ; MISS reste en rouge</li>
+                        <li data-i18n-html="sec.score.li_anim"><strong>animations</strong> : O (défaut) joue les GIF de score et des coups spéciaux, N les saute (optionnel)</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Fléchette manquée, couleur du joueur, sans les GIF :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score3|T20 - MISS - X||0;255;0|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.score1.li_note_last">Seule la dernière fléchette lancée est animée ; les précédentes restent affichées dans le panneau</li>
+                        <li data-i18n="sec.score2.li_note_wait">Après l'animation, la fenêtre caméra et les segments touchés restent animés 30 s, puis l'image se fige jusqu'au message suivant</li>
+                        <li data-i18n="sec.score1.li_note_gif">Les GIF de score et des coups spéciaux sont joués avant l'animation (pas pour un tir manqué), sauf avec N ou si les coups spéciaux sont désactivés</li>
+                        <li data-i18n="sec.score1.li_note_page">Les styles s'essaient depuis l'interface web : Accueil &gt; Médias et personnalisation &gt; Affichage des scores (/scores)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.fond3.title">fond3 - Mur de briques et cible (style 3)</div>
+                <p data-i18n-html="sec.fond3.p_intro">Le fond du style 3 : identique à fond2| (mur de briques sombre et cible), sous les messages et la vue d'ensemble de score3|, jusqu'à fond3|stop. Le zoom et le MISS de score3| gardent tout l'écran.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">fond3|[start/stop]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.fond1.li_action"><strong>action</strong> : start (défaut) pour afficher le fond, stop pour le retirer (l'afficheur est effacé)</li>
+                        <li data-i18n-html="sec.fond3.li_attract"><strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond3|stop, et la caméra balaie lentement la cible à sa place, comme si elle cherchait un segment</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Début de partie : mur de briques, attract mode remplacé par la recherche de segment</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond3|start|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.fond1.li_note_nostop">N'interrompt pas l'affichage en cours</li>
+                        <li data-i18n="sec.fond2.li_note_search">La recherche de segment démarre après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage l'arrête. Pas de fond en mode portrait ni pendant les jeux</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.score4.title">score4 - Score animé « la vague »</div>
+                <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
+                <p data-i18n-html="sec.score4.p_intro">Une grande vague façon estampe japonaise, dans un paysage sombre. Pour chaque fléchette, la vague se retire puis balaie l'écran ; la mer qui la suit découvre le segment touché, puis la vague revient. Un tir manqué (<strong>MISS</strong>) : la vague se retire, le soleil grossit et explose, il ne reste que « MISS ».</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">score4|&lt;X - X - X&gt;|[durée]|[R;G;B]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.scenes.li_valeur"><strong>valeur</strong> : 1 à 3 fléchettes séparées par « - » : un segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tir manqué) ou <strong>X</strong> (pas encore lancée, trait gris dans la colonne)</li>
+                        <li data-i18n-html="sec.score.li_duree"><strong>durée</strong> : Durée d'affichage en secondes (optionnel)</li>
+                        <li data-i18n-html="sec.scenes.li_couleur"><strong>couleur</strong> : Couleur du joueur au format R;G;B, appliquée au segment affiché en grand et à la colonne (optionnel, blanc par défaut) ; MISS reste en rouge</li>
+                        <li data-i18n-html="sec.score.li_anim"><strong>animations</strong> : O (défaut) joue les GIF de score et des coups spéciaux, N les saute (optionnel)</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Fléchette manquée, couleur du joueur, sans les GIF :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score4|T20 - MISS - X||0;255;0|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.scenes.li_note_col">La colonne de droite montre les trois fléchettes de la volée (code du segment, SB et DB compris), sans points ni total ; dans la scène, le segment s'affiche en grand (SB : BULL, DB : DOUBLE BULL), avec un contour qui s'adapte au décor</li>
+                        <li data-i18n="sec.scenes.li_note_wait">Seule la dernière fléchette lancée est animée. Ensuite, la scène reste animée 30 s, puis l'image se fige jusqu'au message suivant</li>
+                        <li data-i18n="sec.score1.li_note_gif">Les GIF de score et des coups spéciaux sont joués avant l'animation (pas pour un tir manqué), sauf avec N ou si les coups spéciaux sont désactivés</li>
+                        <li data-i18n="sec.score1.li_note_page">Les styles s'essaient depuis l'interface web : Accueil &gt; Médias et personnalisation &gt; Affichage des scores (/scores)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.fond4.title">fond4 - Paysage et vague (style 4)</div>
+                <p data-i18n-html="sec.fond4.p_intro">Le décor du style 4 (paysage, soleil, mont Fuji et vague au repos) sous les messages, jusqu'à fond4|stop.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">fond4|[start/stop]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.fond1.li_action"><strong>action</strong> : start (défaut) pour afficher le fond, stop pour le retirer (l'afficheur est effacé)</li>
+                        <li data-i18n-html="sec.fond4.li_attract"><strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond4|stop, et à sa place la vague ondule, des nuages passent et des pétales de cerisier volent</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Début de partie : décor du style, attract mode remplacé par sa scène d'attente</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond4|start|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.fond1.li_note_nostop">N'interrompt pas l'affichage en cours</li>
+                        <li data-i18n="sec.scenes.li_note_overlay">Les animations du score gardent tout l'écran ; les messages sans couleur de fond se posent sur le fond</li>
+                        <li data-i18n="sec.scenes.li_note_idle">La scène d'attente démarre après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage l'arrête. Pas de fond en mode portrait ni pendant les jeux</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.score5.title">score5 - Score animé « les cartes »</div>
+                <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
+                <p data-i18n-html="sec.score5.p_intro">Des cartes sur un fond marine semé de formes colorées. Pour chaque fléchette, une petite carte par multiplicateur claque et se range avec le numéro du secteur (pour un triple, la troisième arrive face cachée au centre et se retourne), puis une grande carte arrive avec le segment. Un tir manqué (<strong>MISS</strong>) : une carte arrive face cachée et se retourne sur « MISS ».</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">score5|&lt;X - X - X&gt;|[durée]|[R;G;B]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.scenes.li_valeur"><strong>valeur</strong> : 1 à 3 fléchettes séparées par « - » : un segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tir manqué) ou <strong>X</strong> (pas encore lancée, trait gris dans la colonne)</li>
+                        <li data-i18n-html="sec.score.li_duree"><strong>durée</strong> : Durée d'affichage en secondes (optionnel)</li>
+                        <li data-i18n-html="sec.scenes.li_couleur"><strong>couleur</strong> : Couleur du joueur au format R;G;B, appliquée au segment affiché en grand et à la colonne (optionnel, blanc par défaut) ; MISS reste en rouge</li>
+                        <li data-i18n-html="sec.score.li_anim"><strong>animations</strong> : O (défaut) joue les GIF de score et des coups spéciaux, N les saute (optionnel)</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Fléchette manquée, couleur du joueur, sans les GIF :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score5|T20 - MISS - X||0;255;0|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.scenes.li_note_col">La colonne de droite montre les trois fléchettes de la volée (code du segment, SB et DB compris), sans points ni total ; dans la scène, le segment s'affiche en grand (SB : BULL, DB : DOUBLE BULL), avec un contour qui s'adapte au décor</li>
+                        <li data-i18n="sec.scenes.li_note_wait">Seule la dernière fléchette lancée est animée. Ensuite, la scène reste animée 30 s, puis l'image se fige jusqu'au message suivant</li>
+                        <li data-i18n="sec.score1.li_note_gif">Les GIF de score et des coups spéciaux sont joués avant l'animation (pas pour un tir manqué), sauf avec N ou si les coups spéciaux sont désactivés</li>
+                        <li data-i18n="sec.score1.li_note_page">Les styles s'essaient depuis l'interface web : Accueil &gt; Médias et personnalisation &gt; Affichage des scores (/scores)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.fond5.title">fond5 - Formes colorées (style 5)</div>
+                <p data-i18n-html="sec.fond5.p_intro">Le décor du style 5 (formes colorées sur un fond marine presque noir) sous les messages, jusqu'à fond5|stop.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">fond5|[start/stop]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.fond1.li_action"><strong>action</strong> : start (défaut) pour afficher le fond, stop pour le retirer (l'afficheur est effacé)</li>
+                        <li data-i18n-html="sec.fond5.li_attract"><strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond5|stop, et à sa place les formes dérivent doucement</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Début de partie : décor du style, attract mode remplacé par sa scène d'attente</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond5|start|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.fond1.li_note_nostop">N'interrompt pas l'affichage en cours</li>
+                        <li data-i18n="sec.scenes.li_note_overlay">Les animations du score gardent tout l'écran ; les messages sans couleur de fond se posent sur le fond</li>
+                        <li data-i18n="sec.scenes.li_note_idle">La scène d'attente démarre après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage l'arrête. Pas de fond en mode portrait ni pendant les jeux</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.score6.title">score6 - Score animé « le skateur »</div>
+                <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
+                <p data-i18n-html="sec.score6.p_intro">Un skateur devant un mur de briques (le même que fond2|). Pour chaque fléchette, il arrive de la gauche et bombe le segment touché, la peinture coule, puis il repart ; le segment s'efface ensuite. Un tir manqué (<strong>MISS</strong>) : sa planche bute sur un caillou, il tombe, « MISS » s'affiche, puis il se relève et repart.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">score6|&lt;X - X - X&gt;|[durée]|[R;G;B]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.scenes.li_valeur"><strong>valeur</strong> : 1 à 3 fléchettes séparées par « - » : un segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tir manqué) ou <strong>X</strong> (pas encore lancée, trait gris dans la colonne)</li>
+                        <li data-i18n-html="sec.score.li_duree"><strong>durée</strong> : Durée d'affichage en secondes (optionnel)</li>
+                        <li data-i18n-html="sec.scenes.li_couleur"><strong>couleur</strong> : Couleur du joueur au format R;G;B, appliquée au segment affiché en grand et à la colonne (optionnel, blanc par défaut) ; MISS reste en rouge</li>
+                        <li data-i18n-html="sec.score.li_anim"><strong>animations</strong> : O (défaut) joue les GIF de score et des coups spéciaux, N les saute (optionnel)</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Fléchette manquée, couleur du joueur, sans les GIF :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score6|T20 - MISS - X||0;255;0|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.scenes.li_note_col">La colonne de droite montre les trois fléchettes de la volée (code du segment, SB et DB compris), sans points ni total ; dans la scène, le segment s'affiche en grand (SB : BULL, DB : DOUBLE BULL), avec un contour qui s'adapte au décor</li>
+                        <li data-i18n="sec.scenes.li_note_wait">Seule la dernière fléchette lancée est animée. Ensuite, la scène reste animée 30 s, puis l'image se fige jusqu'au message suivant</li>
+                        <li data-i18n="sec.score1.li_note_gif">Les GIF de score et des coups spéciaux sont joués avant l'animation (pas pour un tir manqué), sauf avec N ou si les coups spéciaux sont désactivés</li>
+                        <li data-i18n="sec.score1.li_note_page">Les styles s'essaient depuis l'interface web : Accueil &gt; Médias et personnalisation &gt; Affichage des scores (/scores)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.fond6.title">fond6 - Mur de briques (style 6)</div>
+                <p data-i18n-html="sec.fond6.p_intro">Le décor du style 6 (mur de briques sombre et trottoir) sous les messages, jusqu'à fond6|stop.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">fond6|[start/stop]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.fond1.li_action"><strong>action</strong> : start (défaut) pour afficher le fond, stop pour le retirer (l'afficheur est effacé)</li>
+                        <li data-i18n-html="sec.fond6.li_attract"><strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond6|stop, et à sa place le skateur passe de temps en temps : dans un sens ou dans l'autre, avec un ollie, en sautant des obstacles ou en tombant</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Début de partie : décor du style, attract mode remplacé par sa scène d'attente</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond6|start|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.fond1.li_note_nostop">N'interrompt pas l'affichage en cours</li>
+                        <li data-i18n="sec.scenes.li_note_overlay">Les animations du score gardent tout l'écran ; les messages sans couleur de fond se posent sur le fond</li>
+                        <li data-i18n="sec.scenes.li_note_idle">La scène d'attente démarre après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage l'arrête. Pas de fond en mode portrait ni pendant les jeux</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.score7.title">score7 - Score animé « le shuriken »</div>
+                <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
+                <p data-i18n-html="sec.score7.p_intro">Des planches de bois sombres, la valeur à gauche, les projectiles à droite. Pour chaque fléchette, un, deux ou trois shurikens (simple, double, triple), ou un ou deux kunaïs (SB, DB), sont lancés l'un après l'autre et se plantent à des places différentes à chaque fois ; le bois tremble, des éclats volent. Un tir manqué (<strong>MISS</strong>) : trois shurikens rebondissent sans se planter, puis « MISS » s'affiche.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">score7|&lt;X - X - X&gt;|[durée]|[R;G;B]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.scenes.li_valeur"><strong>valeur</strong> : 1 à 3 fléchettes séparées par « - » : un segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tir manqué) ou <strong>X</strong> (pas encore lancée, trait gris dans la colonne)</li>
+                        <li data-i18n-html="sec.score.li_duree"><strong>durée</strong> : Durée d'affichage en secondes (optionnel)</li>
+                        <li data-i18n-html="sec.scenes.li_couleur"><strong>couleur</strong> : Couleur du joueur au format R;G;B, appliquée au segment affiché en grand et à la colonne (optionnel, blanc par défaut) ; MISS reste en rouge</li>
+                        <li data-i18n-html="sec.score.li_anim"><strong>animations</strong> : O (défaut) joue les GIF de score et des coups spéciaux, N les saute (optionnel)</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Fléchette manquée, couleur du joueur, sans les GIF :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score7|T20 - MISS - X||0;255;0|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.scenes.li_note_col">La colonne de droite montre les trois fléchettes de la volée (code du segment, SB et DB compris), sans points ni total ; dans la scène, le segment s'affiche en grand (SB : BULL, DB : DOUBLE BULL), avec un contour qui s'adapte au décor</li>
+                        <li data-i18n="sec.scenes.li_note_wait">Seule la dernière fléchette lancée est animée. Ensuite, la scène reste animée 30 s, puis l'image se fige jusqu'au message suivant</li>
+                        <li data-i18n="sec.score1.li_note_gif">Les GIF de score et des coups spéciaux sont joués avant l'animation (pas pour un tir manqué), sauf avec N ou si les coups spéciaux sont désactivés</li>
+                        <li data-i18n="sec.score1.li_note_page">Les styles s'essaient depuis l'interface web : Accueil &gt; Médias et personnalisation &gt; Affichage des scores (/scores)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.fond7.title">fond7 - Planches de bois (style 7)</div>
+                <p data-i18n-html="sec.fond7.p_intro">Le décor du style 7 (planches de bois sombres) sous les messages, jusqu'à fond7|stop.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">fond7|[start/stop]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.fond1.li_action"><strong>action</strong> : start (défaut) pour afficher le fond, stop pour le retirer (l'afficheur est effacé)</li>
+                        <li data-i18n-html="sec.fond7.li_attract"><strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond7|stop, et à sa place des shurikens ou des kunaïs sont lancés de temps en temps, d'un côté ou de l'autre, se plantent dans le bois puis tombent</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Début de partie : décor du style, attract mode remplacé par sa scène d'attente</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond7|start|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.fond1.li_note_nostop">N'interrompt pas l'affichage en cours</li>
+                        <li data-i18n="sec.scenes.li_note_overlay">Les animations du score gardent tout l'écran ; les messages sans couleur de fond se posent sur le fond</li>
+                        <li data-i18n="sec.scenes.li_note_idle">La scène d'attente démarre après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage l'arrête. Pas de fond en mode portrait ni pendant les jeux</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.score8.title">score8 - Score animé « le tambour »</div>
+                <span class="badge badge-stop">Stop l'attract mode avant affichage</span>
+                <p data-i18n-html="sec.score8.p_intro">Un tambour à gauche, la valeur à droite. Pour chaque fléchette, une frappe de baguette par multiplicateur (une pour un simple et SB, deux pour un double et DB, trois pour un triple) : la peau s'illumine et des ondes partent. Un tir manqué (<strong>MISS</strong>) : la baguette frappe le bord du tambour, une étincelle jaillit, puis « MISS » s'affiche.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">score8|&lt;X - X - X&gt;|[durée]|[R;G;B]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.scenes.li_valeur"><strong>valeur</strong> : 1 à 3 fléchettes séparées par « - » : un segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tir manqué) ou <strong>X</strong> (pas encore lancée, trait gris dans la colonne)</li>
+                        <li data-i18n-html="sec.score.li_duree"><strong>durée</strong> : Durée d'affichage en secondes (optionnel)</li>
+                        <li data-i18n-html="sec.scenes.li_couleur"><strong>couleur</strong> : Couleur du joueur au format R;G;B, appliquée au segment affiché en grand et à la colonne (optionnel, blanc par défaut) ; MISS reste en rouge</li>
+                        <li data-i18n-html="sec.score.li_anim"><strong>animations</strong> : O (défaut) joue les GIF de score et des coups spéciaux, N les saute (optionnel)</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Fléchette manquée, couleur du joueur, sans les GIF :</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "score8|T20 - MISS - X||0;255;0|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.scenes.li_note_col">La colonne de droite montre les trois fléchettes de la volée (code du segment, SB et DB compris), sans points ni total ; dans la scène, le segment s'affiche en grand (SB : BULL, DB : DOUBLE BULL), avec un contour qui s'adapte au décor</li>
+                        <li data-i18n="sec.scenes.li_note_wait">Seule la dernière fléchette lancée est animée. Ensuite, la scène reste animée 30 s, puis l'image se fige jusqu'au message suivant</li>
+                        <li data-i18n="sec.score1.li_note_gif">Les GIF de score et des coups spéciaux sont joués avant l'animation (pas pour un tir manqué), sauf avec N ou si les coups spéciaux sont désactivés</li>
+                        <li data-i18n="sec.score1.li_note_page">Les styles s'essaient depuis l'interface web : Accueil &gt; Médias et personnalisation &gt; Affichage des scores (/scores)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="command-card">
+                <div class="command-title" data-i18n="cmd.fond8.title">fond8 - Tambour (style 8)</div>
+                <p data-i18n-html="sec.fond8.p_intro">Le décor du style 8 (tambour et baguettes au repos) sous les messages, jusqu'à fond8|stop.</p>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.format">Format</h4>
+                    <div class="command-format">fond8|[start/stop]|[O/N]</div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.params">Paramètres</h4>
+                    <ul>
+                        <li data-i18n-html="sec.fond1.li_action"><strong>action</strong> : start (défaut) pour afficher le fond, stop pour le retirer (l'afficheur est effacé)</li>
+                        <li data-i18n-html="sec.fond8.li_attract"><strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond8|stop, et à sa place le tambour glisse au centre et bat doucement ; il revient à gauche dès qu'un affichage arrive</li>
+                    </ul>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.examples">Exemples</h4>
+                    <div class="example-code">
+<span class="comment"># Début de partie : décor du style, attract mode remplacé par sa scène d'attente</span>
+mosquitto_pub -h raspy2dmd -t "raspy2dmd" -m "fond8|start|N"<br>
+                    </div>
+                </div>
+
+                <div class="command-section">
+                    <h4 data-i18n="lbl.notes">Notes</h4>
+                    <ul>
+                        <li data-i18n="sec.fond1.li_note_nostop">N'interrompt pas l'affichage en cours</li>
+                        <li data-i18n="sec.scenes.li_note_overlay">Les animations du score gardent tout l'écran ; les messages sans couleur de fond se posent sur le fond</li>
+                        <li data-i18n="sec.scenes.li_note_idle">La scène d'attente démarre après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage l'arrête. Pas de fond en mode portrait ni pendant les jeux</li>
+                    </ul>
+                </div>
+            </div>
             </div>
             </div>
         </div>
@@ -3985,7 +4416,7 @@ curl -sSL https://raw.githubusercontent.com/rmdelcelier/Raspy2DMD/main/scripts/i
                         <tbody>
                             <tr>
                                 <td data-i18n="sec.recap.td_cat_text"><strong>Texte</strong></td>
-                                <td>msg, msgXX, msgmove, msgmovebcl, msgcarrou, msgcolor, msgimg, msgcst, msgfull, score, score1, score2, fond1, fond2</td>
+                                <td>msg, msgXX, msgmove, msgmovebcl, msgcarrou, msgcolor, msgimg, msgcst, msgfull, score, score1, score2, score3, score4, score5, score6, score7, score8, fond1, fond2, fond3, fond4, fond5, fond6, fond7, fond8</td>
                             </tr>
                             <tr>
                                 <td data-i18n="sec.recap.td_cat_media"><strong>Images & GIFs</strong></td>
@@ -4513,6 +4944,42 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.fond2.p_intro": "Affiche en permanence un mur de briques sombre avec la cible sur son panneau en bois, sous les messages, jusqu'à fond2|stop. Les textes s'y posent comme avec fond1| ; score2| y pose sa vue d'ensemble, mais son zoom et son MISS gardent tout l'écran pour rester lisibles ; comme ailleurs, un texte avec une couleur de fond, les GIF, images, vidéos et l'horloge gardent tout l'écran.",
             "sec.fond2.li_attract": "<strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond2|stop, et la caméra balaie lentement la cible à sa place, comme si elle cherchait un segment",
             "sec.fond2.li_note_search": "La recherche de segment démarre après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage l'arrête. Pas de fond en mode portrait ni pendant les jeux",
+            "cmd.score3.title": "score3 - Score animé « la cible, grande fenêtre »",
+            "sec.score3.p_intro": "Les mêmes animations que score2| (zoom sur le segment touché, flash, valeur qui glisse, recul ; MISS : la cible explose), mais la vue d'ensemble n'a que deux zones : une grande fenêtre caméra à gauche et au centre, qui cherche un segment puis montre en gros plan les segments touchés, et le tableau des scores à droite. Le zoom part de ce que montre la fenêtre et y revient.",
+            "cmd.fond3.title": "fond3 - Mur de briques et cible (style 3)",
+            "sec.fond3.p_intro": "Le fond du style 3 : identique à fond2| (mur de briques sombre et cible), sous les messages et la vue d'ensemble de score3|, jusqu'à fond3|stop. Le zoom et le MISS de score3| gardent tout l'écran.",
+            "sec.fond3.li_attract": "<strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond3|stop, et la caméra balaie lentement la cible à sa place, comme si elle cherchait un segment",
+            "sec.scenes.li_valeur": "<strong>valeur</strong> : 1 à 3 fléchettes séparées par « - » : un segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tir manqué) ou <strong>X</strong> (pas encore lancée, trait gris dans la colonne)",
+            "sec.scenes.li_couleur": "<strong>couleur</strong> : Couleur du joueur au format R;G;B, appliquée au segment affiché en grand et à la colonne (optionnel, blanc par défaut) ; MISS reste en rouge",
+            "sec.scenes.li_note_col": "La colonne de droite montre les trois fléchettes de la volée (code du segment, SB et DB compris), sans points ni total ; dans la scène, le segment s'affiche en grand (SB : BULL, DB : DOUBLE BULL), avec un contour qui s'adapte au décor",
+            "sec.scenes.li_note_wait": "Seule la dernière fléchette lancée est animée. Ensuite, la scène reste animée 30 s, puis l'image se fige jusqu'au message suivant",
+            "sec.scenes.li_note_idle": "La scène d'attente démarre après le délai de l'attract mode + 1 s sans affichage (16 s si l'attract mode est désactivé) ; tout affichage l'arrête. Pas de fond en mode portrait ni pendant les jeux",
+            "sec.scenes.li_note_overlay": "Les animations du score gardent tout l'écran ; les messages sans couleur de fond se posent sur le fond",
+            "cmd.score4.title": "score4 - Score animé « la vague »",
+            "sec.score4.p_intro": "Une grande vague façon estampe japonaise, dans un paysage sombre. Pour chaque fléchette, la vague se retire puis balaie l'écran ; la mer qui la suit découvre le segment touché, puis la vague revient. Un tir manqué (<strong>MISS</strong>) : la vague se retire, le soleil grossit et explose, il ne reste que « MISS ».",
+            "cmd.fond4.title": "fond4 - Paysage et vague (style 4)",
+            "sec.fond4.p_intro": "Le décor du style 4 (paysage, soleil, mont Fuji et vague au repos) sous les messages, jusqu'à fond4|stop.",
+            "sec.fond4.li_attract": "<strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond4|stop, et à sa place la vague ondule, des nuages passent et des pétales de cerisier volent",
+            "cmd.score5.title": "score5 - Score animé « les cartes »",
+            "sec.score5.p_intro": "Des cartes sur un fond marine semé de formes colorées. Pour chaque fléchette, une petite carte par multiplicateur claque et se range avec le numéro du secteur (pour un triple, la troisième arrive face cachée au centre et se retourne), puis une grande carte arrive avec le segment. Un tir manqué (<strong>MISS</strong>) : une carte arrive face cachée et se retourne sur « MISS ».",
+            "cmd.fond5.title": "fond5 - Formes colorées (style 5)",
+            "sec.fond5.p_intro": "Le décor du style 5 (formes colorées sur un fond marine presque noir) sous les messages, jusqu'à fond5|stop.",
+            "sec.fond5.li_attract": "<strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond5|stop, et à sa place les formes dérivent doucement",
+            "cmd.score6.title": "score6 - Score animé « le skateur »",
+            "sec.score6.p_intro": "Un skateur devant un mur de briques (le même que fond2|). Pour chaque fléchette, il arrive de la gauche et bombe le segment touché, la peinture coule, puis il repart ; le segment s'efface ensuite. Un tir manqué (<strong>MISS</strong>) : sa planche bute sur un caillou, il tombe, « MISS » s'affiche, puis il se relève et repart.",
+            "cmd.fond6.title": "fond6 - Mur de briques (style 6)",
+            "sec.fond6.p_intro": "Le décor du style 6 (mur de briques sombre et trottoir) sous les messages, jusqu'à fond6|stop.",
+            "sec.fond6.li_attract": "<strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond6|stop, et à sa place le skateur passe de temps en temps : dans un sens ou dans l'autre, avec un ollie, en sautant des obstacles ou en tombant",
+            "cmd.score7.title": "score7 - Score animé « le shuriken »",
+            "sec.score7.p_intro": "Des planches de bois sombres, la valeur à gauche, les projectiles à droite. Pour chaque fléchette, un, deux ou trois shurikens (simple, double, triple), ou un ou deux kunaïs (SB, DB), sont lancés l'un après l'autre et se plantent à des places différentes à chaque fois ; le bois tremble, des éclats volent. Un tir manqué (<strong>MISS</strong>) : trois shurikens rebondissent sans se planter, puis « MISS » s'affiche.",
+            "cmd.fond7.title": "fond7 - Planches de bois (style 7)",
+            "sec.fond7.p_intro": "Le décor du style 7 (planches de bois sombres) sous les messages, jusqu'à fond7|stop.",
+            "sec.fond7.li_attract": "<strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond7|stop, et à sa place des shurikens ou des kunaïs sont lancés de temps en temps, d'un côté ou de l'autre, se plantent dans le bois puis tombent",
+            "cmd.score8.title": "score8 - Score animé « le tambour »",
+            "sec.score8.p_intro": "Un tambour à gauche, la valeur à droite. Pour chaque fléchette, une frappe de baguette par multiplicateur (une pour un simple et SB, deux pour un double et DB, trois pour un triple) : la peau s'illumine et des ondes partent. Un tir manqué (<strong>MISS</strong>) : la baguette frappe le bord du tambour, une étincelle jaillit, puis « MISS » s'affiche.",
+            "cmd.fond8.title": "fond8 - Tambour (style 8)",
+            "sec.fond8.p_intro": "Le décor du style 8 (tambour et baguettes au repos) sous les messages, jusqu'à fond8|stop.",
+            "sec.fond8.li_attract": "<strong>attract mode</strong> : O (défaut) l'attract mode fonctionne comme d'habitude ; N il est suspendu jusqu'à fond8|stop, et à sa place le tambour glisse au centre et bat doucement ; il revient à gauche dès qu'un affichage arrive",
             // --- IMAGES & GIFS ---
             "sec.img.title": "4️⃣ Images & GIFs - img",
             "cmd.img.title": "img - Afficher une image",
@@ -5319,6 +5786,42 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.fond2.p_intro": "Permanently shows a dark brick wall with the dartboard on its wooden cabinet behind messages, until fond2|stop. Texts are drawn on it as with fond1|; score2| draws its overview on it, but its zoom and MISS keep the full screen to stay readable; as elsewhere, a text with a background color, GIFs, images, videos and the clock keep the full screen.",
             "sec.fond2.li_attract": "<strong>attract mode</strong>: O (default) the attract mode works as usual; N it is suspended until fond2|stop, and the camera slowly sweeps the board instead, as if searching for a segment",
             "sec.fond2.li_note_search": "The segment search starts after the attract mode delay + 1 s without display (16 s if the attract mode is disabled); any display stops it. No background in portrait mode or during games",
+            "cmd.score3.title": "score3 - Animated \"dartboard, large window\" score",
+            "sec.score3.p_intro": "The same animations as score2| (zoom on the segment hit, flash, sliding value, pull back; MISS: the board explodes), but the overview has only two areas: a large camera window on the left and in the centre, which searches for a segment then shows a close-up of the segments hit, and the scoreboard on the right. The zoom starts from what the window shows and comes back to it.",
+            "cmd.fond3.title": "fond3 - Brick wall and dartboard (style 3)",
+            "sec.fond3.p_intro": "The background of style 3: the same as fond2| (dark brick wall and dartboard), behind messages and the overview of score3|, until fond3|stop. The zoom and MISS of score3| keep the full screen.",
+            "sec.fond3.li_attract": "<strong>attract mode</strong>: O (default) the attract mode works as usual; N it is suspended until fond3|stop, and the camera slowly sweeps the board instead, as if searching for a segment",
+            "sec.scenes.li_valeur": "<strong>value</strong>: 1 to 3 darts separated by \"-\": a segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (missed throw) or <strong>X</strong> (not thrown yet, grey dash in the column)",
+            "sec.scenes.li_couleur": "<strong>color</strong>: Player color as R;G;B, used for the segment shown large and for the column (optional, white by default); MISS stays red",
+            "sec.scenes.li_note_col": "The right-hand column shows the three darts of the turn (segment code, SB and DB included), without points or total; in the scene, the segment is shown large (SB: BULL, DB: DOUBLE BULL), with an outline that adapts to the scenery",
+            "sec.scenes.li_note_wait": "Only the last dart thrown is animated. Then the scene stays animated for 30 s, then the picture freezes until the next message",
+            "sec.scenes.li_note_idle": "The idle scene starts after the attract mode delay + 1 s without display (16 s if the attract mode is disabled); any display stops it. No background in portrait mode or during games",
+            "sec.scenes.li_note_overlay": "The score animations keep the full screen; messages without a background color are drawn over the background",
+            "cmd.score4.title": "score4 - Animated \"wave\" score",
+            "sec.score4.p_intro": "A great wave in the style of a Japanese print, in a dark landscape. For each dart, the wave pulls back then sweeps across the screen; the sea following it reveals the segment hit, then the wave comes back. A missed throw (<strong>MISS</strong>): the wave pulls back, the sun grows and explodes, leaving only \"MISS\".",
+            "cmd.fond4.title": "fond4 - Landscape and wave (style 4)",
+            "sec.fond4.p_intro": "The scenery of style 4 (landscape, sun, Mount Fuji and the wave at rest) behind messages, until fond4|stop.",
+            "sec.fond4.li_attract": "<strong>attract mode</strong>: O (default) the attract mode works as usual; N it is suspended until fond4|stop, and instead the wave sways, clouds drift by and cherry petals fly",
+            "cmd.score5.title": "score5 - Animated \"cards\" score",
+            "sec.score5.p_intro": "Cards on a navy background scattered with coloured shapes. For each dart, one small card per multiplier snaps into place with the sector number (for a triple, the third one arrives face down in the centre and flips over), then a large card arrives with the segment. A missed throw (<strong>MISS</strong>): a card arrives face down and flips over to \"MISS\".",
+            "cmd.fond5.title": "fond5 - Coloured shapes (style 5)",
+            "sec.fond5.p_intro": "The scenery of style 5 (coloured shapes on an almost black navy background) behind messages, until fond5|stop.",
+            "sec.fond5.li_attract": "<strong>attract mode</strong>: O (default) the attract mode works as usual; N it is suspended until fond5|stop, and instead the shapes drift slowly",
+            "cmd.score6.title": "score6 - Animated \"skater\" score",
+            "sec.score6.p_intro": "A skater in front of a brick wall (the same as fond2|). For each dart, the skater comes in from the left and spray-paints the segment hit, the paint drips, then rides off; the segment then fades away. A missed throw (<strong>MISS</strong>): the board hits a stone, the skater falls, \"MISS\" appears, then the skater gets up and rides off.",
+            "cmd.fond6.title": "fond6 - Brick wall (style 6)",
+            "sec.fond6.p_intro": "The scenery of style 6 (dark brick wall and pavement) behind messages, until fond6|stop.",
+            "sec.fond6.li_attract": "<strong>attract mode</strong>: O (default) the attract mode works as usual; N it is suspended until fond6|stop, and instead the skater passes by from time to time: in one direction or the other, with an ollie, jumping over obstacles or falling",
+            "cmd.score7.title": "score7 - Animated \"shuriken\" score",
+            "sec.score7.p_intro": "Dark wooden planks, the value on the left, the projectiles on the right. For each dart, one, two or three shurikens (single, double, triple), or one or two kunais (SB, DB), are thrown one after the other and stick in different places each time; the wood shakes, splinters fly. A missed throw (<strong>MISS</strong>): three shurikens bounce off without sticking, then \"MISS\" appears.",
+            "cmd.fond7.title": "fond7 - Wooden planks (style 7)",
+            "sec.fond7.p_intro": "The scenery of style 7 (dark wooden planks) behind messages, until fond7|stop.",
+            "sec.fond7.li_attract": "<strong>attract mode</strong>: O (default) the attract mode works as usual; N it is suspended until fond7|stop, and instead shurikens or kunais are thrown from time to time, from one side or the other, stick in the wood then fall",
+            "cmd.score8.title": "score8 - Animated \"drum\" score",
+            "sec.score8.p_intro": "A drum on the left, the value on the right. For each dart, one drumstick hit per multiplier (one for a single and SB, two for a double and DB, three for a triple): the drumhead lights up and waves spread out. A missed throw (<strong>MISS</strong>): the stick hits the rim of the drum, a spark flies, then \"MISS\" appears.",
+            "cmd.fond8.title": "fond8 - Drum (style 8)",
+            "sec.fond8.p_intro": "The scenery of style 8 (drum and sticks at rest) behind messages, until fond8|stop.",
+            "sec.fond8.li_attract": "<strong>attract mode</strong>: O (default) the attract mode works as usual; N it is suspended until fond8|stop, and instead the drum slides to the centre and beats softly; it goes back to the left as soon as something is displayed",
             "sec.img.title": "4️⃣ Images & GIFs - img",
             "cmd.img.title": "img - Display an image",
             "sec.img.li_fichier": "<strong>file</strong>: Image file name",
@@ -6108,6 +6611,42 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.fond2.p_intro": "Zeigt dauerhaft eine dunkle Ziegelwand mit der Dartscheibe auf ihrem Holzschrank hinter Nachrichten, bis fond2|stop. Texte erscheinen darauf wie bei fond1|; score2| zeigt seine Übersicht darauf, aber Zoom und MISS behalten den ganzen Bildschirm, damit sie lesbar bleiben; wie sonst auch behalten ein Text mit Hintergrundfarbe, GIFs, Bilder, Videos und die Uhr den ganzen Bildschirm.",
             "sec.fond2.li_attract": "<strong>Attract-Modus</strong>: O (Standard) der Attract-Modus läuft wie gewohnt; N er ist bis fond2|stop ausgesetzt, und stattdessen schwenkt die Kamera langsam über die Scheibe, als suche sie ein Segment",
             "sec.fond2.li_note_search": "Die Segmentsuche beginnt nach der Verzögerung des Attract-Modus + 1 s ohne Anzeige (16 s, wenn der Attract-Modus deaktiviert ist); jede Anzeige beendet sie. Kein Hintergrund im Hochformat oder während der Spiele",
+            "cmd.score3.title": "score3 - Animierte Punkteanzeige „Dartscheibe, großes Fenster“",
+            "sec.score3.p_intro": "Dieselben Animationen wie score2| (Zoom auf das getroffene Segment, Blitz, hereingleitender Wert, Zurückziehen; MISS: die Scheibe explodiert), aber die Übersicht hat nur zwei Bereiche: ein großes Kamerafenster links und in der Mitte, das ein Segment sucht und dann die getroffenen Segmente in Nahaufnahme zeigt, und die Punktetafel rechts. Der Zoom beginnt bei dem, was das Fenster zeigt, und kehrt dorthin zurück.",
+            "cmd.fond3.title": "fond3 - Ziegelwand und Dartscheibe (Stil 3)",
+            "sec.fond3.p_intro": "Der Hintergrund von Stil 3: derselbe wie fond2| (dunkle Ziegelwand und Dartscheibe), hinter Nachrichten und der Übersicht von score3|, bis fond3|stop. Zoom und MISS von score3| behalten den ganzen Bildschirm.",
+            "sec.fond3.li_attract": "<strong>Attract-Modus</strong>: O (Standard) der Attract-Modus läuft wie gewohnt; N er ist bis fond3|stop ausgesetzt, und stattdessen schwenkt die Kamera langsam über die Scheibe, als suche sie ein Segment",
+            "sec.scenes.li_valeur": "<strong>Wert</strong>: 1 bis 3 Pfeile, getrennt durch „-“: ein Segment (S20, D5, T20, SB, DB…), <strong>MISS</strong> (Fehlwurf) oder <strong>X</strong> (noch nicht geworfen, grauer Strich in der Spalte)",
+            "sec.scenes.li_couleur": "<strong>Farbe</strong>: Spielerfarbe im Format R;G;B, für das groß angezeigte Segment und die Spalte (optional, standardmäßig weiß); MISS bleibt rot",
+            "sec.scenes.li_note_col": "Die rechte Spalte zeigt die drei Pfeile der Runde (Segmentcode, SB und DB eingeschlossen), ohne Punkte und ohne Summe; in der Szene wird das Segment groß angezeigt (SB: BULL, DB: DOUBLE BULL), mit einer Kontur, die sich der Szenerie anpasst",
+            "sec.scenes.li_note_wait": "Nur der zuletzt geworfene Pfeil wird animiert. Danach bleibt die Szene 30 s animiert, dann bleibt das Bild bis zur nächsten Nachricht stehen",
+            "sec.scenes.li_note_idle": "Die Warteszene startet nach der Verzögerung des Attract-Modus + 1 s ohne Anzeige (16 s, wenn der Attract-Modus deaktiviert ist); jede Anzeige beendet sie. Kein Hintergrund im Hochformat und während der Spiele",
+            "sec.scenes.li_note_overlay": "Die Punkteanimationen behalten den ganzen Bildschirm; Nachrichten ohne Hintergrundfarbe werden über den Hintergrund gelegt",
+            "cmd.score4.title": "score4 - Animierte Punkteanzeige „Welle“",
+            "sec.score4.p_intro": "Eine große Welle im Stil eines japanischen Holzschnitts, in einer dunklen Landschaft. Bei jedem Pfeil zieht sich die Welle zurück und fegt dann über den Bildschirm; das nachfolgende Meer gibt das getroffene Segment frei, dann kehrt die Welle zurück. Ein Fehlwurf (<strong>MISS</strong>): Die Welle zieht sich zurück, die Sonne wächst und explodiert, nur „MISS“ bleibt übrig.",
+            "cmd.fond4.title": "fond4 - Landschaft und Welle (Stil 4)",
+            "sec.fond4.p_intro": "Die Szenerie von Stil 4 (Landschaft, Sonne, Fuji und ruhende Welle) hinter Nachrichten, bis fond4|stop.",
+            "sec.fond4.li_attract": "<strong>Attract-Modus</strong>: O (Standard) der Attract-Modus läuft wie gewohnt; N er ist bis fond4|stop ausgesetzt, und stattdessen die Welle wogt, Wolken ziehen vorbei und Kirschblüten fliegen",
+            "cmd.score5.title": "score5 - Animierte Punkteanzeige „Karten“",
+            "sec.score5.p_intro": "Karten auf einem marineblauen Hintergrund mit bunten Formen. Bei jedem Pfeil schnappt eine kleine Karte pro Multiplikator mit der Sektornummer an ihren Platz (bei einem Triple kommt die dritte verdeckt in die Mitte und dreht sich um), dann kommt eine große Karte mit dem Segment. Ein Fehlwurf (<strong>MISS</strong>): Eine Karte kommt verdeckt und dreht sich auf „MISS“ um.",
+            "cmd.fond5.title": "fond5 - Bunte Formen (Stil 5)",
+            "sec.fond5.p_intro": "Die Szenerie von Stil 5 (bunte Formen auf fast schwarzem Marineblau) hinter Nachrichten, bis fond5|stop.",
+            "sec.fond5.li_attract": "<strong>Attract-Modus</strong>: O (Standard) der Attract-Modus läuft wie gewohnt; N er ist bis fond5|stop ausgesetzt, und stattdessen die Formen treiben langsam",
+            "cmd.score6.title": "score6 - Animierte Punkteanzeige „Skater“",
+            "sec.score6.p_intro": "Ein Skater vor einer Ziegelmauer (derselben wie bei fond2|). Bei jedem Pfeil kommt der Skater von links, sprüht das getroffene Segment an die Wand, die Farbe läuft herunter, dann fährt er weiter; danach verblasst das Segment. Ein Fehlwurf (<strong>MISS</strong>): Das Board bleibt an einem Stein hängen, der Skater stürzt, „MISS“ erscheint, dann steht er auf und fährt weiter.",
+            "cmd.fond6.title": "fond6 - Ziegelmauer (Stil 6)",
+            "sec.fond6.p_intro": "Die Szenerie von Stil 6 (dunkle Ziegelmauer und Gehweg) hinter Nachrichten, bis fond6|stop.",
+            "sec.fond6.li_attract": "<strong>Attract-Modus</strong>: O (Standard) der Attract-Modus läuft wie gewohnt; N er ist bis fond6|stop ausgesetzt, und stattdessen der Skater fährt ab und zu vorbei: in die eine oder andere Richtung, mit einem Ollie, über Hindernisse springend oder stürzend",
+            "cmd.score7.title": "score7 - Animierte Punkteanzeige „Shuriken“",
+            "sec.score7.p_intro": "Dunkle Holzbretter, der Wert links, die Wurfgeschosse rechts. Bei jedem Pfeil werden ein, zwei oder drei Shuriken (Single, Double, Triple) oder ein oder zwei Kunai (SB, DB) nacheinander geworfen und bleiben jedes Mal an anderen Stellen stecken; das Holz bebt, Splitter fliegen. Ein Fehlwurf (<strong>MISS</strong>): Drei Shuriken prallen ab, ohne stecken zu bleiben, dann erscheint „MISS“.",
+            "cmd.fond7.title": "fond7 - Holzbretter (Stil 7)",
+            "sec.fond7.p_intro": "Die Szenerie von Stil 7 (dunkle Holzbretter) hinter Nachrichten, bis fond7|stop.",
+            "sec.fond7.li_attract": "<strong>Attract-Modus</strong>: O (Standard) der Attract-Modus läuft wie gewohnt; N er ist bis fond7|stop ausgesetzt, und stattdessen ab und zu werden Shuriken oder Kunai von der einen oder anderen Seite geworfen, bleiben im Holz stecken und fallen dann herunter",
+            "cmd.score8.title": "score8 - Animierte Punkteanzeige „Trommel“",
+            "sec.score8.p_intro": "Eine Trommel links, der Wert rechts. Bei jedem Pfeil ein Stockschlag pro Multiplikator (einer bei Single und SB, zwei bei Double und DB, drei bei Triple): Das Trommelfell leuchtet auf und Wellen breiten sich aus. Ein Fehlwurf (<strong>MISS</strong>): Der Stock trifft den Rand der Trommel, ein Funke sprüht, dann erscheint „MISS“.",
+            "cmd.fond8.title": "fond8 - Trommel (Stil 8)",
+            "sec.fond8.p_intro": "Die Szenerie von Stil 8 (ruhende Trommel und Stöcke) hinter Nachrichten, bis fond8|stop.",
+            "sec.fond8.li_attract": "<strong>Attract-Modus</strong>: O (Standard) der Attract-Modus läuft wie gewohnt; N er ist bis fond8|stop ausgesetzt, und stattdessen die Trommel gleitet in die Mitte und schlägt leise; sobald etwas angezeigt wird, kehrt sie nach links zurück",
             "sec.img.title": "4️⃣ Bilder & GIFs - img",
             "cmd.img.title": "img - Bild anzeigen",
             "sec.img.li_fichier": "<strong>Datei</strong>: Bilddateiname",
@@ -6897,6 +7436,42 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.fond2.p_intro": "Muestra de forma permanente una pared de ladrillos oscura con la diana en su mueble de madera detrás de los mensajes, hasta fond2|stop. Los textos se muestran encima como con fond1|; score2| muestra encima su vista general, pero su zoom y su MISS ocupan toda la pantalla para seguir siendo legibles; como en otros casos, un texto con color de fondo, los GIF, imágenes, vídeos y el reloj ocupan toda la pantalla.",
             "sec.fond2.li_attract": "<strong>attract mode</strong>: O (por defecto) el attract mode funciona como siempre; N se suspende hasta fond2|stop y, en su lugar, la cámara recorre lentamente la diana, como si buscara un segmento",
             "sec.fond2.li_note_search": "La búsqueda de segmento empieza tras el retardo del attract mode + 1 s sin visualización (16 s si el attract mode está desactivado); cualquier visualización la detiene. Sin fondo en modo vertical ni durante los juegos",
+            "cmd.score3.title": "score3 - Puntuación animada «la diana, ventana grande»",
+            "sec.score3.p_intro": "Las mismas animaciones que score2| (zoom en el segmento acertado, destello, valor que se desliza, retroceso; MISS: la diana explota), pero la vista general solo tiene dos zonas: una ventana de cámara grande a la izquierda y en el centro, que busca un segmento y luego muestra de cerca los segmentos acertados, y el marcador a la derecha. El zoom parte de lo que muestra la ventana y vuelve a ello.",
+            "cmd.fond3.title": "fond3 - Pared de ladrillos y diana (estilo 3)",
+            "sec.fond3.p_intro": "El fondo del estilo 3: el mismo que fond2| (pared de ladrillos oscura y diana), detrás de los mensajes y la vista general de score3|, hasta fond3|stop. El zoom y el MISS de score3| ocupan toda la pantalla.",
+            "sec.fond3.li_attract": "<strong>attract mode</strong>: O (por defecto) el attract mode funciona como siempre; N se suspende hasta fond3|stop y, en su lugar, la cámara recorre lentamente la diana, como si buscara un segmento",
+            "sec.scenes.li_valeur": "<strong>valor</strong>: 1 a 3 dardos separados por «-»: un segmento (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tiro fallado) o <strong>X</strong> (aún no lanzado, guion gris en la columna)",
+            "sec.scenes.li_couleur": "<strong>color</strong>: Color del jugador en formato R;G;B, aplicado al segmento mostrado en grande y a la columna (opcional, blanco por defecto); MISS sigue en rojo",
+            "sec.scenes.li_note_col": "La columna de la derecha muestra los tres dardos de la ronda (código del segmento, SB y DB incluidos), sin puntos ni total; en la escena, el segmento se muestra en grande (SB: BULL, DB: DOUBLE BULL), con un contorno que se adapta al decorado",
+            "sec.scenes.li_note_wait": "Solo se anima el último dardo lanzado. Después, la escena sigue animada 30 s y luego la imagen se congela hasta el mensaje siguiente",
+            "sec.scenes.li_note_idle": "La escena de espera empieza tras el retardo del attract mode + 1 s sin mostrar nada (16 s si el attract mode está desactivado); cualquier visualización la detiene. Sin fondo en modo vertical ni durante los juegos",
+            "sec.scenes.li_note_overlay": "Las animaciones de la puntuación ocupan toda la pantalla; los mensajes sin color de fondo se muestran sobre el fondo",
+            "cmd.score4.title": "score4 - Puntuación animada «la ola»",
+            "sec.score4.p_intro": "Una gran ola al estilo de un grabado japonés, en un paisaje oscuro. Por cada dardo, la ola se retira y luego barre la pantalla; el mar que la sigue descubre el segmento acertado y después la ola vuelve. Un tiro fallado (<strong>MISS</strong>): la ola se retira, el sol crece y explota, y solo queda «MISS».",
+            "cmd.fond4.title": "fond4 - Paisaje y ola (estilo 4)",
+            "sec.fond4.p_intro": "El decorado del estilo 4 (paisaje, sol, monte Fuji y ola en reposo) detrás de los mensajes, hasta fond4|stop.",
+            "sec.fond4.li_attract": "<strong>attract mode</strong>: O (por defecto) el attract mode funciona como siempre; N se suspende hasta fond4|stop y, en su lugar, la ola ondula, pasan nubes y vuelan pétalos de cerezo",
+            "cmd.score5.title": "score5 - Puntuación animada «las cartas»",
+            "sec.score5.p_intro": "Cartas sobre un fondo azul marino salpicado de formas de colores. Por cada dardo, una carta pequeña por multiplicador se coloca con el número del sector (en un triple, la tercera llega boca abajo al centro y se da la vuelta) y después llega una carta grande con el segmento. Un tiro fallado (<strong>MISS</strong>): una carta llega boca abajo y se da la vuelta mostrando «MISS».",
+            "cmd.fond5.title": "fond5 - Formas de colores (estilo 5)",
+            "sec.fond5.p_intro": "El decorado del estilo 5 (formas de colores sobre un azul marino casi negro) detrás de los mensajes, hasta fond5|stop.",
+            "sec.fond5.li_attract": "<strong>attract mode</strong>: O (por defecto) el attract mode funciona como siempre; N se suspende hasta fond5|stop y, en su lugar, las formas se desplazan lentamente",
+            "cmd.score6.title": "score6 - Puntuación animada «el skater»",
+            "sec.score6.p_intro": "Un skater delante de un muro de ladrillos (el mismo que fond2|). Por cada dardo, llega por la izquierda y pinta con espray el segmento acertado, la pintura gotea y se va; después el segmento se borra. Un tiro fallado (<strong>MISS</strong>): la tabla choca con una piedra, el skater se cae, aparece «MISS», y luego se levanta y se va.",
+            "cmd.fond6.title": "fond6 - Muro de ladrillos (estilo 6)",
+            "sec.fond6.p_intro": "El decorado del estilo 6 (muro de ladrillos oscuro y acera) detrás de los mensajes, hasta fond6|stop.",
+            "sec.fond6.li_attract": "<strong>attract mode</strong>: O (por defecto) el attract mode funciona como siempre; N se suspende hasta fond6|stop y, en su lugar, el skater pasa de vez en cuando: en un sentido o en otro, con un ollie, saltando obstáculos o cayéndose",
+            "cmd.score7.title": "score7 - Puntuación animada «el shuriken»",
+            "sec.score7.p_intro": "Tablas de madera oscuras, el valor a la izquierda, los proyectiles a la derecha. Por cada dardo, uno, dos o tres shurikens (simple, doble, triple), o uno o dos kunais (SB, DB), se lanzan uno tras otro y se clavan en sitios distintos cada vez; la madera tiembla y saltan astillas. Un tiro fallado (<strong>MISS</strong>): tres shurikens rebotan sin clavarse y después aparece «MISS».",
+            "cmd.fond7.title": "fond7 - Tablas de madera (estilo 7)",
+            "sec.fond7.p_intro": "El decorado del estilo 7 (tablas de madera oscuras) detrás de los mensajes, hasta fond7|stop.",
+            "sec.fond7.li_attract": "<strong>attract mode</strong>: O (por defecto) el attract mode funciona como siempre; N se suspende hasta fond7|stop y, en su lugar, de vez en cuando se lanzan shurikens o kunais, desde un lado u otro, que se clavan en la madera y luego caen",
+            "cmd.score8.title": "score8 - Puntuación animada «el tambor»",
+            "sec.score8.p_intro": "Un tambor a la izquierda, el valor a la derecha. Por cada dardo, un golpe de baqueta por multiplicador (uno para un simple y SB, dos para un doble y DB, tres para un triple): el parche se ilumina y salen ondas. Un tiro fallado (<strong>MISS</strong>): la baqueta golpea el aro del tambor, salta una chispa y después aparece «MISS».",
+            "cmd.fond8.title": "fond8 - Tambor (estilo 8)",
+            "sec.fond8.p_intro": "El decorado del estilo 8 (tambor y baquetas en reposo) detrás de los mensajes, hasta fond8|stop.",
+            "sec.fond8.li_attract": "<strong>attract mode</strong>: O (por defecto) el attract mode funciona como siempre; N se suspende hasta fond8|stop y, en su lugar, el tambor se desliza al centro y toca suavemente; vuelve a la izquierda en cuanto se muestra algo",
             "sec.img.title": "4️⃣ Imágenes & GIFs - img",
             "cmd.img.title": "img - Mostrar una imagen",
             "sec.img.li_fichier": "<strong>archivo</strong>: Nombre del archivo de imagen",
@@ -7686,6 +8261,42 @@ img|logo|0||.png,.PNG,.jpg,.jpeg<br>
             "sec.fond2.p_intro": "Mostra in modo permanente un muro di mattoni scuro con il bersaglio sul suo mobile di legno dietro i messaggi, fino a fond2|stop. I testi vi appaiono come con fond1|; score2| vi mostra la sua vista d'insieme, ma lo zoom e il MISS occupano tutto lo schermo per restare leggibili; come altrove, un testo con colore di sfondo, le GIF, le immagini, i video e l'orologio occupano tutto lo schermo.",
             "sec.fond2.li_attract": "<strong>attract mode</strong>: O (predefinito) l'attract mode funziona come al solito; N è sospeso fino a fond2|stop e, al suo posto, la telecamera percorre lentamente il bersaglio, come se cercasse un segmento",
             "sec.fond2.li_note_search": "La ricerca del segmento parte dopo il ritardo dell'attract mode + 1 s senza visualizzazione (16 s se l'attract mode è disattivato); qualsiasi visualizzazione la ferma. Nessuno sfondo in modalità verticale né durante i giochi",
+            "cmd.score3.title": "score3 - Punteggio animato «il bersaglio, finestra grande»",
+            "sec.score3.p_intro": "Le stesse animazioni di score2| (zoom sul segmento colpito, lampo, valore che scorre, arretramento; MISS: il bersaglio esplode), ma la vista d'insieme ha solo due zone: una grande finestra della telecamera a sinistra e al centro, che cerca un segmento e poi mostra da vicino i segmenti colpiti, e il tabellone a destra. Lo zoom parte da ciò che mostra la finestra e vi ritorna.",
+            "cmd.fond3.title": "fond3 - Muro di mattoni e bersaglio (stile 3)",
+            "sec.fond3.p_intro": "Lo sfondo dello stile 3: lo stesso di fond2| (muro di mattoni scuro e bersaglio), dietro i messaggi e la vista d'insieme di score3|, fino a fond3|stop. Lo zoom e il MISS di score3| occupano tutto lo schermo.",
+            "sec.fond3.li_attract": "<strong>attract mode</strong>: O (predefinito) l'attract mode funziona come al solito; N è sospeso fino a fond3|stop e, al suo posto, la telecamera percorre lentamente il bersaglio, come se cercasse un segmento",
+            "sec.scenes.li_valeur": "<strong>valore</strong>: da 1 a 3 freccette separate da «-»: un segmento (S20, D5, T20, SB, DB…), <strong>MISS</strong> (tiro mancato) o <strong>X</strong> (non ancora lanciata, trattino grigio nella colonna)",
+            "sec.scenes.li_couleur": "<strong>colore</strong>: Colore del giocatore nel formato R;G;B, applicato al segmento mostrato in grande e alla colonna (opzionale, bianco per impostazione predefinita); MISS resta rosso",
+            "sec.scenes.li_note_col": "La colonna di destra mostra le tre freccette del turno (codice del segmento, SB e DB compresi), senza punti né totale; nella scena il segmento appare in grande (SB: BULL, DB: DOUBLE BULL), con un contorno che si adatta allo scenario",
+            "sec.scenes.li_note_wait": "Viene animata solo l'ultima freccetta lanciata. Poi la scena resta animata 30 s, quindi l'immagine si ferma fino al messaggio successivo",
+            "sec.scenes.li_note_idle": "La scena di attesa parte dopo il ritardo dell'attract mode + 1 s senza visualizzazione (16 s se l'attract mode è disattivato); qualsiasi visualizzazione la interrompe. Nessuno sfondo in modalità verticale né durante i giochi",
+            "sec.scenes.li_note_overlay": "Le animazioni del punteggio occupano tutto lo schermo; i messaggi senza colore di sfondo si sovrappongono allo sfondo",
+            "cmd.score4.title": "score4 - Punteggio animato «l'onda»",
+            "sec.score4.p_intro": "Una grande onda in stile stampa giapponese, in un paesaggio scuro. Per ogni freccetta, l'onda si ritira e poi spazza lo schermo; il mare che la segue scopre il segmento colpito, poi l'onda ritorna. Un tiro mancato (<strong>MISS</strong>): l'onda si ritira, il sole cresce ed esplode, resta solo «MISS».",
+            "cmd.fond4.title": "fond4 - Paesaggio e onda (stile 4)",
+            "sec.fond4.p_intro": "Lo scenario dello stile 4 (paesaggio, sole, monte Fuji e onda a riposo) dietro i messaggi, fino a fond4|stop.",
+            "sec.fond4.li_attract": "<strong>attract mode</strong>: O (predefinito) l'attract mode funziona come al solito; N è sospeso fino a fond4|stop e, al suo posto, l'onda ondeggia, passano nuvole e volano petali di ciliegio",
+            "cmd.score5.title": "score5 - Punteggio animato «le carte»",
+            "sec.score5.p_intro": "Carte su uno sfondo blu notte cosparso di forme colorate. Per ogni freccetta, una carta piccola per moltiplicatore si piazza con il numero del settore (per un triplo, la terza arriva coperta al centro e si gira), poi arriva una carta grande con il segmento. Un tiro mancato (<strong>MISS</strong>): una carta arriva coperta e si gira su «MISS».",
+            "cmd.fond5.title": "fond5 - Forme colorate (stile 5)",
+            "sec.fond5.p_intro": "Lo scenario dello stile 5 (forme colorate su un blu notte quasi nero) dietro i messaggi, fino a fond5|stop.",
+            "sec.fond5.li_attract": "<strong>attract mode</strong>: O (predefinito) l'attract mode funziona come al solito; N è sospeso fino a fond5|stop e, al suo posto, le forme si spostano lentamente",
+            "cmd.score6.title": "score6 - Punteggio animato «lo skater»",
+            "sec.score6.p_intro": "Uno skater davanti a un muro di mattoni (lo stesso di fond2|). Per ogni freccetta, arriva da sinistra e dipinge con la bomboletta il segmento colpito, la vernice cola, poi riparte; in seguito il segmento svanisce. Un tiro mancato (<strong>MISS</strong>): la tavola urta un sasso, lo skater cade, appare «MISS», poi si rialza e riparte.",
+            "cmd.fond6.title": "fond6 - Muro di mattoni (stile 6)",
+            "sec.fond6.p_intro": "Lo scenario dello stile 6 (muro di mattoni scuro e marciapiede) dietro i messaggi, fino a fond6|stop.",
+            "sec.fond6.li_attract": "<strong>attract mode</strong>: O (predefinito) l'attract mode funziona come al solito; N è sospeso fino a fond6|stop e, al suo posto, lo skater passa ogni tanto: in un senso o nell'altro, con un ollie, saltando ostacoli o cadendo",
+            "cmd.score7.title": "score7 - Punteggio animato «lo shuriken»",
+            "sec.score7.p_intro": "Assi di legno scure, il valore a sinistra, i proiettili a destra. Per ogni freccetta, uno, due o tre shuriken (singolo, doppio, triplo), o uno o due kunai (SB, DB), vengono lanciati uno dopo l'altro e si piantano ogni volta in punti diversi; il legno trema, volano schegge. Un tiro mancato (<strong>MISS</strong>): tre shuriken rimbalzano senza piantarsi, poi appare «MISS».",
+            "cmd.fond7.title": "fond7 - Assi di legno (stile 7)",
+            "sec.fond7.p_intro": "Lo scenario dello stile 7 (assi di legno scure) dietro i messaggi, fino a fond7|stop.",
+            "sec.fond7.li_attract": "<strong>attract mode</strong>: O (predefinito) l'attract mode funziona come al solito; N è sospeso fino a fond7|stop e, al suo posto, ogni tanto vengono lanciati shuriken o kunai, da un lato o dall'altro, che si piantano nel legno e poi cadono",
+            "cmd.score8.title": "score8 - Punteggio animato «il tamburo»",
+            "sec.score8.p_intro": "Un tamburo a sinistra, il valore a destra. Per ogni freccetta, un colpo di bacchetta per moltiplicatore (uno per un singolo e SB, due per un doppio e DB, tre per un triplo): la pelle si illumina e partono delle onde. Un tiro mancato (<strong>MISS</strong>): la bacchetta colpisce il bordo del tamburo, sprizza una scintilla, poi appare «MISS».",
+            "cmd.fond8.title": "fond8 - Tamburo (stile 8)",
+            "sec.fond8.p_intro": "Lo scenario dello stile 8 (tamburo e bacchette a riposo) dietro i messaggi, fino a fond8|stop.",
+            "sec.fond8.li_attract": "<strong>attract mode</strong>: O (predefinito) l'attract mode funziona come al solito; N è sospeso fino a fond8|stop e, al suo posto, il tamburo scivola al centro e batte piano; torna a sinistra appena viene mostrato qualcosa",
             "sec.img.title": "4️⃣ Immagini & GIF - img",
             "cmd.img.title": "img - Mostra un'immagine",
             "sec.img.li_fichier": "<strong>file</strong>: Nome del file immagine",
