@@ -1332,7 +1332,7 @@ attract_mode = 0
 raspydarts = raspydarts.local
 raspydartscanal = raspydarts/dmd
 resptoraspydarts = 0
-scrollorder = 1,T
+scrollorder = 1,DH
 checkforupdate = 1
 activehdmi = 0
 
@@ -1367,6 +1367,11 @@ pico_display_enabled = 0
 pico_reconnect_timeout = 60
 CONFIGEOF
     fi
+
+    # Carrousel par defaut : GIF puis date et heure (1,DH). La configuration de Medias.7z
+    # (copiee de la carte de dev) a encore l'ancien defaut GIF puis textes (1,T) : seul ce
+    # defaut exact est remplace, une autre valeur est gardee
+    sed -i -E 's/^(scrollorder[[:space:]]*=[[:space:]]*)1,T[[:space:]]*$/\11,DH/' "$CONFIG_FILE"
 
     if [ "$PICO_SEUL" = "1" ]; then
         # Sortie Pico seul (aucune RGBMatrix, aucun GPIO), liaison RaspyDarts sur cette machine
