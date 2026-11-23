@@ -317,6 +317,10 @@ fi
 # Service de lancement anticipé du moteur
 systemctl disable raspy2dmd.service 2>/dev/null || true
 rm -f /etc/systemd/system/raspy2dmd.service 2>/dev/null || true
+# Mode USB au 1er demarrage d'une carte faite depuis l'image (prepare_image.sh) : il se retire
+# lui-meme apres son passage, il ne reste que si la carte n'a jamais redemarre depuis
+systemctl disable raspy2dmd-usb-gadget-firstboot.service 2>/dev/null || true
+rm -f /etc/systemd/system/raspy2dmd-usb-gadget-firstboot.service /usr/local/sbin/raspy2dmd-usb-gadget-firstboot 2>/dev/null || true
 systemctl daemon-reload 2>/dev/null || true
 
 # Ecoute reseau de Mosquitto ajoutee par l'installation (port 1883, sans mot de passe).
