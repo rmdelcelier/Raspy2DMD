@@ -309,6 +309,10 @@ step_prepare() {
     # Creation du repertoire temporaire
     rm -rf "$TMP_DIR"
     mkdir -p "$TMP_DIR"
+    # Fichiers temporaires de pip (dependances de compilation des bindings RGB Matrix), git, etc.
+    # sur la carte : sous Trixie, /tmp est en memoire (212 Mo sur un Pi a 512 Mo : « No space
+    # left on device » pendant la compilation des bindings, Pi 3A+ le 20/11/2026)
+    export TMPDIR="$TMP_DIR"
 
     # Initialisation du log
     echo "=== Installation Raspy2DMD ===" > "$LOG_FILE"
@@ -778,13 +782,12 @@ step_install_rgbmatrix() {
     export MAKEFLAGS="-j${JOBS}" CMAKE_BUILD_PARALLEL_LEVEL="$JOBS"
     log_info "Compilation sur ${JOBS} coeur(s) ($(awk '/^MemTotal:/ {print int($2 / 1024)}' /proc/meminfo) Mo de memoire)"
 
-    # Nettoyage d'une eventuelle installation precedente
-    if [ -d "/tmp/rpi-rgb-led-matrix" ]; then
-        rm -rf /tmp/rpi-rgb-led-matrix
-    fi
+    # Nettoyage d'une eventuelle installation precedente (/tmp : installeurs plus anciens)
+    rm -rf /tmp/rpi-rgb-led-matrix "$TMP_DIR/rpi-rgb-led-matrix"
 
     log_substep "Clonage du depot rpi-rgb-led-matrix..."
-    cd /tmp
+    # Sur la carte et non dans /tmp (en memoire sous Trixie, voir TMPDIR dans step_prepare)
+    cd "$TMP_DIR"
     git clone https://github.com/hzeller/rpi-rgb-led-matrix.git >> "$LOG_FILE" 2>&1
     cd rpi-rgb-led-matrix
 
