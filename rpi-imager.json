@@ -9,9 +9,9 @@
                         "description":  "DMD Display Controller - Pi Zero 2 W / Pi 3 / Pi 4 / Pi 5",
                         "icon":  "https://raw.githubusercontent.com/rmdelcelier/Raspy2DMD/main/images/imager-icon.png",
                         "url":  "https://images.raspyhub.fr/raspy2dmd/Raspy2DMD_v1.6.2.5.img.xz",
-                        "extract_size":  6571020800,
-                        "extract_sha256":  "5ae4f870bd9476f1cd5f2b8e09dfa19ed62f3e4f79f9285922e3e3556983725c",
-                        "image_download_size":  1116222552,
+                        "extract_size":  6547083776,
+                        "extract_sha256":  "c52f56f5a707dfb5de84bbd4349997671d755a707c1e0e4cfad5c79e08b1b5c4",
+                        "image_download_size":  1116199876,
                         "release_date":  "2026-11-23",
                         "init_format":  "cloudinit-rpi",
                         "devices":  [
