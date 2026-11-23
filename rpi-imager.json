@@ -7,7 +7,7 @@
     {
       "name": "Raspy2DMD v1.5.5.93",
       "description": "DMD Display Controller - Pi Zero 2 W / Pi 3 / Pi 4 / Pi 5",
-      "icon": "https://raw.githubusercontent.com/rmdelcelier/Raspy2DMD/main/web/public/images/favicon.png",
+      "icon": "https://raw.githubusercontent.com/rmdelcelier/Raspy2DMD/main/images/imager-icon.png",
       "url": "https://github.com/rmdelcelier/Raspy2DMD/releases/download/Image/Raspy2DMD_v1.5.5.93.img.xz",
       "extract_size": 7452332544,
       "extract_sha256": "e966d63d2309b5a3bd6ec3744cb32330be0ed05a57efd21eb79fe8eba7768ab1",
