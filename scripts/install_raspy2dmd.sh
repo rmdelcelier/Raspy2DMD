@@ -1278,6 +1278,7 @@ brightness = 50
 brightnesshours = 50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50
 led_row_addr_type = 0
 center_images = 1
+media_scaling = none
 multi_hub = 0
 interrupteur = 0
 
