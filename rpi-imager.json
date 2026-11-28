@@ -6,7 +6,7 @@
     "os_list":  [
                     {
                         "name":  "Raspy2DMD v1.6.2.6",
-                        "description":  "DMD Display Controller - Pi Zero 2 W / Pi 3 / Pi 4 / Pi 5",
+                        "description":  "DMD Display Controller - Pi Zero 2 W / Pi 3 / Pi 4 / Pi 5 (pas le Pi Zero / Zero W)",
                         "icon":  "https://raw.githubusercontent.com/rmdelcelier/Raspy2DMD/main/images/imager-icon.png",
                         "url":  "https://images.raspyhub.fr/raspy2dmd/Raspy2DMD_v1.6.2.6.img.xz",
                         "extract_size":  6554337792,
